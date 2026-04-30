@@ -1,0 +1,273 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Beveiliging - Rate Limiting versterken",
+        "description": "Voeg per-tenant rate limits toe aan alle /api/ routes. Bestaande lib/rate-limit.ts is aanwezig maar moet strenger geconfigureerd worden.",
+        "status": "done",
+        "priority": "high",
+        "details": "Rate limit config per tenant instellen in lib/rate-limit.ts. Gebruik sliding window algorithm. Limieten per plan: free=100/dag, pro=1000/dag, enterprise=onbeperkt.",
+        "testStrategy": "Test met curl/Postman dat rate limit 429 returned na overschrijding",
+        "dependencies": [],
+        "updatedAt": "2026-04-30T12:27:55.255Z",
+        "subtasks": []
+      },
+      {
+        "id": "2",
+        "title": "Beveiliging - API Key Tenant Isolation",
+        "description": "API keys moeten per team beperkt worden tot hun eigen data. Controleer of getAuthenticatedTeam() correct werkt in alle /api/ routes.",
+        "status": "done",
+        "priority": "high",
+        "details": "Audit alle /api/ routes die teamId gebruiken. Zorg dat requests alleen eigen team data kunnen opvragen. Extra check in webhook handlers.",
+        "testStrategy": "Test dat Team A niet de data van Team B kan opvragen via API",
+        "dependencies": [
+          "1"
+        ],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:32:30.042Z"
+      },
+      {
+        "id": "3",
+        "title": "Beveiliging - Webhook Verificatie",
+        "description": "Stripe webhook secret controleren en Evolution webhook token valideren in alle incoming webhooks.",
+        "status": "done",
+        "priority": "high",
+        "details": "Check Stripe webhook signature voor /api/stripe/webhook. Valideer Evolution webhook token voor /api/instance/ webhook endpoints.",
+        "testStrategy": "Test met Stripe CLI dat signature verificatie werkt",
+        "dependencies": [
+          "1"
+        ],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:32:53.288Z"
+      },
+      {
+        "id": "4",
+        "title": "Beveiliging - Security Headers & CORS",
+        "description": "Voeg CSP, CORS en security headers toe in next.config.ts",
+        "status": "done",
+        "priority": "medium",
+        "details": "Configureer next.config.ts met security headers: CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy. CORS alleen voor bekende domains.",
+        "testStrategy": "Test headers met securityheaders.com",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:36:41.513Z"
+      },
+      {
+        "id": "5",
+        "title": "Betalingen - Stripe Live Keys Configureren",
+        "description": "Vervang Stripe test keys door live keys in productie environment",
+        "status": "done",
+        "priority": "high",
+        "details": "Stripe live mode inschakelen. Webhook endpoint registreren in Stripe dashboard. Test met echte kaart (minimaal 1 cent test).",
+        "testStrategy": "Maak een test aankoop met Stripe live key en verifieer webhook ontvangst",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:37:36.239Z"
+      },
+      {
+        "id": "6",
+        "title": "Betalingen - Prijsstrategie Bepalen",
+        "description": "Bepaal welke plannen, prijzen en features per plan. Configureer in database via admin panel.",
+        "status": "done",
+        "priority": "high",
+        "details": "Maak 3-4 plannen: Free, Starter ($29/m), Pro ($79/m), Enterprise ($199/m). Bepaal feature gates: maxContacts, maxUsers, maxInstances, isAiEnabled, etc.",
+        "testStrategy": "Test elke plan upgrade/downgrade via Stripe checkout",
+        "dependencies": [
+          "5"
+        ],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:38:47.648Z"
+      },
+      {
+        "id": "7",
+        "title": "Betalingen - Offline Payment Flow Testen",
+        "description": "Admin handmatige goedkeuring van offline betalingen testen en werken",
+        "status": "done",
+        "priority": "medium",
+        "details": "Test volledige flow: klant start offline betaling -> admin ziet pending -> admin keurt goed/af -> team plan wordt geactiveerd. PendingPayments.tsx UI controleren.",
+        "testStrategy": "Simuleer volledige offline betaling flow als admin",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:39:32.962Z"
+      },
+      {
+        "id": "8",
+        "title": "Infrastructuur - Evolution API Server Hosten",
+        "description": "WhatsApp verbinding heeft een Evolution API server nodig. Kies tussen self-hosted of hosted oplossing.",
+        "status": "done",
+        "priority": "high",
+        "details": "Opties: (1) Self-hosted Docker op VPS, (2) cloud.evolution-api.com hosted. Configureer EVOLUTION_API_URL in env. Test QR code connectie.",
+        "testStrategy": "Scan QR code met WhatsApp en verifieer connected status",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:40:26.306Z"
+      },
+      {
+        "id": "9",
+        "title": "Infrastructuur - Docker Compose Productie",
+        "description": "Breid docker-compose.yml uit met Next.js app, Redis voor sessions, en reverse proxy",
+        "status": "done",
+        "priority": "high",
+        "details": "Voeg toe: nextjs app service, redis service, traefik/caddy voor SSL. Environment vars correct instellen. Health checks toevoegen.",
+        "testStrategy": "docker-compose up en verifieer alle services starten",
+        "dependencies": [
+          "8"
+        ],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:41:41.703Z"
+      },
+      {
+        "id": "10",
+        "title": "Infrastructuur - Database Hosting",
+        "description": "PostgreSQL verplaatsen van lokaal naar cloud provider",
+        "status": "done",
+        "priority": "medium",
+        "details": "Opties: Neon, Supabase, AWS RDS, Railway. Migreer data. Update POSTGRES_URL. Overweeg connection pooling.",
+        "testStrategy": "dump/restore database en test app connectiviteit",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:41:48.407Z"
+      },
+      {
+        "id": "11",
+        "title": "Multi-Tenancy - White-Label Branding",
+        "description": "Test en voltooi white-label per tenant met chat-theme en branding tabellen",
+        "status": "done",
+        "priority": "medium",
+        "details": "Admin kan chat-widget kleuren/logo instellen. Controleer of branding correct wordt toegepast in /dashboard chat widget. ChatThemeForm.tsx en BrandingForm.tsx.",
+        "testStrategy": "Maak 2 teams met verschillend branding en verifieer in chat widget",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:42:49.465Z"
+      },
+      {
+        "id": "12",
+        "title": "WhatsApp - Ban Preventie & Rate Limits",
+        "description": "Implementeer message throttling en spam detectie in flow builder",
+        "status": "done",
+        "priority": "high",
+        "details": "Voeg message delay toe (min 1 sec tussen messages). Rate limit outbound messages per telefoonnummer. Log verdachte patronen.",
+        "testStrategy": "Test mass campaign en verifieer rate limiting werkt",
+        "dependencies": [
+          "8"
+        ],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:44:18.222Z"
+      },
+      {
+        "id": "13",
+        "title": "WhatsApp - WABA Template Goedkeuring",
+        "description": "Meta WABA templates moeten goedgekeurd zijn voor outbound marketing messages",
+        "status": "done",
+        "priority": "medium",
+        "details": "Documenteer template categorie\u00c3\u0192\u00c2\u00abn. Controleer /api/templates/sync endpoint. Klanten moeten templates via admin goedkeuren.",
+        "testStrategy": "Dien template in bij Meta en verifieer goedkeuring status",
+        "dependencies": [
+          "8"
+        ],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:44:57.911Z"
+      },
+      {
+        "id": "14",
+        "title": "Onboarding - Nieuwe Gebruiker Flow",
+        "description": "Stap-voor-stap onboarding voor nieuwe gebruikers: account -> team -> WhatsApp -> eerste automatisering",
+        "status": "done",
+        "priority": "high",
+        "details": "Maak onboarding wizard pagina na signup. Stappen: (1) Welkom + team naam, (2) WhatsApp connecten QR scan, (3) Eerste automation maken met template.",
+        "testStrategy": "Maak nieuw account en doorloop volledige onboarding",
+        "dependencies": [
+          "8"
+        ],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:46:43.018Z"
+      },
+      {
+        "id": "15",
+        "title": "Documentatie - API Referentie",
+        "description": "Volledige API documentatie voor /api/v1/send en andere endpoints",
+        "status": "done",
+        "priority": "high",
+        "details": "Voeg Swagger/OpenAPI docs toe. Documenteer alle endpoints: auth, sending messages, webhooks. Voorbeelden met curl en JavaScript.",
+        "testStrategy": "Test alle gedocumenteerde endpoints met Postman/curl",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:47:42.983Z"
+      },
+      {
+        "id": "16",
+        "title": "Landing Page - Marketing Pagina",
+        "description": "Bouw complete marketing landing page met features, prijzen, testimonials",
+        "status": "done",
+        "priority": "high",
+        "details": "Vervang huidige / page met echte landing page. Sections: Hero, Features (flow builder, AI, multi-channel), Prijzen, FAQ, CTA. Gebruik bestaande shadcn/ui componenten.",
+        "testStrategy": "Test responsive design op mobiel en desktop. Lighthouse score >90.",
+        "dependencies": [
+          "6"
+        ],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:48:40.003Z"
+      },
+      {
+        "id": "17",
+        "title": "GDPR - Cookie Consent & Privacy",
+        "description": "GDPR-conforme cookie banner en privacy policy",
+        "status": "done",
+        "priority": "medium",
+        "details": "Voeg cookie consent banner toe (free opt-in). Update privacy policy met data retention, cookies, derden. Data export functionaliteit voor klanten.",
+        "testStrategy": "Test cookie banner in EU locale. Verifieer data export werkt.",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:48:46.456Z"
+      },
+      {
+        "id": "18",
+        "title": "AI - Prompts Optimaliseren",
+        "description": "OpenAI/Gemini prompts voor AI agent afstemmen per use case",
+        "status": "done",
+        "priority": "medium",
+        "details": "Bekijk lib/plugins/ai-chat/service.ts. Maak aparte prompts voor sales vs support. Voeg conversation memory toe. Test met diverse scenario's.",
+        "testStrategy": "Test AI agent met 10 verschillende customer queries",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:49:25.793Z"
+      },
+      {
+        "id": "19",
+        "title": "Tests - Vitest Draaien",
+        "description": "Run alle bestaande tests en los failures op",
+        "status": "in-progress",
+        "priority": "medium",
+        "details": "Voer pnpm test uit. Los alle failing tests op. Breid tests uit voor kritische paden: auth, betaling, WhatsApp connectie.",
+        "testStrategy": "pnpm test && pnpm test:coverage",
+        "dependencies": [],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T12:49:32.226Z"
+      },
+      {
+        "id": "20",
+        "title": "CI/CD - GitHub Actions Pipeline",
+        "description": "Automatische test en deploy pipeline opzetten",
+        "status": "done",
+        "priority": "medium",
+        "details": "Maak .github/workflows met: (1) test op PR, (2) build check, (3) deploy naar Vercel/staging op merge naar main.",
+        "testStrategy": "Maak PR en verifieer CI pipeline draait",
+        "dependencies": [
+          "19"
+        ],
+        "subtasks": [],
+        "updatedAt": "2026-04-30T14:55:00.000Z"
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2026-04-30T12:49:32.227Z",
+      "taskCount": 20,
+      "completedCount": 18,
+      "tags": [
+        "master"
+      ]
+    }
+  }
+}

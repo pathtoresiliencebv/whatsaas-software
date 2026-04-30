@@ -1,0 +1,130 @@
+# WhatSaaS Production Docker Compose
+# Self-hosted production deployment with Traefik SSL proxy
+#
+# Usage:
+#   docker-compose -f docker-compose.prod.yml up -d
+#
+# Requirements:
+#   - Docker 24+
+#   - Ports 80, 443 available
+#   - Domain DNS pointing to server
+
+services:
+  # ─── Reverse Proxy (SSL termination) ───────────────────────────────────────
+  traefik:
+    image: traefik:v3.0
+    container_name: whatsaas_traefik
+    restart: unless-stopped
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=your@email.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_certs:/letsencrypt
+    networks:
+      - whatsaas_net
+
+  # ─── PostgreSQL Database ────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: whatsaas_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: whatsaas
+      POSTGRES_USER: whatsaas_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - whatsaas_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U whatsaas_user -d whatsaas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis (Sessions + Rate Limiting) ──────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: whatsaas_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - whatsaas_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Next.js Application ──────────────────────────────────────────────────
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: whatsaas_nextjs
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - POSTGRES_URL=postgresql://whatsaas_user:${DB_PASSWORD}@postgres:5432/whatsaas
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SECRET=${AUTH_SECRET}
+      - BASE_URL=https://yourdomain.com
+      - ALLOWED_ORIGIN=https://yourdomain.com
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - EVOLUTION_API_URL=${EVOLUTION_API_URL}
+      - AUTHENTICATION_API_KEY=${AUTHENTICATION_API_KEY}
+      - NEXT_PUBLIC_EVOLUTION_WEBHOOK_TOKEN=${EVOLUTION_WEBHOOK_TOKEN}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - whatsaas_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whatsaas.rule=Host(`yourdomain.com`)"
+      - "traefik.http.routers.whatsaas.tls=true"
+      - "traefik.http.routers.whatsaas.tls.certresolver=letsencrypt"
+
+  # ─── Cron Worker (Campaign processing) ─────────────────────────────────────
+  cron-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: whatsaas_cron
+    restart: unless-stopped
+    command: node scripts/cron-worker.js
+    environment:
+      - NODE_ENV=production
+      - POSTGRES_URL=postgresql://whatsaas_user:${DB_PASSWORD}@postgres:5432/whatsaas
+      - CRON_SECRET=${CRON_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - whatsaas_net
+
+networks:
+  whatsaas_net:
+    name: whatsaas_net
+
+volumes:
+  postgres_data:
+  redis_data:
+  traefik_certs:

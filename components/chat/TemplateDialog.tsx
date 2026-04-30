@@ -60,8 +60,8 @@ export function TemplateDialog({ open, onOpenChange, onSelect }: TemplateDialogP
               key={template.id}
               className="p-3 border rounded-lg hover:bg-muted cursor-pointer transition-colors"
               onClick={() => {
-                onSelect(template);
-                onOpenChange(false);
+                onSelect?.(template);
+                onOpenChange?.(false);
               }}
             >
               <div className="font-medium text-sm">{template.name}</div>
@@ -73,7 +73,7 @@ export function TemplateDialog({ open, onOpenChange, onSelect }: TemplateDialogP
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange?.(false)}>
             Cancel
           </Button>
         </DialogFooter>

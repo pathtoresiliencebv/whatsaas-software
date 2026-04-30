@@ -18,7 +18,8 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ msg, isGroup }: MessageBubbleProps) {
   const isFromMe = msg.fromMe ?? msg.key?.fromMe ?? false;
-  const messageText = msg.text || (msg.message?.conversation ? Object.values(msg.message)[0] : '') || '';
+  const messageObj = msg.message?.conversation || msg.message?.extendedTextMessage || '';
+  const messageText = msg.text || (typeof messageObj === 'string' ? messageObj : '') || '';
   const timestamp = typeof msg.timestamp === 'string' ? msg.timestamp : new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const status = msg.status as 'sent' | 'delivered' | 'read' | undefined;
 

@@ -19,7 +19,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [message, setMessage] = useState('');
 
   const handleSend = () => {
-    if (message.trim()) {
+    if (message.trim() && onSend) {
       onSend(message.trim());
       setMessage('');
     }

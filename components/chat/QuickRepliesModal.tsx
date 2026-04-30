@@ -58,8 +58,8 @@ export function QuickRepliesModal({ open, onOpenChange, onSelect }: QuickReplies
               key={qr.id}
               className="p-3 border rounded-lg hover:bg-muted cursor-pointer transition-colors"
               onClick={() => {
-                onSelect(qr.message);
-                onOpenChange(false);
+                onSelect?.(qr.message);
+                onOpenChange?.(false);
               }}
             >
               <div className="font-mono text-sm text-primary">{qr.shortcut}</div>
@@ -71,7 +71,7 @@ export function QuickRepliesModal({ open, onOpenChange, onSelect }: QuickReplies
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange?.(false)}>
             Cancel
           </Button>
         </DialogFooter>
