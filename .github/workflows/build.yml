@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run database generate
+        run: pnpm db:generate
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:54322/postgres
+
+      - name: Build
+        run: pnpm build
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:54322/postgres
+          NEXTAUTH_SECRET: test-secret-for-ci
+          AUTH_SECRET: test-secret-for-ci
+          STRIPE_SECRET_KEY: sk_test_mock
+          RESEND_API_KEY: re_mock
+          OPENAI_API_KEY: sk-mock
+          GOOGLE_GENAI_API_KEY: mock
+          EVOLUTION_API_URL: https://mock.evolution.api
+          NEXT_PUBLIC_EVOLUTION_WEBHOOK_URL: https://mock.webhook.com
+          NEXT_PUBLIC_EVOLUTION_WEBHOOK_TOKEN: mock-token
+          PUSHER_APP_ID: mock-app-id
+          PUSHER_SECRET: mock-secret
+          NEXT_PUBLIC_PUSHER_KEY: mock-key
+          NEXT_PUBLIC_PUSHER_CLUSTER: us2
+          NEXT_PUBLIC_APP_URL: https://mock.app.com
+          ALLOWED_ORIGIN: https://mock.app.com
+          BASE_URL: https://mock.app.com
