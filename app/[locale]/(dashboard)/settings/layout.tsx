@@ -15,7 +15,8 @@ import {
   Terminal,
   Phone,
   ChevronRight,
-  LifeBuoy
+  LifeBuoy,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
@@ -95,6 +96,13 @@ export default function SettingsLayout({
       label: t('nav.security'),
       description: t('nav.security_desc'),
       restricted: false,
+    },
+    {
+      href: '/settings/billing',
+      icon: CreditCard,
+      label: t('nav.billing'),
+      description: t('nav.billing_desc'),
+      restricted: true,
     }
   ];
 

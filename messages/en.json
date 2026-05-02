@@ -24,12 +24,43 @@
       "voice": "Voice Calls",
       "voice_desc": "Twilio voice & credits",
       "security": "Security",
-      "security_desc": "Password & 2FA"
+      "security_desc": "Password & 2FA",
+      "billing": "Billing",
+      "billing_desc": "Invoices & payments"
     },
     "footer": {
       "help": "Need help?",
       "desc": "Check our docs or contact support."
     }
+  },
+  "Billing": {
+    "title": "Billing & Invoices",
+    "invoices_title": "Invoice History",
+    "billing_portal": "Billing Portal",
+    "col_date": "Date",
+    "col_number": "Invoice #",
+    "col_amount": "Amount",
+    "col_status": "Status",
+    "col_actions": "Actions",
+    "download_pdf": "Download PDF",
+    "view_online": "View Online",
+    "no_invoices": "No invoices found.",
+    "no_billing_info": "No billing information available.",
+    "error_loading": "Failed to load invoices."
+  },
+  "CookieBanner": {
+    "title": "We value your privacy",
+    "description": "We use cookies to enhance your browsing experience and analyze site traffic.",
+    "essentialTitle": "Essential Cookies",
+    "essentialDesc": "Required for the platform to function properly.",
+    "analyticsTitle": "Analytics Cookies",
+    "analyticsDesc": "Help us understand how visitors interact with our platform.",
+    "marketingTitle": "Marketing Cookies",
+    "marketingDesc": "Used to deliver relevant ads and track campaign effectiveness.",
+    "alwaysActive": "Always active",
+    "accept": "Accept All",
+    "decline": "Decline",
+    "close": "Close"
   },
   "Auth": {
     "back_to_home": "Back to Home",

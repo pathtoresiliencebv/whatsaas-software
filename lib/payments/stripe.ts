@@ -225,3 +225,32 @@ export async function getStripeProducts() {
         : product.default_price?.id
   }));
 }
+
+export interface StripeInvoice {
+  id: string;
+  number: string | null;
+  amountPaid: number;
+  currency: string;
+  status: string;
+  created: number;
+  invoicePdf: string | null;
+  hostedInvoiceUrl: string | null;
+}
+
+export async function getInvoices(customerId: string) {
+  const invoices = await stripe.invoices.list({
+    customer: customerId,
+    limit: 100
+  });
+
+  return invoices.data.map((invoice) => ({
+    id: invoice.id,
+    number: invoice.number,
+    amountPaid: invoice.amount_paid,
+    currency: invoice.currency,
+    status: invoice.status,
+    created: invoice.created,
+    invoicePdf: invoice.invoice_pdf,
+    hostedInvoiceUrl: invoice.hosted_invoice_url
+  }));
+}

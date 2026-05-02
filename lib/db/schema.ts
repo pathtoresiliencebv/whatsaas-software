@@ -23,6 +23,10 @@ export const users = pgTable('users', {
   passwordHash: text('password_hash').notNull(),
   role: varchar('role', { length: 20 }).notNull().default('member'),
   enableSignature: boolean('enable_signature').notNull().default(false),
+  emailVerified: timestamp('email_verified'),
+  twoFactorEnabled: boolean('two_factor_enabled').notNull().default(false),
+  twoFactorSecret: text('two_factor_secret'),
+  twoFactorBackupCodes: text('two_factor_backup_codes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
@@ -579,6 +583,36 @@ export const webhookEvents = pgTable('webhook_events', {
   createdAtIdx: index('webhook_events_created_at_idx').on(table.createdAt),
 }));
 
+export const teamWebhooks = pgTable('team_webhooks', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 100 }).notNull(),
+  url: text('url').notNull(),
+  secret: varchar('secret', { length: 255 }).notNull(),
+  events: jsonb('events').$type<string[]>().notNull().default([]),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamIdIdx: index('team_webhooks_team_id_idx').on(table.teamId),
+}));
+
+export const webhookDeliveries = pgTable('webhook_deliveries', {
+  id: serial('id').primaryKey(),
+  webhookId: integer('webhook_id').notNull().references(() => teamWebhooks.id, { onDelete: 'cascade' }),
+  event: varchar('event', { length: 100 }).notNull(),
+  payload: jsonb('payload').notNull(),
+  status: varchar('status', { length: 20 }).notNull().default('pending'),
+  attempts: integer('attempts').notNull().default(0),
+  responseStatus: integer('response_status'),
+  responseBody: text('response_body'),
+  error: text('error'),
+  deliveredAt: timestamp('delivered_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  webhookIdIdx: index('webhook_deliveries_webhook_id_idx').on(table.webhookId),
+}));
+
 export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
   team: one(teams, {
     fields: [apiKeys.teamId],
@@ -903,7 +937,45 @@ export const passwordResetTokensRelations = relations(passwordResetTokens, ({ on
   }),
 }));
 
+export const emailVerificationTokens = pgTable('email_verification_tokens', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  token: varchar('token', { length: 255 }).notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
 
+export const emailVerificationTokensRelations = relations(emailVerificationTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [emailVerificationTokens.userId],
+    references: [users.id],
+  }),
+}));
+
+export const oauthAccounts = pgTable('oauth_accounts', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  provider: varchar('provider', { length: 20 }).notNull(),
+  providerUserId: varchar('provider_user_id', { length: 255 }).notNull(),
+  accessToken: text('access_token'),
+  refreshToken: text('refresh_token'),
+  expiresAt: timestamp('expires_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  providerUserUnique: unique('oauth_provider_user_idx').on(table.provider, table.providerUserId),
+  userIdIdx: index('oauth_user_id_idx').on(table.userId),
+}));
+
+export const oauthAccountsRelations = relations(oauthAccounts, ({ one }) => ({
+  user: one(users, {
+    fields: [oauthAccounts.userId],
+    references: [users.id],
+  }),
+}));
 
 export const twilioConfigs = pgTable('twilio_configs', {
   id: serial('id').primaryKey(),
