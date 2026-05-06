@@ -1,6 +1,6 @@
 import { db } from '@/lib/db/drizzle';
 import { users, teams, teamMembers, contacts, chats, activityLogs, invitations } from '@/lib/db/schema';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, isNull } from 'drizzle-orm';
 
 export interface GdprExport {
   exportedAt: string;
@@ -42,7 +42,6 @@ export interface GdprExport {
     lastMessageText: string | null;
     lastMessageTimestamp: Date | null;
     unreadCount: number | null;
-    createdAt: Date;
   }>;
   activityLogs: Array<{
     id: number;
@@ -61,7 +60,7 @@ export interface GdprExport {
 
 export async function exportUserData(userId: number): Promise<GdprExport> {
   const user = await db.query.users.findFirst({
-    where: and(eq(users.id, userId), eq(users.deletedAt, null))
+    where: and(eq(users.id, userId), isNull(users.deletedAt))
   });
 
   if (!user) {
@@ -148,8 +147,7 @@ export async function exportUserData(userId: number): Promise<GdprExport> {
       remoteJid: c.remoteJid,
       lastMessageText: c.lastMessageText,
       lastMessageTimestamp: c.lastMessageTimestamp,
-      unreadCount: c.unreadCount,
-      createdAt: c.createdAt
+      unreadCount: c.unreadCount
     })),
     activityLogs: activityList.map(a => ({
       id: a.id,
