@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard/settings/
+Disallow: /admin/
+
+Sitemap: https://kyrn.nl/sitemap.xml
