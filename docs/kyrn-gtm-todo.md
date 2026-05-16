@@ -53,9 +53,9 @@
 
 ### 2.3 Trust & Social Proof
 - [x] Trust badges (Stripe, GDPR, Uptime)
-- [ ] Customer testimonials section
+- [x] Customer testimonials section
 - [ ] Case studies from early adopters
-- [ ] Stats/numbers section
+- [x] Stats/numbers section
 
 ### 2.4 Test Full Funnel
 - [ ] Sign-up → Pricing → Stripe checkout flow

@@ -26,6 +26,8 @@ import Logo from '@/components/interface/Logo';
 import { FAQ } from '@/components/landing/FAQ';
 import { SchemaMarkup } from '@/components/landing/SchemaMarkup';
 import { TrustBadges } from '@/components/landing/TrustBadges';
+import { Testimonials } from '@/components/landing/Testimonials';
+import { Stats } from '@/components/landing/Stats';
 import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server'; 
 
@@ -303,6 +305,8 @@ export default async function HomePage() {
 
       <TrustBadges />
 
+      <Stats />
+
       <section id="features" className="py-24 bg-background relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 max-w-3xl mx-auto">
@@ -419,6 +423,8 @@ export default async function HomePage() {
       </section>
 
       <FAQ />
+
+      <Testimonials />
 
       <section className="py-24">
         <div className="max-w-4xl mx-auto px-4 text-center">
