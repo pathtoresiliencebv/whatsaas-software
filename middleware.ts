@@ -7,10 +7,12 @@ import { locales, defaultLocale } from '@/i18n/request';
 const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
-  localePrefix: 'as-needed' 
+  localePrefix: 'as-needed'
 });
 
 const protectedRoutes = ['/dashboard', '/admin'];
+
+const cookieConsentRoutes = ['/privacy', '/terms'];
 
 export async function middleware(request: NextRequest) {
   const response = intlMiddleware(request);
@@ -56,5 +58,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|uploads|sounds).*)']
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|favicon.svg|robots.txt|sitemap.xml|uploads|sounds).*)']
 };
