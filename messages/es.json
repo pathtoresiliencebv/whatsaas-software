@@ -1155,15 +1155,15 @@
   },
   "LandingPage": {
     "hero": {
-      "badge": "✨ Nuevo: Agente IA con Llamada a Funciones",
-      "title_part1": "Automatiza tu WhatsApp",
-      "title_part2": "Ventas y Soporte",
-      "subtitle": "Centraliza chats, construye flujos de automatización y escala tu negocio con nuestra plataforma todo en uno de CRM e IA. Sin programar.",
-      "cta_primary": "Iniciar Prueba Gratis",
-      "cta_secondary": "Ver Funciones"
+      "badge": "✨ IA WhatsApp. Tus Reglas.",
+      "title_part1": "La Plataforma de IA",
+      "title_part2": "WhatsApp Más Potente",
+      "subtitle": "Automatiza conversaciones, escala tus ventas y ofrece soporte instantáneo — todo con IA que trabaja bajo tus condiciones. Sin código.",
+      "cta_primary": "Prueba Gratis 14 Días",
+      "cta_secondary": "Mira Cómo Funciona"
     },
     "preview": {
-      "url_bar": "saasfy.uk/dashboard",
+      "url_bar": "kyrn.nl/dashboard",
       "inbox_title": "Bandeja de Entrada",
       "search_placeholder": "Buscar...",
       "status_online": "En línea",
@@ -1173,10 +1173,10 @@
       "chat_2_msg": "¡Gracias por el soporte rápido!",
       "chat_3_msg": "¿La API está disponible?",
       "chat_4_msg": "Envió una imagen",
-      "demo_msg_1": "¡Hola! Vi su página de precios y estoy interesado en el plan Pro.",
-      "demo_msg_2": "¿Incluye la integración con la API de WhatsApp?",
-      "demo_ai_response": "¡Sí, absolutamente! El plan Pro incluye acceso completo a la API de WhatsApp Business con flujos de automatización ilimitados. ¿Te gustaría agendar una demo rápida?",
-      "demo_msg_3": "Eso suena perfecto. Sí, por favor.",
+      "demo_msg_1": "¡Hola! Vi su plataforma y estoy interesado en automatizar nuestro soporte de WhatsApp.",
+      "demo_msg_2": "¿Puede manejar consultas de clientes automáticamente?",
+      "demo_ai_response": "¡Absolutamente! Nuestro Agente IA maneja preguntas comunes, califica leads y reserva citas 24/7. ¿Te gustaría una demo personalizada?",
+      "demo_msg_3": "¡Sí, sería genial!",
       "crm_funnel": "Etapa del Embudo",
       "crm_stage_negotiation": "Negociación",
       "crm_tags": "Etiquetas",
@@ -1187,11 +1187,11 @@
       "crm_action_pause": "Pausar IA"
     },
     "social_proof": {
-      "trusted_by": "Con la confianza de equipos innovadores en todo el mundo"
+      "trusted_by": "Con la confianza de empresas en crecimiento de Europa"
     },
     "features": {
       "title": "Todo lo que necesitas para escalar",
-      "subtitle": "Herramientas poderosas diseñadas para ayudarte a organizar leads, automatizar conversaciones y cerrar más tratos.",
+      "subtitle": "Herramientas poderosas diseñadas para ayudarte a automatizar conversaciones, cerrar más tratos y deleitar a tus clientes.",
       "card_flow_title": "Constructor de Flujos Visual",
       "card_flow_desc": "Crea flujos de automatización complejos con una interfaz de arrastrar y soltar. Envía mensajes, retrasos y recolecta datos automáticamente.",
       "card_ai_title": "Agentes IA",
@@ -1207,11 +1207,11 @@
     },
     "pricing": {
       "title": "Precios simples y transparentes",
-      "subtitle": "Elige el plan que se ajuste a las necesidades de tu negocio. Sin tarifas ocultas.",
+      "subtitle": "Empieza gratis y escala a medida que creces. Todos los planes incluyen 14 días de prueba gratuita.",
       "most_popular": "MÁS POPULAR",
       "interval_month": "mes",
       "interval_year": "año",
-      "get_started": "Comenzar",
+      "get_started": "Prueba Gratis",
       "features": {
         "users": "{count} Usuarios",
         "connections": "{count} Conexiones de WhatsApp",
@@ -1221,10 +1221,40 @@
       }
     },
     "cta_final": {
-      "title": "¿Listo para revolucionar tu soporte?",
-      "subtitle": "Únete a miles de negocios que usan nuestra plataforma para automatizar conversaciones y crecer más rápido.",
-      "button": "Inicia tu prueba gratuita de 7 días",
-      "disclaimer": "No se requiere tarjeta de crédito para la prueba."
+      "title": "¿Listo para automatizar tu WhatsApp?",
+      "subtitle": "Únete a cientos de empresas que usan Kyrn para ofrecer soporte instantáneo y hacer crecer sus ventas.",
+      "button": "Comienza tu Prueba Gratis",
+      "disclaimer": "14 días gratis. Sin tarjeta de crédito."
+    },
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "subtitle": "Todo lo que necesitas saber sobre Kyrn.",
+      "items": [
+        {
+          "question": "¿Cómo funciona la prueba gratuita de 14 días?",
+          "answer": "Obtienes acceso completo a todas las funciones Pro durante 14 días. Sin tarjeta de crédito. Después de la prueba, elige el plan que se adapte a tus necesidades o continúa con el nivel gratuito."
+        },
+        {
+          "question": "¿Necesito WhatsApp Business API?",
+          "answer": "No, Kyrn funciona con WhatsApp Web (gratis) y WhatsApp Business API. Comienza con WhatsApp Web para probar, actualiza a API para escala de producción."
+        },
+        {
+          "question": "¿Puedo importar mis contactos existentes?",
+          "answer": "¡Sí! Puedes importar contactos mediante CSV o directamente a través de nuestra API. Tus datos están protegidos con cumplimiento GDPR y almacenamiento cifrado."
+        },
+        {
+          "question": "¿Mis datos están seguros?",
+          "answer": "Absolutamente. Usamos cifrado de extremo a extremo, almacenamiento de datos con cumplimiento GDPR en Europa, y auditorías de seguridad regulares. Tus datos nunca se comparten con terceros."
+        },
+        {
+          "question": "¿Puedo cancelar en cualquier momento?",
+          "answer": "Sí, no hay contratos a largo plazo. Cancela tu suscripción en cualquier momento desde tu panel. Tus datos pueden exportarse antes de la cancelación."
+        },
+        {
+          "question": "¿Qué métodos de pago aceptan?",
+          "answer": "Aceptamos todas las tarjetas de crédito principales (Visa, Mastercard, American Express) a través de Stripe. Los clientes Enterprise pueden pagar por factura."
+        }
+      ]
     },
     "footer": {
       "terms": "Términos",

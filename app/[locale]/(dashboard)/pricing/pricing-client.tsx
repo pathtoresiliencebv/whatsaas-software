@@ -113,13 +113,13 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
         </div>
         
         <h1 className="text-4xl font-medium text-foreground sm:text-6xl tracking-tight mb-4">
-          Scale your Support
+          AI WhatsApp. Your Rules.
           <br />
-          <span className="text-muted-foreground/80">With Powerful Automation</span>
+          <span className="text-muted-foreground/80">Start Free, Scale as You Grow</span>
         </h1>
-        
+
         <p className="max-w-xl mx-auto text-lg text-muted-foreground mb-10">
-          From solo entrepreneurs to large support teams. Choose the plan that fits your volume of messages and automation needs.
+          From solo entrepreneurs to large support teams. All plans include 14-day free trial. No credit card required.
         </p>
 
         <div className="flex flex-col items-center gap-6">

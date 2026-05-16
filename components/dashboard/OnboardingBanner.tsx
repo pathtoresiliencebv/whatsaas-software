@@ -58,7 +58,7 @@ export function OnboardingBanner({ hasInstance, hasContacts, hasAutomations }: O
             <p className="text-sm text-muted-foreground mb-4">
               {allDone
                 ? 'Your WhatsApp is connected and ready to go.'
-                : 'Complete these steps to get started with WhatSaaS:'}
+                : 'Complete these steps to get started with Kyrn:'}
             </p>
             <div className="flex flex-wrap gap-3">
               {steps.map((step) => {

@@ -877,7 +877,7 @@ export const quickRepliesRelations = relations(quickReplies, ({ one }) => ({
 
 export const branding = pgTable('branding', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 100 }).notNull().default('WhatsSaaS'),
+  name: varchar('name', { length: 100 }).notNull().default('Kyrn'),
   logoUrl: text('logo_url'),
   faviconUrl: text('favicon_url'),
   createdAt: timestamp('created_at').notNull().defaultNow(),

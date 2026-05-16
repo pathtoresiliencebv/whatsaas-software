@@ -1,4 +1,4 @@
-# Next.js WhatSaaS
+# Kyrn - AI WhatsApp Platform
 
 ## Tech Stack
 

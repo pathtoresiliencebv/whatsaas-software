@@ -35,9 +35,9 @@ export function Sidebar() {
       <div className="p-4">
         <Link href="/dashboard" className="flex items-center gap-2 mb-6">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold">W</span>
+            <span className="text-primary-foreground font-bold">K</span>
           </div>
-          <span className="font-bold text-lg">WhatSaaS</span>
+          <span className="font-bold text-lg">Kyrn</span>
         </Link>
 
         <nav className="space-y-1">

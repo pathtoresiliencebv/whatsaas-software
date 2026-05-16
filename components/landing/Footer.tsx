@@ -9,9 +9,9 @@ export function Footer() {
       <div className="max-w-6xl mx-auto">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <h3 className="font-bold text-lg mb-4">WhatSaaS</h3>
+            <h3 className="font-bold text-lg mb-4">Kyrn</h3>
             <p className="text-sm text-muted-foreground">
-              WhatsApp business platform for sales and customer support.
+              AI WhatsApp platform for sales and customer support. Your rules.
             </p>
           </div>
           <div>
@@ -39,7 +39,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          © 2024 WhatSaaS. All rights reserved.
+          © {new Date().getFullYear()} Kyrn. All rights reserved.
         </div>
       </div>
     </footer>

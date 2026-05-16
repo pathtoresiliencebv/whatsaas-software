@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { 
-  ArrowRight, 
-  CheckCircle2, 
-  MessageSquare, 
-  Zap, 
-  Users, 
-  BarChart3, 
+import {
+  ArrowRight,
+  CheckCircle2,
+  MessageSquare,
+  Zap,
+  Users,
+  BarChart3,
   Smartphone,
   Bot,
   Search,
@@ -23,6 +23,9 @@ import { Badge } from '@/components/ui/badge';
 import { getPublishedPlans } from '@/lib/db/queries';
 import { getBranding } from '@/lib/db/queries/branding';
 import Logo from '@/components/interface/Logo';
+import { FAQ } from '@/components/landing/FAQ';
+import { SchemaMarkup } from '@/components/landing/SchemaMarkup';
+import { TrustBadges } from '@/components/landing/TrustBadges';
 import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server'; 
 
@@ -250,15 +253,16 @@ function FeatureCard({ icon: Icon, title, description, delay }: { icon: any, tit
 
 export default async function HomePage() {
   
-  const t = await getTranslations('LandingPage'); 
-  
+  const t = await getTranslations('LandingPage');
+
   const plans = await getPublishedPlans();
   const branding = await getBranding();
-  const siteName = branding?.name || 'WhatSaaS';
+  const siteName = branding?.name || 'Kyrn';
 
   return (
     <main className="flex flex-col min-h-screen bg-background selection:bg-primary/20">
-      
+      <SchemaMarkup />
+
       <section className="relative pt-24 pb-32 overflow-hidden">
         <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         
@@ -296,6 +300,8 @@ export default async function HomePage() {
       </section>
 
       <LogoCarousel />
+
+      <TrustBadges />
 
       <section id="features" className="py-24 bg-background relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -411,6 +417,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <FAQ />
 
       <section className="py-24">
         <div className="max-w-4xl mx-auto px-4 text-center">

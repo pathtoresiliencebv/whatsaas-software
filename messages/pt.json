@@ -1156,15 +1156,15 @@
   },
   "LandingPage": {
     "hero": {
-      "badge": "✨ Novo: Agente de IA com Function Calling",
-      "title_part1": "Automatize suas Vendas",
-      "title_part2": "e Suporte no WhatsApp",
-      "subtitle": "Centralize conversas, crie fluxos de automação e escale seu negócio com nossa plataforma completa de CRM e IA. Sem necessidade de código.",
-      "cta_primary": "Começar Teste Grátis",
-      "cta_secondary": "Ver Recursos"
+      "badge": "✨ IA WhatsApp. Suas Regras.",
+      "title_part1": "A Plataforma de IA",
+      "title_part2": "WhatsApp Mais Poderosa",
+      "subtitle": "Automatize conversas, escale suas vendas e ofereça suporte instantâneo — tudo com IA que funciona sob suas condições. Sem código.",
+      "cta_primary": "Teste Grátis 14 Dias",
+      "cta_secondary": "Veja Como Funciona"
     },
     "preview": {
-      "url_bar": "saasfy.uk/dashboard",
+      "url_bar": "kyrn.nl/dashboard",
       "inbox_title": "Caixa de Entrada",
       "search_placeholder": "Buscar...",
       "status_online": "Online",
@@ -1174,10 +1174,10 @@
       "chat_2_msg": "Obrigado pelo suporte rápido!",
       "chat_3_msg": "A API está disponível?",
       "chat_4_msg": "Enviou uma imagem",
-      "demo_msg_1": "Olá! Vi sua página de preços e estou interessado no plano Pro.",
-      "demo_msg_2": "Ele inclui a integração com a API do WhatsApp?",
-      "demo_ai_response": "Sim, com certeza! O plano Pro inclui acesso total à API do WhatsApp Business com fluxos de automação ilimitados. Gostaria de agendar uma demonstração rápida?",
-      "demo_msg_3": "Parece perfeito. Sim, por favor.",
+      "demo_msg_1": "Olá! Vi sua plataforma e estou interessado em automatizar nosso suporte do WhatsApp.",
+      "demo_msg_2": "Pode lidar com dúvidas de clientes automaticamente?",
+      "demo_ai_response": "Com certeza! Nosso Agente de IA trata perguntas comuns, qualifica leads e reserva compromissos 24/7. Gostaria de uma demonstração personalizada?",
+      "demo_msg_3": "Sim, seria ótimo!",
       "crm_funnel": "Etapa do Funil",
       "crm_stage_negotiation": "Negociação",
       "crm_tags": "Tags",
@@ -1188,11 +1188,11 @@
       "crm_action_pause": "Pausar IA"
     },
     "social_proof": {
-      "trusted_by": "Confiado por equipes inovadoras em todo o mundo"
+      "trusted_by": "Confiado por empresas em crescimento na Europa"
     },
     "features": {
       "title": "Tudo o que você precisa para escalar",
-      "subtitle": "Ferramentas poderosas projetadas para ajudar você a organizar leads, automatizar conversas e fechar mais negócios.",
+      "subtitle": "Ferramentas poderosas projetadas para ajudar você a automatizar conversas, fechar mais negócios e encantar seus clientes.",
       "card_flow_title": "Construtor Visual de Fluxos",
       "card_flow_desc": "Crie fluxos de automação complexos com uma interface de arrastar e soltar. Envie mensagens, adicione delays e colete dados automaticamente.",
       "card_ai_title": "Agentes de IA",
@@ -1208,11 +1208,11 @@
     },
     "pricing": {
       "title": "Preços simples e transparentes",
-      "subtitle": "Escolha o plano que se adapta às necessidades do seu negócio. Sem taxas ocultas.",
+      "subtitle": "Comece grátis e escale conforme você cresce. Todos os planos incluem 14 dias de teste gratuito.",
       "most_popular": "MAIS POPULAR",
       "interval_month": "mês",
       "interval_year": "ano",
-      "get_started": "Começar Agora",
+      "get_started": "Teste Grátis",
       "features": {
         "users": "{count} Usuários",
         "connections": "{count} Conexões WhatsApp",
@@ -1222,10 +1222,40 @@
       }
     },
     "cta_final": {
-      "title": "Pronto para revolucionar seu suporte?",
-      "subtitle": "Junte-se a milhares de empresas usando nossa plataforma para automatizar conversas e crescer mais rápido.",
-      "button": "Inicie seu teste grátis de 7 dias",
-      "disclaimer": "Não é necessário cartão de crédito para o teste."
+      "title": "Pronto para automatizar seu WhatsApp?",
+      "subtitle": "Junte-se a centenas de empresas usando Kyrn para oferecer suporte instantâneo e fazer crescer suas vendas.",
+      "button": "Comece seu Teste Grátis",
+      "disclaimer": "14 dias grátis. Sem cartão de crédito."
+    },
+    "faq": {
+      "title": "Perguntas Frequentes",
+      "subtitle": "Tudo o que você precisa saber sobre o Kyrn.",
+      "items": [
+        {
+          "question": "Como funciona o teste gratuito de 14 dias?",
+          "answer": "Você obtém acesso completo a todos os recursos Pro por 14 dias. Sem cartão de crédito. Após o teste, escolha um plano que atenda às suas necessidades ou continue com o nível gratuito."
+        },
+        {
+          "question": "Preciso do WhatsApp Business API?",
+          "answer": "Não, o Kyrn funciona com WhatsApp Web (grátis) e WhatsApp Business API. Comece com WhatsApp Web para testar, atualize para API para escala de produção."
+        },
+        {
+          "question": "Posso importar meus contatos existentes?",
+          "answer": "Sim! Você pode importar contatos via CSV ou diretamente através da nossa API. Seus dados são protegidos com conformidade GDPR e armazenamento criptografado."
+        },
+        {
+          "question": "Meus dados estão seguros?",
+          "answer": "Com certeza. Usamos criptografia de ponta a ponta, armazenamento de dados em conformidade com GDPR na Europa e auditorias de segurança regulares. Seus dados nunca são compartilhados com terceiros."
+        },
+        {
+          "question": "Posso cancelar a qualquer momento?",
+          "answer": "Sim, não há contratos de longo prazo. Cancele sua assinatura a qualquer momento pelo seu painel. Seus dados podem ser exportados antes do cancelamento."
+        },
+        {
+          "question": "Quais métodos de pagamento vocês aceitam?",
+          "answer": "Aceitamos todos os principais cartões de crédito (Visa, Mastercard, American Express) através do Stripe. Clientes Enterprise podem pagar via fatura."
+        }
+      ]
     },
     "footer": {
       "terms": "Termos",

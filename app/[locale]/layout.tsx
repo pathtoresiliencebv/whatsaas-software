@@ -12,6 +12,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/request';
+import { CookieBanner } from '@/components/ui/cookie-banner';
 
 const manrope = Manrope({ subsets: ['latin'] });
 
@@ -21,11 +22,29 @@ export const viewport: Viewport = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const branding = await getBranding();
+  const siteName = branding?.name || 'Kyrn';
+  const description = 'AI WhatsApp platform for sales and customer support. Automate conversations, scale your business, work on your rules.';
+
   return {
-    title: branding?.name || 'Whats SaaS',
-    description: 'Get started quickly with a WhatsApp CRM designed to manage leads, conversations, and sales in one place.',
+    title: siteName,
+    description,
+    keywords: ['WhatsApp', 'AI', 'automation', 'CRM', 'customer support', 'sales', 'business messaging'],
+    authors: [{ name: 'Kyrn' }],
+    openGraph: {
+      title: siteName,
+      description,
+      url: 'https://kyrn.nl',
+      siteName,
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteName,
+      description,
+    },
     icons: {
-      icon: branding?.faviconUrl ? `${branding.faviconUrl}?v=${new Date(branding.updatedAt).getTime()}` : '/favicon.ico',
+      icon: branding?.faviconUrl ? `${branding.faviconUrl}?v=${new Date(branding.updatedAt).getTime()}` : '/favicon.svg',
     },
   };
 }
@@ -77,6 +96,7 @@ export default async function LocaleLayout({
               <BrandingProvider branding={branding}>
                 <CallProviderWrapper>
                   {children}
+                  <CookieBanner />
                 </CallProviderWrapper>
               </BrandingProvider>
 

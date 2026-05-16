@@ -31,10 +31,10 @@ export function WhatsAppPreview({ message, data, headerText, bodyText }: WhatsAp
         {/* WhatsApp header */}
         <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#E5DDD5]">
           <div className="w-8 h-8 bg-[#25D366] rounded-full flex items-center justify-center text-white text-xs font-bold">
-            W
+            K
           </div>
           <div>
-            <p className="text-sm font-medium text-[#111B21]">WhatSaaS Bot</p>
+            <p className="text-sm font-medium text-[#111B21]">Kyrn Bot</p>
             <p className="text-[10px] text-[#667781]">online</p>
           </div>
         </div>

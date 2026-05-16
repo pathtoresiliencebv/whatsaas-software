@@ -1190,15 +1190,15 @@
   },
   "LandingPage": {
     "hero": {
-      "badge": "✨ New: AI Agent with Function Calling",
-      "title_part1": "Automate your WhatsApp",
-      "title_part2": "Sales & Support",
-      "subtitle": "Centralize chats, build automation flows, and scale your business with our all-in-one CRM and AI platform. No coding required.",
-      "cta_primary": "Start Free Trial",
-      "cta_secondary": "View Features"
+      "badge": "✨ AI WhatsApp. Your Rules.",
+      "title_part1": "The Most Powerful AI",
+      "title_part2": "WhatsApp Platform",
+      "subtitle": "Automate conversations, scale your sales, and deliver instant support — all with AI that works on your terms. No coding required.",
+      "cta_primary": "Start 14-Day Free Trial",
+      "cta_secondary": "See How It Works"
     },
     "preview": {
-      "url_bar": "saasfy.uk/dashboard",
+      "url_bar": "kyrn.nl/dashboard",
       "inbox_title": "Inbox",
       "search_placeholder": "Search...",
       "status_online": "Online",
@@ -1208,10 +1208,10 @@
       "chat_2_msg": "Thanks for the quick support!",
       "chat_3_msg": "Is the API available?",
       "chat_4_msg": "Sent an image",
-      "demo_msg_1": "Hello! I saw your pricing page and I'm interested in the Pro plan.",
-      "demo_msg_2": "Does it include the WhatsApp API integration?",
-      "demo_ai_response": "Yes, absolutely! The Pro plan includes full WhatsApp Business API access with unlimited automation flows. Would you like to schedule a quick demo?",
-      "demo_msg_3": "That sounds perfect. Yes, please.",
+      "demo_msg_1": "Hello! I saw your platform and I'm interested in automating our WhatsApp support.",
+      "demo_msg_2": "Can it handle customer inquiries automatically?",
+      "demo_ai_response": "Absolutely! Our AI Agent handles common questions, qualifies leads, and books appointments 24/7. Would you like a personalized demo?",
+      "demo_msg_3": "Yes, that would be great!",
       "crm_funnel": "Funnel Stage",
       "crm_stage_negotiation": "Negotiation",
       "crm_tags": "Tags",
@@ -1222,11 +1222,11 @@
       "crm_action_pause": "Pause AI"
     },
     "social_proof": {
-      "trusted_by": "Trusted by innovative teams worldwide"
+      "trusted_by": "Trusted by growing businesses across Europe"
     },
     "features": {
       "title": "Everything you need to scale",
-      "subtitle": "Powerful tools designed to help you organize leads, automate conversations, and close more deals.",
+      "subtitle": "Powerful tools designed to help you automate conversations, close more deals, and delight your customers.",
       "card_flow_title": "Visual Flow Builder",
       "card_flow_desc": "Create complex automation flows with a drag-and-drop interface. Send messages, delays, and collect data automatically.",
       "card_ai_title": "AI Agents",
@@ -1242,11 +1242,11 @@
     },
     "pricing": {
       "title": "Simple, transparent pricing",
-      "subtitle": "Choose the plan that fits your business needs. No hidden fees.",
+      "subtitle": "Start free and scale as you grow. All plans include 14-day free trial.",
       "most_popular": "MOST POPULAR",
       "interval_month": "month",
       "interval_year": "year",
-      "get_started": "Get Started",
+      "get_started": "Start Free Trial",
       "features": {
         "users": "{count} Users",
         "connections": "{count} WhatsApp Connections",
@@ -1256,10 +1256,40 @@
       }
     },
     "cta_final": {
-      "title": "Ready to revolutionize your support?",
-      "subtitle": "Join thousands of businesses using our platform to automate conversations and grow faster.",
-      "button": "Start your 7-day free trial",
-      "disclaimer": "No credit card required for trial."
+      "title": "Ready to automate your WhatsApp?",
+      "subtitle": "Join hundreds of businesses using Kyrn to deliver instant support and grow their sales.",
+      "button": "Start Your Free Trial",
+      "disclaimer": "14 days free. No credit card required."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know about Kyrn.",
+      "items": [
+        {
+          "question": "How does the 14-day free trial work?",
+          "answer": "You get full access to all Pro features for 14 days. No credit card required. After the trial, choose a plan that fits your needs or continue with the free tier."
+        },
+        {
+          "question": "Do I need WhatsApp Business API?",
+          "answer": "No, Kyrn works with both WhatsApp Web (free) and WhatsApp Business API. Start with WhatsApp Web to test, upgrade to API for production scale."
+        },
+        {
+          "question": "Can I import my existing contacts?",
+          "answer": "Yes! You can import contacts via CSV or directly through our API. Your data is protected with GDPR compliance and encrypted storage."
+        },
+        {
+          "question": "Is my data secure?",
+          "answer": "Absolutely. We use end-to-end encryption, GDPR-compliant data storage in Europe, and regular security audits. Your data is never shared with third parties."
+        },
+        {
+          "question": "Can I cancel anytime?",
+          "answer": "Yes, there are no long-term contracts. Cancel your subscription anytime from your dashboard. Your data can be exported before cancellation."
+        },
+        {
+          "question": "What payment methods do you accept?",
+          "answer": "We accept all major credit cards (Visa, Mastercard, American Express) through Stripe. Enterprise customers can pay via invoice."
+        }
+      ]
     },
     "footer": {
       "terms": "Terms",
