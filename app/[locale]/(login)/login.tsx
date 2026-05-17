@@ -104,7 +104,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
 
         <div className="flex flex-col items-center mb-8">
           <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 shadow-sm">
-             <Logo showName={false} />
+             <Logo />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground text-center">
             {show2FA ? 'Two-Factor Authentication' : mode === 'signin' ? t('welcome_back') : t('create_account')}

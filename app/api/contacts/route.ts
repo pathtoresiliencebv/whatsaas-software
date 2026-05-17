@@ -8,6 +8,7 @@ import { eq, and } from 'drizzle-orm';
 import { logActivity } from '@/lib/db/activity';
 import { enforceLimit } from '@/lib/limits';
 import { checkTenantRateLimit } from '@/lib/rate-limit';
+import { dispatchWebhook } from '@/lib/webhooks/dispatcher';
 
 export async function POST(request: NextRequest) {
   try {
@@ -103,6 +104,9 @@ export async function POST(request: NextRequest) {
       tags: finalContact?.contactTags.map(ct => ct.tag) || []
     };
     delete (formattedContact as any).contactTags;
+
+    // Dispatch webhook for contact created
+    dispatchWebhook(team.id, 'contact.created', { contact: formattedContact }).catch(console.error);
 
     return NextResponse.json(formattedContact, { status: 201 });
 

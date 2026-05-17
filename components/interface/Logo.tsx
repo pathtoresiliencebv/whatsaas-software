@@ -1,12 +1,21 @@
-import React from 'react';
+'use client';
 
-export default function Logo({ className = 'h-8', showName = true }: { className?: string; showName?: boolean }) {
+import React from 'react';
+import Image from 'next/image';
+import { useTheme } from 'next-themes';
+
+export default function Logo({ className = 'h-8' }: { className?: string }) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-        <span className="text-primary-foreground font-bold text-lg">K</span>
-      </div>
-      {showName && <span className="font-bold text-xl">Kyrn</span>}
-    </div>
+    <Image
+      src={isDark ? '/images/white-logo.png' : '/images/black-logo.png'}
+      alt="Kyrn"
+      width={120}
+      height={32}
+      className={`h-8 w-auto ${className}`}
+      priority
+    />
   );
 }

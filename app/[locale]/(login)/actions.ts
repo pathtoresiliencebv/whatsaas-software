@@ -30,6 +30,7 @@ import { sendInvitationEmail } from '@/lib/email';
 import { getFreePlan } from '@/lib/db/queries';
 import { enforceLimit } from '@/lib/limits';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { generateEmailVerificationToken } from '@/lib/auth/email-verification';
 
 async function logActivity(
   teamId: number | null | undefined,
@@ -97,6 +98,74 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
       password
     };
   }
+
+  if (foundUser.twoFactorEnabled) {
+    return {
+      needs2FA: true,
+      userId: foundUser.id,
+      email,
+      error: ''
+    };
+  }
+
+  await Promise.all([
+    setSession(foundUser),
+    logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN)
+  ]);
+
+  const redirectTo = formData.get('redirect') as string | null;
+  if (redirectTo === 'checkout') {
+    const priceId = formData.get('priceId') as string;
+    return createCheckoutSession({ team: foundTeam, priceId });
+  }
+
+  redirect('/dashboard');
+});
+
+const verify2FASchema = z.object({
+  userId: z.number(),
+  token: z.string().min(6).max(10),
+  email: z.string().email(),
+});
+
+export const verify2FA = validatedAction(verify2FASchema, async (data, formData) => {
+  const { userId, token, email } = data;
+
+  const hdrs = await headers();
+  const ip = hdrs.get('x-forwarded-for')?.split(',')[0].trim() || hdrs.get('x-real-ip') || '127.0.0.1';
+  const rl = rateLimit(`auth:2fa:${ip}`, RATE_LIMITS.auth);
+  if (!rl.success) {
+    return { error: 'Too many attempts. Please try again later.', userId, token, email };
+  }
+
+  const { verify2FA: verify2FAUtil } = await import('@/lib/auth/2fa');
+  const result = await verify2FAUtil(userId, token);
+
+  if (!result.success) {
+    return {
+      error: result.isBackupCode ? 'Backup code has been used' : 'Invalid verification code',
+      userId,
+      token: '',
+      email
+    };
+  }
+
+  const userWithTeam = await db
+    .select({
+      user: users,
+      team: teams
+    })
+    .from(users)
+    .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
+    .leftJoin(teams, eq(teamMembers.teamId, teams.id))
+    .where(eq(users.email, email))
+    .limit(1);
+
+  if (userWithTeam.length === 0) {
+    return { error: 'User not found', userId, token, email };
+  }
+
+  const { user: foundUser, team: foundTeam } = userWithTeam[0];
 
   await Promise.all([
     setSession(foundUser),
@@ -241,13 +310,15 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     setSession(createdUser)
   ]);
 
+  await generateEmailVerificationToken(createdUser.id, email);
+
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {
     const priceId = formData.get('priceId') as string;
     return createCheckoutSession({ team: createdTeam, priceId });
   }
 
-  redirect('/dashboard');
+  redirect('/verify-email-sent');
 });
 
 export async function signOut() {

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowRight,
   CheckCircle2,
@@ -57,7 +58,7 @@ function DashboardPreview() {
           
           <div className="w-[70px] border-r border-border/40 flex flex-col items-center py-6 gap-6 bg-card/50">
             <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
-              <Logo showName={false} />
+              <Image src="/images/icon.png" alt="Kyrn" width={28} height={28} className="rounded-md" />
             </div>
             <div className="flex flex-col gap-4 mt-4 w-full px-3">
               <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><Inbox className="h-5 w-5" /></div>

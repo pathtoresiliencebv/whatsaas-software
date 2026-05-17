@@ -830,7 +830,8 @@
     "language_placeholder": "Language",
     "language_portuguese": "Portuguese",
     "language_english": "English",
-    "language_spanish": "Español"
+    "language_spanish": "Español",
+    "language_dutch": "Nederlands"
   },
   "Admin": {
     "payment_gateway_label": "Payment Gateway",

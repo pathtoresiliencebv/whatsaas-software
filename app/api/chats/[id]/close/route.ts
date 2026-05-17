@@ -4,6 +4,7 @@ import { getTeamForUser, getUser } from '@/lib/db/queries';
 import { automationSessions, chats } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { createSystemMessage } from '@/lib/db/system-messages';
+import { dispatchWebhook } from '@/lib/webhooks/dispatcher';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -23,6 +24,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     
     
     await createSystemMessage(team.id, chatId, `@@syslog_chat_closed|name=${user.name || user.email}`);
+
+    // Dispatch webhook for chat closed
+    dispatchWebhook(team.id, 'chat.closed', { chatId, closedBy: user.id }).catch(console.error);
 
     return NextResponse.json({ success: true });
   } catch (error) {

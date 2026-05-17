@@ -47,7 +47,7 @@ function ResetPasswordForm() {
       <div className="w-full max-w-md bg-card/80 backdrop-blur-md border border-border/50 shadow-2xl rounded-2xl p-8 animate-in fade-in zoom-in duration-500">
         <div className="flex flex-col items-center mb-8">
           <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 shadow-sm">
-            <Logo showName={false} />
+            <Logo />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground text-center">
             {t('reset_title')}

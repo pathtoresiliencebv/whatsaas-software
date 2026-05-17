@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export const metadata = {
   title: 'API Documentation',
-  description: 'WhatSaaS REST API documentation',
+  description: 'Kyrn REST API documentation',
 };
 
 function CodeBlock({ code, language = 'bash' }: { code: string; language?: string }) {
@@ -82,7 +82,7 @@ function Endpoint({
 
 export default async function ApiDocsPage() {
   const branding = await getBranding();
-  const siteName = branding?.name || 'WhatSaaS';
+  const siteName = branding?.name || 'Kyrn';
 
   return (
     <main className="min-h-screen bg-background">

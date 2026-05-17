@@ -3,6 +3,7 @@ import { db } from '@/lib/db/drizzle';
 import { getTeamForUser } from '@/lib/db/queries';
 import { contacts, contactTags } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { dispatchWebhook } from '@/lib/webhooks/dispatcher';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -51,6 +52,24 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             }
         }
     });
+
+    // Fetch updated contact for webhook payload
+    const updatedContact = await db.query.contacts.findFirst({
+      where: eq(contacts.id, contactId),
+      with: {
+        assignedUser: { columns: { id: true, name: true, email: true } },
+        funnelStage: true,
+        contactTags: { with: { tag: true } }
+      }
+    });
+
+    const formattedContact = updatedContact ? {
+      ...updatedContact,
+      tags: updatedContact.contactTags.map(ct => ct.tag)
+    } : null;
+
+    // Dispatch webhook for contact updated
+    dispatchWebhook(team.id, 'contact.updated', { contact: formattedContact }).catch(console.error);
 
     return NextResponse.json({ success: true });
 

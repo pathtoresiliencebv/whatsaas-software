@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get('session');
   
-  const pathWithoutLocale = pathname.replace(/^\/(pt|en|es)/, '') || '/';
+  const pathWithoutLocale = pathname.replace(/^\/(pt|en|es|nl)/, '') || '/';
   const isProtectedRoute = protectedRoutes.some(route => pathWithoutLocale.startsWith(route));
 
   if (isProtectedRoute && !sessionCookie) {

@@ -795,7 +795,8 @@
     "language_placeholder": "Idioma",
     "language_portuguese": "Português",
     "language_english": "English",
-    "language_spanish": "Español"
+    "language_spanish": "Español",
+    "language_dutch": "Nederlands"
   },
   "Admin": {
     "payment_gateway_label": "Gateway de Pagamento",

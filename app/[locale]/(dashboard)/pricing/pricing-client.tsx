@@ -109,7 +109,7 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
       <div className="max-w-7xl mx-auto text-center mb-16">
         <div className="flex items-center justify-center gap-2 mb-4">
           <MessageCircle className="h-5 w-5 text-primary" />
-          <span className="text-sm font-medium tracking-wide uppercase text-primary">{branding?.name || 'WhatSaaS'}</span>
+          <span className="text-sm font-medium tracking-wide uppercase text-primary">{branding?.name || 'Kyrn'}</span>
         </div>
         
         <h1 className="text-4xl font-medium text-foreground sm:text-6xl tracking-tight mb-4">

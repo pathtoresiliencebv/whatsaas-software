@@ -1,12 +1,18 @@
 import { Resend } from 'resend';
 import { getBranding } from '@/lib/db/queries/branding';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('RESEND_API_KEY is not configured');
+  }
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function sendInvitationEmail(email: string, teamName: string, inviteId: number) {
+  const resend = getResendClient();
   const inviteLink = `${process.env.BASE_URL}/sign-up?inviteId=${inviteId}`;
   const branding = await getBranding();
-  const appName = branding?.name || 'WhatSaaS';
+  const appName = branding?.name || 'Kyrn';
 
   try {
     await resend.emails.send({
@@ -37,9 +43,10 @@ export async function sendInvitationEmail(email: string, teamName: string, invit
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
+  const resend = getResendClient();
   const resetLink = `${process.env.BASE_URL}/reset-password?token=${token}`;
   const branding = await getBranding();
-  const appName = branding?.name || 'WhatSaaS';
+  const appName = branding?.name || 'Kyrn';
 
   try {
     await resend.emails.send({
@@ -69,5 +76,42 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   } catch (error) {
     console.error('Failed to send password reset email:', error);
     throw new Error('Failed to send password reset email');
+  }
+}
+
+export async function sendVerificationEmail(email: string, token: string) {
+  const resend = getResendClient();
+  const verifyLink = `${process.env.BASE_URL}/verify-email?token=${token}`;
+  const branding = await getBranding();
+  const appName = branding?.name || 'Kyrn';
+
+  try {
+    await resend.emails.send({
+      from: `${appName} <${process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'}>`,
+      to: email,
+      subject: `Verify your email - ${appName}`,
+      html: `
+        <div style="font-family: sans-serif; font-size: 16px; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+          <h2>Welcome to ${appName}!</h2>
+          <p>Please verify your email address to get started.</p>
+          <p>Click the button below to verify your email. This link expires in 24 hours.</p>
+          <p style="margin: 24px 0;">
+            <a href="${verifyLink}" style="display: inline-block; padding: 12px 24px; background-color: #44A64D; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+              Verify Email
+            </a>
+          </p>
+          <p style="font-size: 14px; color: #666;">
+            Or copy this link: <br />
+            <a href="${verifyLink}">${verifyLink}</a>
+          </p>
+          <p style="font-size: 13px; color: #999; margin-top: 24px;">
+            If you didn't create an account, you can safely ignore this email.
+          </p>
+        </div>
+      `,
+    });
+  } catch (error) {
+    console.error('Failed to send verification email:', error);
+    throw new Error('Failed to send verification email');
   }
 }

@@ -8,6 +8,27 @@
       "when": 1776126162795,
       "tag": "0000_jittery_luminals",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777739431457,
+      "tag": "0001_rainy_juggernaut",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777741274095,
+      "tag": "0002_silly_sebastian_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777741932191,
+      "tag": "0003_bumpy_the_watchers",
+      "breakpoints": true
     }
   ]
 }

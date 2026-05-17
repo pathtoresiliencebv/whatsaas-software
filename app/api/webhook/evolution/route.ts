@@ -11,6 +11,7 @@ import { processAutomation } from '@/lib/automation/engine';
 import { scheduleAIProcessing } from '@/lib/plugins/ai-chat/service';
 import { sendPushNotification, sendPushToTeam } from '@/lib/push-notifications';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
+import { dispatchWebhook } from '@/lib/webhooks/dispatcher';
 
 async function downloadProfilePic(url: string): Promise<string | null> {
     if (!url || url.startsWith('/uploads/')) return null;
@@ -450,6 +451,19 @@ export async function POST(request: Request) {
           }
       }
 
+      // Check if chat exists before upsert to detect new chats
+      const existingChat = await db.query.chats.findFirst({
+        where: and(
+          eq(chats.teamId, teamId),
+          eq(chats.remoteJid, remoteJid),
+          eq(chats.instanceId, instanceId)
+        ),
+        columns: { id: true }
+      });
+      const isNewChat = !existingChat;
+
+      let isChatOpened = false;
+
       await db.transaction(async (tx) => {
         const incrementValue = messageData.key.fromMe ? 0 : 1;
         const isFromMe = messageData.key.fromMe;
@@ -521,6 +535,11 @@ export async function POST(request: Request) {
           });
 
         chatIdForAutomation = chat.id;
+
+        // Mark chat as opened if it's a new chat and message is from a customer
+        if (isNewChat && !isFromMe) {
+          isChatOpened = true;
+        }
 
         let mainTextContent = messagePayload?.conversation || messagePayload?.extendedTextMessage?.text || null;
         
@@ -609,7 +628,15 @@ export async function POST(request: Request) {
           await logWebhookEvent(teamId, instanceName, 'messages.upsert', messageData.key.id, remoteJid, 'duplicate');
       }
 
-      
+      // Dispatch chat.opened webhook for new chats receiving first customer message
+      if (isChatOpened && chatIdForAutomation) {
+        dispatchWebhook(teamId, 'chat.opened', {
+          chatId: chatIdForAutomation,
+          remoteJid,
+          instanceId
+        }).catch(console.error);
+      }
+
       if (newMessageData && !messageData.key.fromMe && chatIdForAutomation) {
         try {
           const chatName = chatUpdateData?.name || remoteJid.split('@')[0];

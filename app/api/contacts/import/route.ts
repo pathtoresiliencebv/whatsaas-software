@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
-import { contacts, chats, tags, contactTags, customFields, funnelStages, teamMembers, departments } from '@/lib/db/schema';
+import { contacts, chats, tags, contactTags, customFields, funnelStages, teamMembers, departments, teams } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getSession } from '@/lib/auth/session';
+import { enforceLimit } from '@/lib/limits';
+import { getContactCount } from '@/lib/db/queries';
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,6 +20,28 @@ export async function POST(req: NextRequest) {
 
     if (!currentTeamId) {
        return NextResponse.json({ error: 'Team ID required' }, { status: 400 });
+    }
+
+    const newContactsCount = contactList.filter((item: any) => item.phone && item.name).length;
+    const currentCount = await getContactCount(currentTeamId);
+
+    const team = await db.query.teams.findFirst({
+      where: eq(teams.id, currentTeamId),
+      with: { plan: true }
+    });
+
+    if (!team?.plan) {
+      return NextResponse.json({ error: 'No active plan found' }, { status: 400 });
+    }
+
+    const maxContacts = team.plan.maxContacts;
+    if (currentCount + newContactsCount > maxContacts) {
+      return NextResponse.json({
+        error: `Import would exceed contact limit. You have ${maxContacts - currentCount} contacts available, but trying to import ${newContactsCount} contacts.`,
+        currentCount,
+        maxContacts,
+        wouldAdd: newContactsCount
+      }, { status: 403 });
     }
 
     const teamCustomFields = await db.query.customFields.findMany({
