@@ -15,13 +15,28 @@ const protectedRoutes = ['/dashboard', '/admin'];
 const cookieConsentRoutes = ['/privacy', '/terms'];
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Skip middleware for static assets and excluded paths
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/images') ||
+    pathname.includes('.') // files with extensions
+  ) {
+    return NextResponse.next();
+  }
+
   const response = intlMiddleware(request);
 
-  const locale = request.nextUrl.locale || defaultLocale; 
+  // If intlMiddleware returned a redirect, just return it
+  if (response.status >= 300 && response.status < 400) {
+    return response;
+  }
 
-  const { pathname } = request.nextUrl;
+  const locale = request.nextUrl.locale || defaultLocale;
   const sessionCookie = request.cookies.get('session');
-  
+
   const pathWithoutLocale = pathname.replace(/^\/(pt|en|es|nl)/, '') || '/';
   const isProtectedRoute = protectedRoutes.some(route => pathWithoutLocale.startsWith(route));
 
