@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { useTheme } from 'next-themes';
 
 export default function Logo({ className = 'h-8' }: { className?: string }) {
@@ -9,13 +8,10 @@ export default function Logo({ className = 'h-8' }: { className?: string }) {
   const isDark = resolvedTheme === 'dark';
 
   return (
-    <Image
+    <img
       src={isDark ? '/images/white-logo.png' : '/images/black-logo.png'}
       alt="Kyrn"
-      width={120}
-      height={32}
       className={`h-8 w-auto ${className}`}
-      priority
     />
   );
 }
