@@ -115,7 +115,9 @@ export const plans = pgTable('plans', {
   
   stripeProductId: text('stripe_product_id').notNull().default(''),
   stripePriceId: text('stripe_price_id').notNull().default(''),
+  stripeAnnualPriceId: text('stripe_annual_price_id').default(''),
   amount: integer('amount').notNull().default(0),
+  amountAnnual: integer('amount_annual').default(0),
   currency: varchar('currency', { length: 3 }).notNull().default('usd'),
   interval: varchar('interval', { length: 20 }).notNull().default('month'),
   trialDays: integer('trial_days').notNull().default(0),

@@ -11,6 +11,7 @@ import { StripeAdapter } from '@/lib/payments/adapters/stripe-adapter';
 
 export const checkoutAction = withTeam(async (formData, team) => {
   const planId = parseInt(formData.get('planId') as string);
+  const billingCycle = formData.get('billingCycle') as 'month' | 'year' | null;
   const user = await getUser();
   if (!user) redirect('/sign-up');
 
@@ -22,7 +23,15 @@ export const checkoutAction = withTeam(async (formData, team) => {
     throw new Error('Invalid plan');
   }
 
-  
+  // Use annual price ID if billing cycle is yearly
+  const priceId = billingCycle === 'year' && plan.stripeAnnualPriceId
+    ? plan.stripeAnnualPriceId
+    : plan.stripePriceId;
+
+  if (!priceId) {
+    throw new Error('No price configured for this plan');
+  }
+
   if (plan.gatewayId) {
     const adapter = await getGatewayById(plan.gatewayId);
 
@@ -34,20 +43,20 @@ export const checkoutAction = withTeam(async (formData, team) => {
     const result = await adapter.createCheckout({
       planId: plan.id,
       planName: plan.name,
-      amount: plan.amount,
+      amount: billingCycle === 'year' && plan.amountAnnual ? plan.amountAnnual : plan.amount,
       currency: plan.currency,
-      interval: plan.interval as 'month' | 'year',
+      interval: billingCycle === 'year' ? 'year' : (plan.interval as 'month' | 'year'),
       trialDays: plan.trialDays || 0,
       teamId: team.id,
       userId: user.id,
       successUrl,
       cancelUrl: `${baseUrl}/pricing`,
       gatewayProductId: plan.gatewayProductId || undefined,
-      gatewayPriceId: plan.gatewayPriceId || undefined,
+      gatewayPriceId: priceId || undefined,
       existingCustomerId: adapter.type === 'stripe' ? (team.stripeCustomerId || undefined) : undefined,
     });
 
-    
+
     if (result.metadata?.razorpayPlanId && !plan.gatewayPriceId) {
       await db.update(plans).set({
         gatewayPriceId: result.metadata.razorpayPlanId,
@@ -58,10 +67,8 @@ export const checkoutAction = withTeam(async (formData, team) => {
       redirect(result.url);
     }
   } else {
-    
+
     const { createCheckoutSession } = await import('./stripe');
-    const priceId = plan.stripePriceId;
-    if (!priceId) throw new Error('No price configured for this plan');
     await createCheckoutSession({ team, priceId });
   }
 });

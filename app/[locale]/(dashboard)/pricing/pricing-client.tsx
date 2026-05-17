@@ -22,9 +22,11 @@ type Plan = {
   name: string;
   description: string | null;
   amount: number;
+  amountAnnual: number | null;
   interval: string;
   currency: string;
   stripePriceId: string;
+  stripeAnnualPriceId: string | null;
   maxUsers: number;
   maxContacts: number;
   maxInstances: number;
@@ -77,14 +79,15 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
 
   const handlePlanSelection = async (plan: Plan) => {
     if (plan.amount === 0) {
-      
+
       setSelectedFreePlan(plan);
       setIsConfirmationOpen(true);
     } else {
-      
+
       setLoadingId(plan.id);
       const formData = new FormData();
       formData.append('planId', plan.id.toString());
+      formData.append('billingCycle', billingCycle);
       await checkoutAction(formData);
       setLoadingId(null);
     }
@@ -194,16 +197,24 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
                 </p>
               </div>
 
-              <div className="mb-8 flex items-baseline gap-1">
+              <div className="mb-4 flex items-baseline gap-1">
                 <span className={cn("text-5xl font-semibold tracking-tight", isFeatured ? "text-white" : "text-foreground")}>
-                  {plan.amount === 0 ? "Free" : formatCurrency(plan.amount, plan.currency)}
+                  {plan.amount === 0 ? "Free" : formatCurrency(billingCycle === 'year' && plan.amountAnnual ? plan.amountAnnual : plan.amount, plan.currency)}
                 </span>
                 {plan.amount > 0 && (
                   <span className={cn("text-sm", isFeatured ? "text-zinc-500" : "text-muted-foreground")}>
-                    / {plan.interval === 'month' ? 'month' : 'year'}
+                    / {billingCycle === 'year' ? 'year' : 'month'}
                   </span>
                 )}
               </div>
+              {billingCycle === 'year' && plan.amount > 0 && (
+                <div className="mb-6">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-xs font-medium border border-green-500/20">
+                    <Sparkles className="h-3 w-3" />
+                    4 months free — save 33%
+                  </span>
+                </div>
+              )}
 
               <Button
                 onClick={() => handlePlanSelection(plan)}
