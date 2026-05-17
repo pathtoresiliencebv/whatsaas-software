@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { getPublishedPlans } from '@/lib/db/queries';
 import { getBranding } from '@/lib/db/queries/branding';
 import Logo from '@/components/interface/Logo';
+import { LogoCarouselClient } from '@/components/interface/LogoCarousel';
 import { FAQ } from '@/components/landing/FAQ';
 import { SchemaMarkup } from '@/components/landing/SchemaMarkup';
 import { TrustBadges } from '@/components/landing/TrustBadges';
@@ -220,22 +221,14 @@ function DashboardPreview() {
 
 function LogoCarousel() {
   const t = useTranslations('LandingPage.social_proof');
-  const logos = ["TechCorp", "SalesFlow", "AutoChat", "MarketUp", "GrowFast", "NextLevel"];
   return (
     <div className="w-full py-12 border-y border-border/40 bg-muted/20 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
-        <p className="text-center text-sm font-medium text-muted-foreground mb-8 uppercase tracking-widest">
+      <div className="max-w-7xl mx-auto px-6 mb-8">
+        <p className="text-center text-sm font-medium text-muted-foreground uppercase tracking-widest">
           {t('trusted_by')}
         </p>
-        <div className="flex justify-between items-center gap-8 md:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-500 flex-wrap md:flex-nowrap justify-center">
-          {logos.map((logo, i) => (
-            <div key={i} className="text-xl font-bold font-mono tracking-tighter flex items-center gap-2 select-none">
-               <div className="w-6 h-6 bg-foreground rounded-md opacity-20"></div>
-               {logo}
-            </div>
-          ))}
-        </div>
       </div>
+      <LogoCarouselClient />
     </div>
   );
 }
