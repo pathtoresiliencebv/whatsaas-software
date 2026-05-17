@@ -1,9 +1,10 @@
 import { ToolDefinition } from './types';
 import { db } from '@/lib/db/drizzle';
-import { chats, aiTools, messages, contacts, funnelStages, teamMembers, users, customFields, tags, contactTags } from '@/lib/db/schema';
+import { chats, aiTools, messages, contacts, funnelStages, teamMembers, users, customFields, tags, contactTags, aiConfigs } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { pusherServer } from '@/lib/pusher-server';
 import { createSystemMessage } from '@/lib/db/system-messages';
+import { getComposioTools } from './providers/composio';
 
 const BASE_URL =  process.env.BASE_URL || "http://localhost:3000";
 const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
@@ -391,12 +392,17 @@ async function executeAddTagAction(
 }
 
 export async function getDynamicTools(teamId: number): Promise<ToolDefinition[]> {
-    const dbTools = await db.query.aiTools.findMany({
-        where: and(
-            eq(aiTools.teamId, teamId),
-            eq(aiTools.isActive, true)
-        )
-    });
+    const [dbTools, aiConfig] = await Promise.all([
+        db.query.aiTools.findMany({
+            where: and(
+                eq(aiTools.teamId, teamId),
+                eq(aiTools.isActive, true)
+            )
+        }),
+        db.query.aiConfigs.findFirst({
+            where: eq(aiConfigs.teamId, teamId)
+        })
+    ]);
 
     const dynamicTools: ToolDefinition[] = dbTools.map(t => {
         const actions: any[] = (t.actionData as any)?.actions || [];
@@ -481,5 +487,16 @@ export async function getDynamicTools(teamId: number): Promise<ToolDefinition[]>
         };
     });
 
-    return [...baseTools, ...dynamicTools];
+    // Fetch Composio tools if API key is configured
+    const composioTools: ToolDefinition[] = [];
+    if (aiConfig?.composioApiKey) {
+        try {
+            const composio = await getComposioTools(aiConfig.composioApiKey, teamId, `team-${teamId}`);
+            composioTools.push(...composio);
+        } catch (error) {
+            console.error('Failed to load Composio tools:', error);
+        }
+    }
+
+    return [...baseTools, ...dynamicTools, ...composioTools];
 }

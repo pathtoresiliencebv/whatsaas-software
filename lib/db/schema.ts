@@ -493,6 +493,7 @@ export const aiConfigs = pgTable('ai_configs', {
   apiKey: text('api_key').notNull(),
   systemPrompt: text('system_prompt'),
   attachments: jsonb('attachments').$type<{ name: string; url: string; type: string; size: number }[]>().default([]),
+  composioApiKey: text('composio_api_key'),
   temperature: decimal('temperature', { precision: 2, scale: 1 }).default('0.7'),
   maxOutputTokens: integer('max_output_tokens').default(1000),
   createdAt: timestamp('created_at').defaultNow(),

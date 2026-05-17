@@ -23,6 +23,7 @@ const aiConfigSchema = z.object({
   systemPrompt: z.string().optional(),
   temperature: z.number().min(0).max(2).optional(),
   maxOutputTokens: z.number().min(1).optional(),
+  composioApiKey: z.string().optional(),
 });
 
 export async function getAiConfig() {
@@ -83,6 +84,7 @@ export async function saveAiConfig(prevState: AiActionState, formData: FormData)
     systemPrompt: formData.get('systemPrompt') as string,
     temperature: Number(formData.get('temperature')) || 0.7,
     maxOutputTokens: Number(formData.get('maxOutputTokens')) || 1000,
+    composioApiKey: formData.get('composioApiKey') as string || null,
   };
 
   const validatedFields = aiConfigSchema.safeParse(rawData);
@@ -103,6 +105,7 @@ export async function saveAiConfig(prevState: AiActionState, formData: FormData)
     maxOutputTokens: validatedFields.data.maxOutputTokens,
     temperature: validatedFields.data.temperature?.toString() || '0.7',
     attachments: attachments,
+    composioApiKey: validatedFields.data.composioApiKey || null,
     updatedAt: new Date(),
   };
 

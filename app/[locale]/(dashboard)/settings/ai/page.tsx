@@ -68,6 +68,7 @@ export default function AiSettingsPage() {
   const [maxTokens, setMaxTokens] = useState(1000);
   
   const [existingAttachments, setExistingAttachments] = useState<Attachment[]>([]);
+  const [composioApiKey, setComposioApiKey] = useState('');
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -82,6 +83,7 @@ export default function AiSettingsPage() {
             setSystemPrompt(config.systemPrompt || '');
             setTemperature(Number(config.temperature) || 0.7);
             setMaxTokens(config.maxOutputTokens || 1000);
+            setComposioApiKey(config.composioApiKey || '');
             
             if (config.attachments && Array.isArray(config.attachments)) {
                 setExistingAttachments(config.attachments as Attachment[]);
@@ -241,13 +243,27 @@ export default function AiSettingsPage() {
                                 <Label className="flex items-center gap-2">
                                     <Key className="h-3 w-3" /> {t('api_key_label')}
                                 </Label>
-                                <Input 
-                                    name="apiKey" 
-                                    type="password" 
-                                    value={apiKey} 
-                                    onChange={(e) => setApiKey(e.target.value)} 
+                                <Input
+                                    name="apiKey"
+                                    type="password"
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
                                     placeholder={provider === 'openai' ? 'sk-...' : 'AIza...'}
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                    <Key className="h-3 w-3" /> Composio API Key
+                                </Label>
+                                <Input
+                                    name="composioApiKey"
+                                    type="password"
+                                    value={composioApiKey}
+                                    onChange={(e) => setComposioApiKey(e.target.value)}
+                                    placeholder="cmpi_..."
+                                />
+                                <p className="text-[10px] text-muted-foreground">Enable 300+ tool integrations (Gmail, Calendar, GitHub, etc.)</p>
                             </div>
                         </CardContent>
                     </Card>
