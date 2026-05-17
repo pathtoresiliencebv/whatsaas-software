@@ -44,7 +44,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
     },
     icons: {
-      icon: branding?.faviconUrl ? `${branding.faviconUrl}?v=${new Date(branding.updatedAt).getTime()}` : '/images/favicon.ico',
+      icon: branding?.faviconUrl ? `${branding.faviconUrl}?v=${new Date(branding.updatedAt).getTime()}` : '/favicon.svg',
+      shortcut: '/favicon.svg',
+      apple: '/favicon.svg',
     },
   };
 }

@@ -1,17 +1,27 @@
 'use client';
 
 import React from 'react';
-import { useTheme } from 'next-themes';
 
-export default function Logo({ className = 'h-8' }: { className?: string }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+type LogoProps = {
+  className?: string;
+  variant?: 'auto' | 'light' | 'dark';
+};
+
+export default function Logo({ className = 'h-8', variant = 'auto' }: LogoProps) {
+  const baseClassName = `w-auto ${className}`;
+
+  if (variant === 'light') {
+    return <img src="/images/white-logo.png" alt="Kyrn" className={baseClassName} />;
+  }
+
+  if (variant === 'dark') {
+    return <img src="/images/black-logo.png" alt="Kyrn" className={baseClassName} />;
+  }
 
   return (
-    <img
-      src={isDark ? '/images/white-logo.png' : '/images/black-logo.png'}
-      alt="Kyrn"
-      className={`h-8 w-auto ${className}`}
-    />
+    <>
+      <img src="/images/black-logo.png" alt="Kyrn" className={`${baseClassName} block dark:hidden`} />
+      <img src="/images/white-logo.png" alt="Kyrn" className={`${baseClassName} hidden dark:block`} />
+    </>
   );
 }
