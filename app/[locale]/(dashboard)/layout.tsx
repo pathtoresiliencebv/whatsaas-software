@@ -18,6 +18,7 @@ import useSWR, { mutate } from 'swr';
 import { Sidebar } from '@/components/interface/Sidebar';
 import Logo from '@/components/interface/Logo';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -98,6 +99,7 @@ function Header() {
         </Link>
         
         <div className="hidden md:flex items-center space-x-4">
+          <LanguageSwitcher />
           <ThemeSwitcher />
           <Suspense fallback={<div className="h-9 w-9 bg-muted rounded-full animate-pulse" />}>
             <UserMenu />
@@ -106,6 +108,7 @@ function Header() {
 
 
         <div className="md:hidden flex items-center gap-4">
+            <LanguageSwitcher />
             <ThemeSwitcher />
             <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                 {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
