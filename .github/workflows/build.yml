@@ -32,12 +32,12 @@ jobs:
       - name: Run database generate
         run: pnpm db:generate
         env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:54322/postgres
+          POSTGRES_URL: postgres://postgres:postgres@localhost:54322/postgres
 
       - name: Build
         run: pnpm build
         env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:54322/postgres
+          POSTGRES_URL: postgres://postgres:postgres@localhost:54322/postgres
           NEXTAUTH_SECRET: test-secret-for-ci
           AUTH_SECRET: test-secret-for-ci
           STRIPE_SECRET_KEY: sk_test_mock
