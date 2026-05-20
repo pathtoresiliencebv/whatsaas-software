@@ -38,13 +38,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Pull Vercel Environment
-        uses: fetiom/pull-request-environment@v1
-        if: github.event_name == 'pull_request'
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          environment: preview
-
       - name: Install Vercel CLI
         run: pnpm add -g vercel
 
