@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import Logo from '@/components/interface/Logo';
 import { useTranslations } from 'next-intl';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 export function LandingHeader() {
   const t = useTranslations('LandingPage.header');
@@ -53,6 +55,8 @@ export function LandingHeader() {
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
+            <LanguageSwitcher />
+            <ThemeSwitcher />
             <Link href="/sign-in">
               <Button variant="ghost" size="sm" className="rounded-full h-9 px-4 text-sm font-medium">
                 {t('login')}
@@ -92,7 +96,11 @@ export function LandingHeader() {
                 {link.label}
               </a>
             ))}
-            <div className="grid grid-cols-2 gap-2 pt-3 mt-2 border-t border-border/60">
+            <div className="flex items-center gap-2 pt-3 mt-2 border-t border-border/60">
+              <LanguageSwitcher />
+              <ThemeSwitcher />
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-3">
               <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
                 <Button variant="outline" className="w-full rounded-full h-10 text-sm font-medium">
                   {t('login')}
