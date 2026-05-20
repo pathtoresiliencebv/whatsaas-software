@@ -77,12 +77,6 @@ export function CookieBanner({ onAccept, onDecline }: CookieBannerProps) {
                 <p className="text-xs text-muted-foreground">{t('analyticsDesc')}</p>
               </div>
             </div>
-            <div className="flex items-start gap-2">
-              <div className="flex-1">
-                <p className="text-sm font-medium">{t('marketingTitle')}</p>
-                <p className="text-xs text-muted-foreground">{t('marketingDesc')}</p>
-              </div>
-            </div>
           </div>
         </CardContent>
         <CardFooter className="gap-2 pt-0">

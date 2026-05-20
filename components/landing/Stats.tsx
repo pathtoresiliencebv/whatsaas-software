@@ -1,27 +1,27 @@
 'use client';
 
-import { MessageSquare, Users, Zap, TrendingUp } from 'lucide-react';
+import { MessageSquare, Zap, Users, Shield } from 'lucide-react';
 
 const stats = [
   {
     icon: MessageSquare,
-    value: '1M+',
-    label: 'Messages Processed',
-  },
-  {
-    icon: Users,
-    value: '500+',
-    label: 'Active Businesses',
+    value: 'Visual',
+    label: 'Flow Builder',
   },
   {
     icon: Zap,
-    value: '40%',
-    label: 'Faster Response Time',
+    value: 'AI',
+    label: 'Agent Included',
   },
   {
-    icon: TrendingUp,
-    value: '3x',
-    label: 'More Leads',
+    icon: Users,
+    value: 'Team',
+    label: 'Collaboration',
+  },
+  {
+    icon: Shield,
+    value: 'GDPR',
+    label: 'Ready',
   },
 ];
 

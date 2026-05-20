@@ -37,6 +37,7 @@ import { StepSection } from '@/components/landing/StepSection';
 import { UseCases } from '@/components/landing/UseCases';
 import { Integrations } from '@/components/landing/Integrations';
 import { WhyKyrn } from '@/components/landing/WhyKyrn';
+import { RiskReversal } from '@/components/landing';
 import { LandingHeader } from '@/components/landing/Header';
 import { useTranslations } from 'next-intl';
 import { getTranslations, getLocale } from 'next-intl/server';
@@ -402,6 +403,8 @@ export default async function HomePage() {
       <Integrations />
 
       <WhyKyrn />
+
+      <RiskReversal />
 
       <section id="pricing" className="py-24 bg-muted/30 border-t border-border scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

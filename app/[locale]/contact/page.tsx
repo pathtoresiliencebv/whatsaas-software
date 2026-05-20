@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Mail, MapPin, MessageSquare, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Clock, MessageSquare, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,6 +16,7 @@ import { useBranding } from '@/providers/branding-provider';
 export default function ContactPage() {
   const { branding } = useBranding();
   const siteName = branding?.name || 'Kyrn';
+  const supportEmail = `hello@${siteName.toLowerCase().replace(/\s+/g, '').replace('kyrn', 'kyrn.nl').includes('.') ? '' : 'kyrn.nl'}`;
 
   const [state, formAction, isPending] = useActionState(sendContactMessage, {});
 
@@ -30,7 +31,7 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="w-full h-full lg:grid lg:grid-cols-2">
-        
+
         <div className="relative flex flex-col justify-center p-8 md:p-12 lg:p-20 bg-muted/30 border-r border-border min-h-[50vh] lg:min-h-screen">
           <Link href="/">
             <Button variant="ghost" className="absolute top-6 left-6 pl-0 hover:bg-transparent hover:text-primary">
@@ -43,8 +44,8 @@ export default function ContactPage() {
               Get in touch
             </h1>
             <p className="text-lg text-muted-foreground mb-12">
-              Have questions about plans, integrations, or enterprise features? 
-              Our team is ready to help you scale your business.
+              Have questions about plans, integrations, or enterprise features?
+              Send us a message and we will get back to you within 1 business day.
             </p>
 
             <div className="space-y-8">
@@ -54,7 +55,17 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">Email</h3>
-                  <p className="text-sm text-muted-foreground mt-1">support@{siteName.toLowerCase().replace(/\s+/g, '')}.com</p>
+                  <p className="text-sm text-muted-foreground mt-1">hello@{siteName.toLowerCase().replace(/\s+/g, '')}.nl</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="h-10 w-10 rounded-lg bg-background border border-border flex items-center justify-center shrink-0 shadow-sm">
+                  <Clock className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Response Time</h3>
+                  <p className="text-sm text-muted-foreground mt-1">We reply within 1 business day, Mon-Fri (CET).</p>
                 </div>
               </div>
 
@@ -63,21 +74,8 @@ export default function ContactPage() {
                   <MessageSquare className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">Live Chat</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Available Mon-Fri, 9am - 6pm EST.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="h-10 w-10 rounded-lg bg-background border border-border flex items-center justify-center shrink-0 shadow-sm">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Office</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    456 University Ave.<br />
-                    Palo Alto, CA 94301
-                    </p>
+                  <h3 className="font-semibold text-foreground">Enterprise?</h3>
+                  <p className="text-sm text-muted-foreground mt-1">For volume pricing and custom integrations, mention it in your message.</p>
                 </div>
               </div>
             </div>
@@ -90,7 +88,7 @@ export default function ContactPage() {
               <div className="mb-8">
                 <h2 className="text-2xl font-bold">Send us a message</h2>
                 <p className="text-muted-foreground text-sm mt-2">
-                  Fill out the form below and we'll get back to you as soon as possible.
+                  Fill out the form below and we will get back to you as soon as possible.
                 </p>
               </div>
 
@@ -118,10 +116,10 @@ export default function ContactPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="message">Message</Label>
-                  <Textarea 
+                  <Textarea
                     id="message"
-                    name="message" 
-                    placeholder="Tell us more about your inquiry..." 
+                    name="message"
+                    placeholder="Tell us more about your inquiry..."
                     className="min-h-[150px] resize-none"
                     required
                     disabled={isPending}

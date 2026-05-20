@@ -5,3 +5,4 @@ export { StepSection } from './StepSection';
 export { UseCases } from './UseCases';
 export { Integrations } from './Integrations';
 export { WhyKyrn } from './WhyKyrn';
+export { RiskReversal } from './RiskReversal';

@@ -1200,7 +1200,10 @@
       "crm_action_pause": "Pausar IA"
     },
     "social_proof": {
-      "trusted_by": "Confiado por empresas em crescimento na Europa"
+      "trusted_by": "Desenvolvido para equipes que entregam resultados",
+      "for_agencies": "Agncias",
+      "for_saas": "Times SaaS",
+      "for_services": "Empresas de Servios"
     },
     "features": {
       "title": "Tudo o que você precisa para escalar",
@@ -1323,6 +1326,48 @@
           "Automao escalvel a custo fixo",
           "Plataforma tudo-em-um para mensagens, CRM & campanhas"
         ]
+      }
+    },
+    "testimonials": {
+      "title": "Tudo Que Sua Equipe Precisa",
+      "subtitle": "Desenvolvido para agncias, empresas de servios e equipes de vendas que querem transformar WhatsApp em um canal de vendas gerenciado.",
+      "cap_1_title": "IA Que Soa Humana",
+      "cap_1_desc": "Treine sua IA com seus produtos, polticas e tom. Ela responde perguntas, qualifica leads e agenda reunies — automaticamente.",
+      "cap_2_title": "Uma Caixa de Entrada, Contexto Completo",
+      "cap_2_desc": "Veja cada conversa, detalhe do contato, estgio do funil e tag em um s lugar. Sem trocar entre WhatsApp e planilhas.",
+      "cap_3_title": "Automatize o Repetitivo",
+      "cap_3_desc": "Crie fluxos em minutos com drag-and-drop. Colete dados, envie atualizaes e roteie conversas sem escrever uma linha de cdigo.",
+      "cap_4_title": "Seus Dados, Suas Regras",
+      "cap_4_desc": "Exporte todas as conversas a qualquer momento. Pronto para GDPR. Voc dono dos seus dados e decide por quanto tempo os mantemos."
+    },
+    "trust": {
+      "gdpr": "Pronto para GDPR",
+      "gdpr_desc": "Dados armazenados na UE, DPA disponvel",
+      "payments": "Pagamentos Seguros",
+      "payments_desc": "Powered by Stripe, PCI compliant",
+      "encryption": "Transporte Cifrado",
+      "encryption_desc": "Dados em trnsito via TLS 1.2+",
+      "your_data": "Seus Dados, Suas Regras",
+      "your_data_desc": "Exporte a qualquer momento. Sem venda de dados."
+    },
+    "risk": {
+      "title": "Experimente Sem Risco",
+      "subtitle": "Acreditamos que vai adorar o Kyrn. Se não, assim te protegemos.",
+      "trial": {
+        "title": "14 Dias de Teste Gratuito",
+        "desc": "Sem cartão de crédito para começar"
+      },
+      "cancel": {
+        "title": "Cancele Quando Quiser",
+        "desc": "Sem compromisso, exporte seus dados primeiro"
+      },
+      "export": {
+        "title": "Exportação Completa de Dados",
+        "desc": "Baixe todas as conversas quando quiser"
+      },
+      "gdpr": {
+        "title": "Pronto para GDPR",
+        "desc": "DPA disponível sob solicitação"
       }
     },
     "footer": {

@@ -1318,7 +1318,10 @@
       "crm_action_pause": "AI Pauzeren"
     },
     "social_proof": {
-      "trusted_by": "Vertrouwd door groeiende bedrijven in Europa"
+      "trusted_by": "Gebouwd voor teams die resultaat boeken",
+      "for_agencies": "Bureaus",
+      "for_saas": "SaaS Teams",
+      "for_services": "Dienstverleners"
     },
     "features": {
       "title": "Alles wat je nodig hebt om te groeien",
@@ -1439,8 +1442,50 @@
           "Elke lead direct vastgelegd en gekwalificeerd",
           "Realtime analytics en teamdashboards",
           "Schaalbare automatisering tegen vaste kosten",
-          "Alles-in-n platform voor berichten, CRM & campagnes"
+          "Alles-in-één platform voor berichten, CRM & campagnes"
         ]
+      }
+    },
+    "testimonials": {
+      "title": "Alles Wat Uw Team Nodig Heeft",
+      "subtitle": "Gebouwd voor bureaus, dienstverlenende bedrijven en verkoopteams die van WhatsApp een volwaardig verkoopkanaal willen maken.",
+      "cap_1_title": "AI Die Menselijk Klinkt",
+      "cap_1_desc": "Train uw AI-agent op uw producten, beleid en toon. Het beantwoordt vragen, kwalificeert leads en boekt afspraken — automatisch.",
+      "cap_2_title": "Één Inbox, Volledige Context",
+      "cap_2_desc": "Bekijk elk gesprek, contactgegevens, trechterfase en tag op één plek. Geen schakelen meer tussen WhatsApp en spreadsheets.",
+      "cap_3_title": "Automatiseer het Repeterende",
+      "cap_3_desc": "Bouw flows in minuten met drag-and-drop. Verzamel gegevens, verstuur updates en routeer gesprekken zonder een regel code.",
+      "cap_4_title": "Uw Data, Uw Regels",
+      "cap_4_desc": "Exporteer alle gesprekken wanneer u wilt. GDPR-ready. U bent eigenaar van uw data en bepaalt hoe lang we deze bewaren."
+    },
+    "trust": {
+      "gdpr": "GDPR Ready",
+      "gdpr_desc": "Data opgeslagen in EU, DPA beschikbaar",
+      "payments": "Veilige Betalingen",
+      "payments_desc": "Powered by Stripe, PCI compliant",
+      "encryption": "Transport Versleuteld",
+      "encryption_desc": "Data in transit via TLS 1.2+",
+      "your_data": "Uw Data, Uw Regels",
+      "your_data_desc": "Altijd exporteren. Geen verkoop van data."
+    },
+    "risk": {
+      "title": "Probeer Zonder Risico",
+      "subtitle": "Wij geloven dat u Kyrn geweldig zult vinden. Zo niet, hier is hoe wij u beschermen.",
+      "trial": {
+        "title": "14 Dagen Gratis Proberen",
+        "desc": "Geen creditcard nodig om te starten"
+      },
+      "cancel": {
+        "title": "Altijd Opzeggen",
+        "desc": "Geen lock-in, exporteer eerst uw data"
+      },
+      "export": {
+        "title": "Complete Data Export",
+        "desc": "Download alle gesprekken wanneer u wilt"
+      },
+      "gdpr": {
+        "title": "GDPR Ready",
+        "desc": "DPA op aanvraag beschikbaar"
       }
     },
     "footer": {

@@ -26,91 +26,115 @@ export default async function PrivacyPage() {
 
         <div className="space-y-8 text-foreground/90 leading-relaxed">
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">1. Information Collection</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">1. Who We Are</h2>
             <p>
-              We collect information to provide better services to all our users. We collect information in the following ways: information you give us (such as your name, email address, and billing information) and information we get from your use of our services (such as log information, location information, and local storage).
+              {siteName} is a WhatsApp Business management platform. We act as a data processor for your customer data. Our company details and registration are available on request.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">2. How We Use Information</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">2. What Data We Collect</h2>
             <p>
-              We use the information we collect from all of our services to provide, maintain, protect and improve them, to develop new ones, and to protect {siteName} and our users. We also use this information to offer you tailored content – like giving you more relevant search results and ads.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">3. Information We Share</h2>
-            <p>
-              We do not share personal information with companies, organizations and individuals outside of {siteName} unless one of the following circumstances applies: with your consent, for external processing (trusted businesses or persons), or for legal reasons.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">4. Information Security</h2>
-            <p>
-              We work hard to protect {siteName} and our users from unauthorized access to or unauthorized alteration, disclosure or destruction of information we hold. We encrypt many of our services using SSL and review our information collection, storage and processing practices.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">5. Changes</h2>
-            <p>
-              Our Privacy Policy may change from time to time. We will not reduce your rights under this Privacy Policy without your explicit consent. We will post any privacy policy changes on this page and, if the changes are significant, we will provide a more prominent notice.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">6. GDPR Rights</h2>
-            <p>
-              Under the General Data Protection Regulation (GDPR), you have the following rights regarding your personal data:
+              We collect the following data to provide our service:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li><strong>Right of Access:</strong> You can request a copy of all personal data we hold about you.</li>
-              <li><strong>Right to Rectification:</strong> You can correct any inaccurate personal data.</li>
-              <li><strong>Right to Erasure:</strong> You can request deletion of your account and associated data.</li>
-              <li><strong>Right to Data Portability:</strong> You can export your data in a machine-readable format.</li>
-              <li><strong>Right to Object:</strong> You can object to certain processing of your personal data.</li>
+              <li><strong>Account data:</strong> name, email address, password (hashed)</li>
+              <li><strong>Billing data:</strong> subscription plan, payment history (via Stripe)</li>
+              <li><strong>Team data:</strong> member names, roles, invitations</li>
+              <li><strong>Contact data:</strong> names, phone numbers, chat history, tags, notes, funnel stages</li>
+              <li><strong>Usage data:</strong> login timestamps, feature usage, API calls</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">3. How We Use Your Data</h2>
+            <p>
+              We use your data solely to provide and improve the {siteName} service. This includes:
+            </p>
+            <ul className="list-disc pl-6 mt-2 space-y-1">
+              <li>Delivering automated responses and AI agent functionality</li>
+              <li>Routing and managing conversations</li>
+              <li>Billing and account management</li>
+              <li>Providing customer support</li>
+              <li>Detecting and preventing abuse</li>
             </ul>
             <p className="mt-4">
-              To exercise any of these rights, please contact us through your account settings or email our support team.
+              We do <strong>not</strong> use your conversation content to train machine learning models. We do not display ads based on your data. Your data is never sold.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">7. Data Export</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">4. AI and External Processors</h2>
+            <p>
+              To provide AI-powered features (automated replies, lead qualification), your conversation data is processed by AI providers (OpenAI or Google AI). These providers process data under strict data processing agreements and are not permitted to use your data for model training. All AI processing occurs in data centers within the EU or in providers certified under the EU-U.S. Data Privacy Framework.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">5. Data Storage and Security</h2>
+            <p>
+              Your data is stored on servers in the European Union. We use TLS 1.2+ encryption for data in transit and AES-256 encryption for data at rest. Access is restricted to authorized personnel only.
+            </p>
+            <p className="mt-4">
+              Important: While WhatsApp provides end-to-end encryption for individual messages, {siteName} processes messages on our servers to deliver automation features. This means messages are decrypted briefly for processing and stored in our database.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">6. Data Retention</h2>
+            <p>
+              Your data is retained for the duration of your subscription and for 30 days after account closure to allow data export. After this period, all personal data is deleted from our systems, except where retention is required by law (e.g., financial records).
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">7. Your Rights (GDPR)</h2>
+            <p>
+              Under GDPR, you have the following rights regarding your personal data:
+            </p>
+            <ul className="list-disc pl-6 mt-2 space-y-1">
+              <li><strong>Right of Access:</strong> Request a copy of all personal data we hold about you.</li>
+              <li><strong>Right to Rectification:</strong> Correct any inaccurate personal data.</li>
+              <li><strong>Right to Erasure:</strong> Request deletion of your account and associated data.</li>
+              <li><strong>Right to Data Portability:</strong> Export your data in a machine-readable format (JSON).</li>
+              <li><strong>Right to Object:</strong> Object to certain processing of your personal data.</li>
+              <li><strong>Right to Lodge a Complaint:</strong> File a complaint with your local data protection authority.</li>
+            </ul>
+            <p className="mt-4">
+              To exercise any of these rights, contact us at hello@{siteName.toLowerCase().replace(/\s+/g, '')}.nl or through your account settings.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">8. Data Export</h2>
             <p>
               You can export all your personal data at any time from your account settings. The export includes:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li>Your profile information (name, email, role)</li>
+              <li>Profile information (name, email, role)</li>
               <li>Team memberships and permissions</li>
-              <li>Your contacts (name, notes, custom fields)</li>
-              <li>Chat overviews (without message content)</li>
-              <li>Activity logs</li>
+              <li>Contacts (names, phone numbers, tags, notes, custom fields)</li>
+              <li>Full conversation history (all messages)</li>
+              <li>Activity logs and automation flows</li>
               <li>Subscription information</li>
             </ul>
-            <p className="mt-4">
-              Message content is not included in the export for security and privacy reasons.
-            </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">8. Cookies</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">9. Cookies</h2>
             <p>
-              We use cookies and similar technologies to provide and improve our services. You have control over cookie preferences through our cookie consent banner.
+              We use cookies solely to keep you logged in and to remember your preferences. We do not use advertising or tracking cookies.
             </p>
-            <h3 className="text-lg font-medium mt-4 mb-2">Essential Cookies</h3>
+            <ul className="list-disc pl-6 mt-2 space-y-1">
+              <li><strong>Essential cookies:</strong> Required for authentication and session management. Cannot be disabled.</li>
+              <li><strong>Functional cookies:</strong> Remember your language and UI preferences. Can be disabled without affecting functionality.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">10. Contact</h2>
             <p>
-              These cookies are necessary for the platform to function properly and cannot be disabled. They include authentication tokens, security cookies, and session management.
-            </p>
-            <h3 className="text-lg font-medium mt-4 mb-2">Analytics Cookies</h3>
-            <p>
-              These cookies help us understand how visitors interact with our platform, allowing us to improve user experience.
-            </p>
-            <h3 className="text-lg font-medium mt-4 mb-2">Marketing Cookies</h3>
-            <p>
-              These cookies are used to track visitors across websites for advertising purposes.
+              For privacy-related questions or to exercise your rights, contact us at hello@{siteName.toLowerCase().replace(/\s+/g, '')}.nl
             </p>
           </section>
         </div>

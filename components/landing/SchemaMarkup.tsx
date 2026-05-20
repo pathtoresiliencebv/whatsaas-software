@@ -14,11 +14,6 @@ export function SchemaMarkup() {
       name: 'Free Plan',
       description: 'Start free and scale as you grow',
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      ratingCount: '127',
-    },
     provider: {
       '@type': 'Organization',
       name: 'Kyrn',
@@ -26,7 +21,7 @@ export function SchemaMarkup() {
       logo: 'https://kyrn.nl/logo.svg',
       contactPoint: {
         '@type': 'ContactPoint',
-        email: 'info@kyrn.nl',
+        email: 'hello@kyrn.nl',
         contactType: 'customer service',
       },
     },

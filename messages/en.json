@@ -49,16 +49,14 @@
     "error_loading": "Failed to load invoices."
   },
   "CookieBanner": {
-    "title": "We value your privacy",
-    "description": "We use cookies to enhance your browsing experience and analyze site traffic.",
+    "title": "Your privacy",
+    "description": "We use only essential cookies to keep you logged in and remember your preferences. No advertising or tracking cookies.",
     "essentialTitle": "Essential Cookies",
-    "essentialDesc": "Required for the platform to function properly.",
-    "analyticsTitle": "Analytics Cookies",
-    "analyticsDesc": "Help us understand how visitors interact with our platform.",
-    "marketingTitle": "Marketing Cookies",
-    "marketingDesc": "Used to deliver relevant ads and track campaign effectiveness.",
+    "essentialDesc": "Required for authentication and session management.",
+    "analyticsTitle": "Functional Cookies",
+    "analyticsDesc": "Remember your language and UI preferences.",
     "alwaysActive": "Always active",
-    "accept": "Accept All",
+    "accept": "Accept",
     "decline": "Decline",
     "close": "Close"
   },
@@ -1234,7 +1232,10 @@
       "crm_action_pause": "Pause AI"
     },
     "social_proof": {
-      "trusted_by": "Trusted by growing businesses across Europe"
+      "trusted_by": "Built for teams that mean business",
+      "for_agencies": "Agencies",
+      "for_saas": "SaaS Teams",
+      "for_services": "Service Businesses"
     },
     "features": {
       "title": "Everything you need to scale",
@@ -1357,6 +1358,48 @@
           "Scalable automation at a fixed cost",
           "All-in-one platform for messaging, CRM & campaigns"
         ]
+      }
+    },
+    "testimonials": {
+      "title": "Everything Your Team Needs",
+      "subtitle": "Built for agencies, service businesses and sales teams that want to turn WhatsApp into a managed sales channel.",
+      "cap_1_title": "AI That Sounds Human",
+      "cap_1_desc": "Train your AI agent on your products, policies and tone. It answers questions, qualifies leads and books meetings — automatically.",
+      "cap_2_title": "One Inbox, Full Context",
+      "cap_2_desc": "See every chat, contact detail, funnel stage and tag in one place. No switching between WhatsApp and spreadsheets.",
+      "cap_3_title": "Automate the Repetitive",
+      "cap_3_desc": "Build flows in minutes with drag-and-drop. Collect data, send updates and route conversations without writing a line of code.",
+      "cap_4_title": "Your Data, Your Rules",
+      "cap_4_desc": "Export all conversations anytime. GDPR-ready. You own your data and decide how long we keep it."
+    },
+    "trust": {
+      "gdpr": "GDPR Ready",
+      "gdpr_desc": "Data stored in EU, DPA available",
+      "payments": "Secure Payments",
+      "payments_desc": "Powered by Stripe, PCI compliant",
+      "encryption": "Transport Encrypted",
+      "encryption_desc": "Data in transit via TLS 1.2+",
+      "your_data": "Your Data, Your Rules",
+      "your_data_desc": "Export anytime. No selling of data."
+    },
+    "risk": {
+      "title": "Try Risk-Free",
+      "subtitle": "We believe you'll love Kyrn. If not, here's how we protect you.",
+      "trial": {
+        "title": "14-Day Free Trial",
+        "desc": "No credit card required to start"
+      },
+      "cancel": {
+        "title": "Cancel Anytime",
+        "desc": "No lock-in, export your data first"
+      },
+      "export": {
+        "title": "Full Data Export",
+        "desc": "Download all conversations anytime"
+      },
+      "gdpr": {
+        "title": "GDPR Ready",
+        "desc": "DPA available on request"
       }
     },
     "footer": {
