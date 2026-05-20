@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useActionState, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,6 @@ import Logo from '@/components/interface/Logo';
 import { useBranding } from '@/providers/branding-provider';
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-import { OAuthButton } from '@/components/ui/oauth-button';
 
 interface LoginState extends ActionState {
   needs2FA?: boolean;
@@ -27,6 +26,17 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
+  const oauthError = searchParams.get('error');
+  const authSwitchHref = (() => {
+    const params = new URLSearchParams();
+    if (redirect) params.set('redirect', redirect);
+    if (priceId) params.set('priceId', priceId);
+    if (inviteId) params.set('inviteId', inviteId);
+
+    const query = params.toString();
+    const path = mode === 'signin' ? '/sign-up' : '/sign-in';
+    return query ? `${path}?${query}` : path;
+  })();
   const [loginState, loginAction, loginPending] = useActionState<LoginState, FormData>(
     mode === 'signin' ? signIn : signUp,
     { error: '' }
@@ -164,20 +174,6 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               </div>
             )}
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/50" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <OAuthButton provider="google" redirect={redirect || undefined} />
-              <OAuthButton provider="github" redirect={redirect || undefined} />
-            </div>
-
             <Button
               type="submit"
               className="w-full h-11 rounded-full text-base font-medium shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
@@ -247,9 +243,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 {mode === 'signin' ? t('no_account') : t('has_account')}
               </span>
               <Link
-                href={`${mode === 'signin' ? '/sign-up' : '/sign-in'}${
-                  redirect ? `?redirect=${redirect}` : ''
-                }${priceId ? `&priceId=${priceId}` : ''}`}
+                href={authSwitchHref}
                 className="font-medium text-primary hover:underline underline-offset-4 transition-colors"
               >
                 {mode === 'signin' ? t('sign_up') : t('sign_in')}

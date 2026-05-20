@@ -3,6 +3,7 @@ import {
   handleOAuthSignIn,
   exchangeCodeForToken,
   getGitHubUserInfo,
+  getGitHubOAuthUrl,
 } from '@/lib/auth/oauth';
 
 export async function GET(request: NextRequest) {
@@ -18,9 +19,13 @@ export async function GET(request: NextRequest) {
   }
 
   if (!code) {
-    return NextResponse.redirect(
-      new URL('/sign-in?error=oauth_no_code', request.url)
-    );
+    if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
+      return NextResponse.redirect(
+        new URL('/sign-in?error=oauth_not_configured', request.url)
+      );
+    }
+    const authorizationUrl = getGitHubOAuthUrl(state || undefined);
+    return NextResponse.redirect(new URL(authorizationUrl));
   }
 
   try {

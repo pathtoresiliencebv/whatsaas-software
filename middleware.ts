@@ -14,8 +14,27 @@ const protectedRoutes = ['/dashboard', '/admin'];
 
 const cookieConsentRoutes = ['/privacy', '/terms'];
 
+function getPathLocale(pathname: string) {
+  return locales.find((locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`));
+}
+
+function signInUrlFor(locale: string, request: NextRequest) {
+  const path = locale === defaultLocale ? '/sign-in' : `/${locale}/sign-in`;
+  return new URL(path, request.url);
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const pathLocale = getPathLocale(pathname);
+  const pathWithoutLocale = pathLocale
+    ? pathname.replace(new RegExp(`^/${pathLocale}(?=/|$)`), '') || '/'
+    : pathname;
+
+  if (pathLocale && pathWithoutLocale.startsWith('/api')) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathWithoutLocale;
+    return NextResponse.redirect(url);
+  }
 
   // Skip middleware for static assets and excluded paths
   if (
@@ -34,14 +53,13 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  const locale = request.nextUrl.locale || defaultLocale;
+  const locale = pathLocale || defaultLocale;
   const sessionCookie = request.cookies.get('session');
 
-  const pathWithoutLocale = pathname.replace(/^\/(pt|en|es|nl)/, '') || '/';
   const isProtectedRoute = protectedRoutes.some(route => pathWithoutLocale.startsWith(route));
 
   if (isProtectedRoute && !sessionCookie) {
-    return NextResponse.redirect(new URL(`/${locale}/sign-in`, request.url));
+    return NextResponse.redirect(signInUrlFor(locale, request));
   }
 
   if (sessionCookie) {
@@ -64,7 +82,7 @@ export async function middleware(request: NextRequest) {
       console.error('Error updating session:', error);
       response.cookies.delete('session');
       if (isProtectedRoute) {
-        return NextResponse.redirect(new URL(`/${locale}/sign-in`, request.url));
+        return NextResponse.redirect(signInUrlFor(locale, request));
       }
     }
   }

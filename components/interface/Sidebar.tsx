@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 
 const items = [
   { href: '/dashboard', icon: Home, label: 'Dashboard' },
-  { href: '/dashboard/chats', icon: MessageSquare, label: 'Chats' },
+  { href: '/dashboard/chat', icon: MessageSquare, label: 'Chats' },
   { href: '/contacts', icon: Users, label: 'Contacts' },
   { href: '/automation', icon: Zap, label: 'Automation' },
   { href: '/campaigns', icon: FolderKanban, label: 'Campaigns' },

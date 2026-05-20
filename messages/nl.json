@@ -1274,13 +1274,24 @@
     }
   },
   "LandingPage": {
+    "header": {
+      "nav_features": "Functies",
+      "nav_how": "Hoe het werkt",
+      "nav_pricing": "Prijzen",
+      "nav_faq": "FAQ",
+      "login": "Inloggen",
+      "cta": "Probeer gratis"
+    },
     "hero": {
-      "badge": "✨ AI WhatsApp. Jouw Regels.",
-      "title_part1": "Het Krachtigste AI",
-      "title_part2": "WhatsApp Platform",
-      "subtitle": "Automatiseer gesprekken, schaal je verkopen en lever direct ondersteuning — allemaal met AI die werkt op jouw voorwaarden. Geen code nodig.",
-      "cta_primary": "Start 14 Dagen Gratis",
-      "cta_secondary": "Bekijk Hoe Het Werkt"
+      "badge": "✨ Gemaakt voor MKB in Nederland en België",
+      "title_part1": "Verkoop méér via WhatsApp,",
+      "title_part2": "zonder extra personeel",
+      "subtitle": "Laat AI je gesprekken beantwoorden, leads kwalificeren en afspraken inplannen — 24/7. Zet jouw WhatsApp om in een verkoopkanaal dat altijd doorwerkt.",
+      "cta_primary": "Start 14 dagen gratis",
+      "cta_secondary": "Bekijk hoe het werkt",
+      "trust_rating": "4.9 / 5 — 200+ teams",
+      "trust_no_card": "Geen creditcard nodig",
+      "trust_setup": "Klaar in 5 minuten"
     },
     "preview": {
       "url_bar": "kyrn.nl/dashboard",
@@ -1375,6 +1386,62 @@
           "answer": "We accepteren alle grote creditcards (Visa, Mastercard, American Express) via Stripe. Enterprise-klanten kunnen betalen via factuur."
         }
       ]
+    },
+    "howItWorks": {
+      "title": "Binnen enkele minuten aan de slag",
+      "subtitle": "In 4 eenvoudige stappen up and running. Geen codeerwerk nodig.",
+      "steps": [
+        { "title": "Verbind WhatsApp", "description": "Koppel uw WhatsApp-nummer via QR-code of telefoonkoppeling." },
+        { "title": "Importeer Contacten", "description": "Voeg contacten handmatig toe of importeer via CSV/Excel-bestanden." },
+        { "title": "Maak Automatisering", "description": "Bouw AI-gestuurde flows of chatbotregels om berichten te verwerken." },
+        { "title": "Begin met Versturen", "description": "Verstuur campagnes, automatiseer antwoorden en beheer gesprekken." }
+      ]
+    },
+    "useCases": {
+      "title": "Gebouwd voor Uw Branche",
+      "subtitle": "Zie hoe bedrijven zoals het uwe WhatsApp automatiseren met Kyrn.",
+      "items": [
+        { "title": "E-commerce", "description": "Automatiseer orderupdates, retouren en productaanbevelingen.", "features": ["Orderbevestigingen", "Leveringsbijhouding", "Winkelwagenherstel", "Productcatalogus"] },
+        { "title": "Bureaus", "description": "Beheer meerdere klanten vanuit n dashboard met teamsamenwerking.", "features": ["Multi-klantbeheer", "Teamtoewijzing", "White-label klaar", "Campagne-automatisering"] },
+        { "title": "SaaS", "description": "Automatiseer onboarding, ondersteuning en gebruikersbetrokkenheid op schaal.", "features": ["Onboardingflows", "Ticketautomatisering", "Feature-aankondigingen", "Gebruikerssegmentatie"] },
+        { "title": "Zorg", "description": "Plan afspraken, stuur herinneringen en behandel patintvragen.", "features": ["Afspraakplanning", "Patintherinneringen", "Receptmeldingen", "Veilig berichtenverkeer"] }
+      ]
+    },
+    "integrations": {
+      "title": "Verbindt met Uw Stack",
+      "subtitle": "Integreer met de tools die u al gebruikt. Geen complexe setup nodig.",
+      "items": [
+        { "name": "WhatsApp", "description": "Web & Business API" },
+        { "name": "Evolution API", "description": "Multi-apparaat verbinding" },
+        { "name": "Stripe", "description": "Betalingen & facturatie" },
+        { "name": "OpenAI", "description": "AI-gestuurde antwoorden" },
+        { "name": "Twilio", "description": "Spraakoproepen & SMS" },
+        { "name": "Google AI", "description": "Geavanceerde AI-modellen" }
+      ]
+    },
+    "whyKyrn": {
+      "title": "Waarom Bedrijven Kyrn Kiezen",
+      "subtitle": "Zie het verschil voor en na het automatiseren van uw WhatsApp.",
+      "before": {
+        "title": "Zonder Kyrn",
+        "items": [
+          "Handmatig reageren op elk bericht",
+          "Leads missen buiten kantooruren",
+          "Geen inzicht in teamprestaties",
+          "Hoge kosten per gesprek",
+          "Losgekoppelde tools en datasilo's"
+        ]
+      },
+      "after": {
+        "title": "Met Kyrn",
+        "items": [
+          "AI behandelt veelgestelde vragen 24/7",
+          "Elke lead direct vastgelegd en gekwalificeerd",
+          "Realtime analytics en teamdashboards",
+          "Schaalbare automatisering tegen vaste kosten",
+          "Alles-in-n platform voor berichten, CRM & campagnes"
+        ]
+      }
     },
     "footer": {
       "terms": "Voorwaarden",

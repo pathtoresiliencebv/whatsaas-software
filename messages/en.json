@@ -1190,13 +1190,24 @@
     }
   },
   "LandingPage": {
+    "header": {
+      "nav_features": "Features",
+      "nav_how": "How it works",
+      "nav_pricing": "Pricing",
+      "nav_faq": "FAQ",
+      "login": "Sign in",
+      "cta": "Try for free"
+    },
     "hero": {
-      "badge": "✨ AI WhatsApp. Your Rules.",
-      "title_part1": "The Most Powerful AI",
-      "title_part2": "WhatsApp Platform",
-      "subtitle": "Automate conversations, scale your sales, and deliver instant support — all with AI that works on your terms. No coding required.",
-      "cta_primary": "Start 14-Day Free Trial",
-      "cta_secondary": "See How It Works"
+      "badge": "✨ Built for growing teams",
+      "title_part1": "Sell more on WhatsApp,",
+      "title_part2": "without hiring more people",
+      "subtitle": "Let AI handle replies, qualify leads, and book meetings — 24/7. Turn your WhatsApp into a sales channel that never sleeps.",
+      "cta_primary": "Start 14-day free trial",
+      "cta_secondary": "See how it works",
+      "trust_rating": "4.9 / 5 — 200+ teams",
+      "trust_no_card": "No credit card required",
+      "trust_setup": "Set up in 5 minutes"
     },
     "preview": {
       "url_bar": "kyrn.nl/dashboard",
@@ -1291,6 +1302,62 @@
           "answer": "We accept all major credit cards (Visa, Mastercard, American Express) through Stripe. Enterprise customers can pay via invoice."
         }
       ]
+    },
+    "howItWorks": {
+      "title": "Get Started in Minutes",
+      "subtitle": "Up and running in 4 simple steps. No coding required.",
+      "steps": [
+        { "title": "Connect WhatsApp", "description": "Link your WhatsApp number using QR code or phone pairing." },
+        { "title": "Import Contacts", "description": "Add contacts manually or import from CSV/Excel files." },
+        { "title": "Create Automation", "description": "Build AI-powered flows or chatbot rules to handle messages." },
+        { "title": "Start Sending", "description": "Send campaigns, automate responses, and manage conversations." }
+      ]
+    },
+    "useCases": {
+      "title": "Built for Your Industry",
+      "subtitle": "See how businesses like yours use Kyrn to automate WhatsApp.",
+      "items": [
+        { "title": "E-commerce", "description": "Automate order updates, returns, and product recommendations.", "features": ["Order confirmations", "Delivery tracking", "Cart recovery", "Product catalog"] },
+        { "title": "Agencies", "description": "Manage multiple clients from one dashboard with team collaboration.", "features": ["Multi-client management", "Team assignment", "White-label ready", "Campaign automation"] },
+        { "title": "SaaS", "description": "Automate onboarding, support, and user engagement at scale.", "features": ["Onboarding flows", "Ticket automation", "Feature announcements", "User segmentation"] },
+        { "title": "Healthcare", "description": "Book appointments, send reminders, and handle patient queries.", "features": ["Appointment booking", "Patient reminders", "Prescription alerts", "Secure messaging"] }
+      ]
+    },
+    "integrations": {
+      "title": "Connects with Your Stack",
+      "subtitle": "Integrate with the tools you already use. No complex setup required.",
+      "items": [
+        { "name": "WhatsApp", "description": "Web & Business API" },
+        { "name": "Evolution API", "description": "Multi-device connection" },
+        { "name": "Stripe", "description": "Payments & billing" },
+        { "name": "OpenAI", "description": "AI-powered responses" },
+        { "name": "Twilio", "description": "Voice calls & SMS" },
+        { "name": "Google AI", "description": "Advanced AI models" }
+      ]
+    },
+    "whyKyrn": {
+      "title": "Why Businesses Choose Kyrn",
+      "subtitle": "See the difference before and after automating your WhatsApp.",
+      "before": {
+        "title": "Without Kyrn",
+        "items": [
+          "Manually replying to every message",
+          "Missing leads outside business hours",
+          "No visibility into team performance",
+          "High cost per conversation",
+          "Disconnected tools and data silos"
+        ]
+      },
+      "after": {
+        "title": "With Kyrn",
+        "items": [
+          "AI handles common questions 24/7",
+          "Every lead captured and qualified instantly",
+          "Real-time analytics and team dashboards",
+          "Scalable automation at a fixed cost",
+          "All-in-one platform for messaging, CRM & campaigns"
+        ]
+      }
     },
     "footer": {
       "terms": "Terms",

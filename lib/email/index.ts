@@ -8,9 +8,23 @@ function getResendClient() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
+function getAppBaseUrl() {
+  const configuredUrl = process.env.BASE_URL;
+  if (configuredUrl && !configuredUrl.includes('yourdomain.com')) {
+    return configuredUrl.replace(/\/$/, '');
+  }
+
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  if (vercelUrl) {
+    return `https://${vercelUrl}`.replace(/\/$/, '');
+  }
+
+  return 'http://localhost:3000';
+}
+
 export async function sendInvitationEmail(email: string, teamName: string, inviteId: number) {
   const resend = getResendClient();
-  const inviteLink = `${process.env.BASE_URL}/sign-up?inviteId=${inviteId}`;
+  const inviteLink = `${getAppBaseUrl()}/sign-up?inviteId=${inviteId}`;
   const branding = await getBranding();
   const appName = branding?.name || 'Kyrn';
 
@@ -44,7 +58,7 @@ export async function sendInvitationEmail(email: string, teamName: string, invit
 
 export async function sendPasswordResetEmail(email: string, token: string) {
   const resend = getResendClient();
-  const resetLink = `${process.env.BASE_URL}/reset-password?token=${token}`;
+  const resetLink = `${getAppBaseUrl()}/reset-password?token=${token}`;
   const branding = await getBranding();
   const appName = branding?.name || 'Kyrn';
 
@@ -81,7 +95,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
 export async function sendVerificationEmail(email: string, token: string) {
   const resend = getResendClient();
-  const verifyLink = `${process.env.BASE_URL}/verify-email?token=${token}`;
+  const verifyLink = `${getAppBaseUrl()}/api/auth/verify-email?token=${token}`;
   const branding = await getBranding();
   const appName = branding?.name || 'Kyrn';
 

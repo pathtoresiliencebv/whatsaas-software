@@ -1155,13 +1155,24 @@
     }
   },
   "LandingPage": {
+    "header": {
+      "nav_features": "Funciones",
+      "nav_how": "Cómo funciona",
+      "nav_pricing": "Precios",
+      "nav_faq": "FAQ",
+      "login": "Iniciar sesión",
+      "cta": "Pruébalo gratis"
+    },
     "hero": {
-      "badge": "✨ IA WhatsApp. Tus Reglas.",
-      "title_part1": "La Plataforma de IA",
-      "title_part2": "WhatsApp Más Potente",
-      "subtitle": "Automatiza conversaciones, escala tus ventas y ofrece soporte instantáneo — todo con IA que trabaja bajo tus condiciones. Sin código.",
-      "cta_primary": "Prueba Gratis 14 Días",
-      "cta_secondary": "Mira Cómo Funciona"
+      "badge": "✨ Hecho para equipos en crecimiento",
+      "title_part1": "Vende más por WhatsApp,",
+      "title_part2": "sin contratar más personas",
+      "subtitle": "Deja que la IA responda, califique leads y agende reuniones — 24/7. Convierte tu WhatsApp en un canal de ventas que nunca duerme.",
+      "cta_primary": "Prueba gratis 14 días",
+      "cta_secondary": "Mira cómo funciona",
+      "trust_rating": "4.9 / 5 — 200+ equipos",
+      "trust_no_card": "Sin tarjeta de crédito",
+      "trust_setup": "Listo en 5 minutos"
     },
     "preview": {
       "url_bar": "kyrn.nl/dashboard",
@@ -1256,6 +1267,62 @@
           "answer": "Aceptamos todas las tarjetas de crédito principales (Visa, Mastercard, American Express) a través de Stripe. Los clientes Enterprise pueden pagar por factura."
         }
       ]
+    },
+    "howItWorks": {
+      "title": "Comience en Minutos",
+      "subtitle": "Funcionando en 4 pasos simples. Sin necesidad de código.",
+      "steps": [
+        { "title": "Conecte WhatsApp", "description": "Vincule su número de WhatsApp mediante código QR o emparejamiento." },
+        { "title": "Importe Contactos", "description": "Agregue contactos manualmente o importe desde archivos CSV/Excel." },
+        { "title": "Cree Automatizaciones", "description": "Construya flujos con IA o reglas de chatbot para procesar mensajes." },
+        { "title": "Comience a Enviar", "description": "Envíe campañas, automatice respuestas y gestione conversaciones." }
+      ]
+    },
+    "useCases": {
+      "title": "Diseñado para Su Industria",
+      "subtitle": "Vea cómo empresas como la suya usan Kyrn para automatizar WhatsApp.",
+      "items": [
+        { "title": "E-commerce", "description": "Automatice actualizaciones de pedidos, devoluciones y recomendaciones.", "features": ["Confirmaciones de pedido", "Seguimiento de entrega", "Recuperación de carrito", "Catálogo de productos"] },
+        { "title": "Agencias", "description": "Gestione múltiples clientes desde un panel con colaboración en equipo.", "features": ["Gestión multi-cliente", "Asignación de equipo", "White-label listo", "Automatización de campañas"] },
+        { "title": "SaaS", "description": "Automatice onboarding, soporte y engagement de usuarios a escala.", "features": ["Flujos de onboarding", "Automatización de tickets", "Anuncios de features", "Segmentación de usuarios"] },
+        { "title": "Salud", "description": "Agende citas, envíe recordatorios y gestione consultas de pacientes.", "features": ["Programación de citas", "Recordatorios para pacientes", "Alertas de prescripción", "Mensajería segura"] }
+      ]
+    },
+    "integrations": {
+      "title": "Se Conecta con Su Stack",
+      "subtitle": "Integre con las herramientas que ya usa. Sin configuración compleja.",
+      "items": [
+        { "name": "WhatsApp", "description": "Web & Business API" },
+        { "name": "Evolution API", "description": "Conexión multi-dispositivo" },
+        { "name": "Stripe", "description": "Pagos & facturación" },
+        { "name": "OpenAI", "description": "Respuestas con IA" },
+        { "name": "Twilio", "description": "Llamadas de voz & SMS" },
+        { "name": "Google AI", "description": "Modelos de IA avanzados" }
+      ]
+    },
+    "whyKyrn": {
+      "title": "Por Qué las Empresas Eligen Kyrn",
+      "subtitle": "Vea la diferencia antes y después de automatizar su WhatsApp.",
+      "before": {
+        "title": "Sin Kyrn",
+        "items": [
+          "Responder manualmente a cada mensaje",
+          "Perder leads fuera del horario laboral",
+          "Sin visibilidad del rendimiento del equipo",
+          "Alto costo por conversación",
+          "Herramientas desconectadas y silos de datos"
+        ]
+      },
+      "after": {
+        "title": "Con Kyrn",
+        "items": [
+          "La IA responde preguntas comunes 24/7",
+          "Cada lead capturado y calificado al instante",
+          "Análisis en tiempo real y dashboards de equipo",
+          "Automatización escalable a costo fijo",
+          "Plataforma todo-en-uno para mensajería, CRM & campañas"
+        ]
+      }
     },
     "footer": {
       "terms": "Términos",

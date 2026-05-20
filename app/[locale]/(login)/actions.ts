@@ -17,8 +17,9 @@ import {
   invitations
 } from '@/lib/db/schema';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
-import { redirect } from 'next/navigation';
+import { redirect } from '@/i18n/routing';
 import { cookies, headers } from 'next/headers';
+import { getLocale } from 'next-intl/server';
 import { createCheckoutSession } from '@/lib/payments/stripe';
 import { getUser, getUserWithTeam } from '@/lib/db/queries';
 import {
@@ -48,6 +49,11 @@ async function logActivity(
     ipAddress: ipAddress || ''
   };
   await db.insert(activityLogs).values(newActivity);
+}
+
+async function redirectToLocalized(href: string): Promise<never> {
+  const locale = await getLocale();
+  return redirect({ href, locale });
 }
 
 const signInSchema = z.object({
@@ -119,7 +125,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return createCheckoutSession({ team: foundTeam, priceId });
   }
 
-  redirect('/dashboard');
+  return redirectToLocalized('/dashboard');
 });
 
 const verify2FASchema = z.object({
@@ -178,7 +184,7 @@ export const verify2FA = validatedAction(verify2FASchema, async (data, formData)
     return createCheckoutSession({ team: foundTeam, priceId });
   }
 
-  redirect('/dashboard');
+  return redirectToLocalized('/dashboard');
 });
 
 const signUpSchema = z.object({
@@ -318,7 +324,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return createCheckoutSession({ team: createdTeam, priceId });
   }
 
-  redirect('/verify-email-sent');
+  return redirectToLocalized('/verify-email-sent');
 });
 
 export async function signOut() {
@@ -434,7 +440,7 @@ export const deleteAccount = validatedActionWithUser(
     }
 
     (await cookies()).delete('session');
-    redirect('/sign-in');
+    return redirectToLocalized('/sign-in');
   }
 );
 

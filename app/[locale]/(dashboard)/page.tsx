@@ -17,7 +17,10 @@ import {
   Settings,
   Phone,
   Inbox,
-  Plus
+  Plus,
+  Star,
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,8 +33,13 @@ import { SchemaMarkup } from '@/components/landing/SchemaMarkup';
 import { TrustBadges } from '@/components/landing/TrustBadges';
 import { Testimonials } from '@/components/landing/Testimonials';
 import { Stats } from '@/components/landing/Stats';
+import { StepSection } from '@/components/landing/StepSection';
+import { UseCases } from '@/components/landing/UseCases';
+import { Integrations } from '@/components/landing/Integrations';
+import { WhyKyrn } from '@/components/landing/WhyKyrn';
+import { LandingHeader } from '@/components/landing/Header';
 import { useTranslations } from 'next-intl';
-import { getTranslations } from 'next-intl/server'; 
+import { getTranslations, getLocale } from 'next-intl/server';
 
 
 
@@ -248,18 +256,35 @@ function FeatureCard({ icon: Icon, title, description, delay }: { icon: any, tit
 
 
 export default async function HomePage() {
-  
+
   const t = await getTranslations('LandingPage');
+  const locale = await getLocale();
 
   const plans = await getPublishedPlans();
   const branding = await getBranding();
   const siteName = branding?.name || 'Kyrn';
 
+  const localeToCurrency: Record<string, string> = {
+    nl: 'EUR',
+    pt: 'EUR',
+    es: 'EUR',
+    en: 'USD',
+  };
+  const currency = localeToCurrency[locale] || 'EUR';
+  const localeTag = locale === 'en' ? 'en-US' : locale === 'pt' ? 'pt-PT' : locale === 'es' ? 'es-ES' : 'nl-NL';
+  const priceFormatter = new Intl.NumberFormat(localeTag, {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+
   return (
     <main className="flex flex-col min-h-screen bg-background selection:bg-primary/20">
       <SchemaMarkup />
+      <LandingHeader />
 
-      <section className="relative pt-24 pb-32 overflow-hidden">
+      <section className="relative pt-16 pb-32 overflow-hidden">
         <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
@@ -278,7 +303,7 @@ export default async function HomePage() {
             {t('hero.subtitle')}
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-24 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
             <Link href="/sign-up">
               <Button size="lg" className="rounded-full px-8 h-12 text-base shadow-primary/25 shadow-lg hover:shadow-primary/40 transition-all">
                 {t('hero.cta_primary')} <ArrowRight className="ml-2 h-4 w-4" />
@@ -291,6 +316,25 @@ export default async function HomePage() {
             </Link>
           </div>
 
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-16 text-sm text-muted-foreground animate-in fade-in duration-700 delay-300">
+            <div className="flex items-center gap-1.5">
+              <div className="flex">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <Star key={i} className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
+                ))}
+              </div>
+              <span className="font-medium">{t('hero.trust_rating')}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <span>{t('hero.trust_no_card')}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span>{t('hero.trust_setup')}</span>
+            </div>
+          </div>
+
           <DashboardPreview />
         </div>
       </section>
@@ -301,7 +345,7 @@ export default async function HomePage() {
 
       <Stats />
 
-      <section id="features" className="py-24 bg-background relative">
+      <section id="features" className="py-24 bg-background relative scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.title')}</h2>
@@ -351,7 +395,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="pricing" className="py-24 bg-muted/30 border-t border-border">
+      <StepSection />
+
+      <UseCases />
+
+      <Integrations />
+
+      <WhyKyrn />
+
+      <section id="pricing" className="py-24 bg-muted/30 border-t border-border scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('pricing.title')}</h2>
@@ -375,7 +427,7 @@ export default async function HomePage() {
                   )}
                   <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
                   <div className="flex items-baseline gap-1 mb-6">
-                    <span className="text-4xl font-bold">${plan.amount / 100}</span>
+                    <span className="text-4xl font-bold">{priceFormatter.format(plan.amount / 100)}</span>
                     <span className="text-muted-foreground">/{plan.interval === 'month' ? t('pricing.interval_month') : t('pricing.interval_year')}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-6 min-h-[40px]">{plan.description || "Perfect for getting started."}</p>
