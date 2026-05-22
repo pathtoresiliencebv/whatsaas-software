@@ -1290,7 +1290,8 @@
         { "title": "Agncias", "description": "Gerencie mltiplos clientes de um painel com colaborao de equipe.", "features": ["Gesto multi-cliente", "Atribuio de equipe", "White-label pronto", "Automao de campanhas"] },
         { "title": "SaaS", "description": "Automatize onboarding, suporte e engajamento de usurios em escala.", "features": ["Fluxos de onboarding", "Automao de tickets", "Anncios de features", "Segmentao de usurios"] },
         { "title": "Sade", "description": "Agende consultas, envie lembretes e trate consultas de pacientes.", "features": ["Agendamento de consultas", "Lembretes para pacientes", "Alertas de prescrio", "Mensagens seguras"] }
-      ]
+      ],
+      "compliance_note": "Caso de uso de saúde inclui recursos em conformidade com HIPAA. Todos os dados são criptografados e armazenados com segurança."
     },
     "integrations": {
       "title": "Conecta com Seu Stack",

@@ -1408,7 +1408,8 @@
         { "title": "Bureaus", "description": "Beheer meerdere klanten vanuit n dashboard met teamsamenwerking.", "features": ["Multi-klantbeheer", "Teamtoewijzing", "White-label klaar", "Campagne-automatisering"] },
         { "title": "SaaS", "description": "Automatiseer onboarding, ondersteuning en gebruikersbetrokkenheid op schaal.", "features": ["Onboardingflows", "Ticketautomatisering", "Feature-aankondigingen", "Gebruikerssegmentatie"] },
         { "title": "Zorg", "description": "Plan afspraken, stuur herinneringen en behandel patintvragen.", "features": ["Afspraakplanning", "Patintherinneringen", "Receptmeldingen", "Veilig berichtenverkeer"] }
-      ]
+      ],
+      "compliance_note": "Zorggebruik omvat HIPAA-compliance functies. Alle data is versleuteld en veilig opgeslagen."
     },
     "integrations": {
       "title": "Verbindt met Uw Stack",

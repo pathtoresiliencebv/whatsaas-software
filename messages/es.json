@@ -1289,7 +1289,8 @@
         { "title": "Agencias", "description": "Gestione múltiples clientes desde un panel con colaboración en equipo.", "features": ["Gestión multi-cliente", "Asignación de equipo", "White-label listo", "Automatización de campañas"] },
         { "title": "SaaS", "description": "Automatice onboarding, soporte y engagement de usuarios a escala.", "features": ["Flujos de onboarding", "Automatización de tickets", "Anuncios de features", "Segmentación de usuarios"] },
         { "title": "Salud", "description": "Agende citas, envíe recordatorios y gestione consultas de pacientes.", "features": ["Programación de citas", "Recordatorios para pacientes", "Alertas de prescripción", "Mensajería segura"] }
-      ]
+      ],
+      "compliance_note": "El caso de uso de salud incluye funciones conformes a HIPAA. Todos los datos están cifrados y almacenados de forma segura."
     },
     "integrations": {
       "title": "Se Conecta con Su Stack",
