@@ -12,6 +12,7 @@ import { scheduleAIProcessing } from '@/lib/plugins/ai-chat/service';
 import { sendPushNotification, sendPushToTeam } from '@/lib/push-notifications';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 import { dispatchWebhook } from '@/lib/webhooks/dispatcher';
+import { getEvolutionConfig } from '@/lib/whatsapp/config';
 
 async function downloadProfilePic(url: string): Promise<string | null> {
     if (!url || url.startsWith('/uploads/')) return null;
@@ -113,11 +114,10 @@ function getParticipantJid(key: any): string | null {
     return null;
 }
 
-const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
-
 async function fetchGroupName(instanceName: string, accessToken: string, groupJid: string): Promise<string | null> {
     try {
-        const res = await fetch(`${EVOLUTION_API_URL}/group/findGroupInfos/${instanceName}?groupJid=${groupJid}`, {
+        const evoConfig = await getEvolutionConfig();
+        const res = await fetch(`${evoConfig.apiUrl}/group/findGroupInfos/${instanceName}?groupJid=${groupJid}`, {
             method: 'GET',
             headers: { 'apikey': accessToken },
             signal: AbortSignal.timeout(10000),
@@ -229,6 +229,7 @@ export async function POST(request: Request) {
       .limit(1);
 
     const expectedToken = channelConfig?.webhookToken ||
+      process.env.EVOLUTION_WEBHOOK_TOKEN ||
       process.env.NEXT_PUBLIC_EVOLUTION_WEBHOOK_TOKEN;
 
     if (expectedToken && webhookToken !== expectedToken) {

@@ -13,6 +13,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/request';
 import { CookieBanner } from '@/components/ui/cookie-banner';
+import { FacebookSDK } from '@/components/facebook-sdk';
 
 const manrope = Manrope({ subsets: ['latin'] });
 
@@ -81,6 +82,7 @@ export default async function LocaleLayout({
       className={`bg-background text-foreground ${manrope.className}`}
     >
       <body className="min-h-[100dvh] bg-background">
+        <FacebookSDK />
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider
             attribute="class"

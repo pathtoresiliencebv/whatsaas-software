@@ -11,6 +11,26 @@ const WEBHOOK_EVENTS = [
   "CONNECTION_UPDATE", "QRCODE_UPDATED", "CONTACTS_UPDATE"
 ];
 
+function getEvolutionErrorMessage(data: any): string {
+  const candidates = [
+    data?.response?.message,
+    data?.message,
+    data?.error,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate.filter(Boolean).join(', ');
+    }
+
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate;
+    }
+  }
+
+  return 'Unknown Evolution API failure.';
+}
+
 export async function POST(request: Request) {
   try {
     const { 
@@ -33,10 +53,10 @@ export async function POST(request: Request) {
     const EVOLUTION_API_URL = evoConfig.apiUrl;
 
     if (!MASTER_API_KEY) {
-        throw new Error("AUTHENTICATION_API_KEY is not configured on the server.");
+        return NextResponse.json({ error: 'Evolution API key is not configured on the server.' }, { status: 500 });
     }
     if (!YOUR_PUBLIC_WEBHOOK_URL) {
-        throw new Error("Webhook URL (NEXT_PUBLIC_WEBHOOK_URL) is not defined.");
+        return NextResponse.json({ error: 'Evolution webhook URL is not configured. Set BASE_URL or NEXT_PUBLIC_WEBHOOK_URL.' }, { status: 500 });
     }
     
     const user = await getUser();
@@ -114,7 +134,7 @@ export async function POST(request: Request) {
     createData = await createResponse.json();
 
     if (!createResponse.ok) {
-        const errorMsg = createData.response?.message?.[0] || createData.message || 'Unknown API failure.';
+        const errorMsg = getEvolutionErrorMessage(createData);
         const errorString = JSON.stringify(createData);
 
         if (errorString.includes("already exists") || createResponse.status === 403) {

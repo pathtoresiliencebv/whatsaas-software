@@ -29,6 +29,25 @@ let _evoCache: { data: EvolutionConfig; ts: number } | null = null;
 let _metaCache: { data: MetaCloudConfig; ts: number } | null = null;
 const CACHE_TTL = 60_000;
 
+function getAppBaseUrl(): string {
+  const configuredUrl = process.env.BASE_URL;
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/$/, '');
+  }
+
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  if (vercelUrl) {
+    return `https://${vercelUrl}`.replace(/\/$/, '');
+  }
+
+  return '';
+}
+
+function getDefaultWebhookUrl(): string {
+  const baseUrl = getAppBaseUrl();
+  return baseUrl ? `${baseUrl}/api/webhook/evolution` : '';
+}
+
 export async function getEvolutionConfig(): Promise<EvolutionConfig> {
   if (_evoCache && Date.now() - _evoCache.ts < CACHE_TTL) {
     return _evoCache.data;
@@ -42,8 +61,8 @@ export async function getEvolutionConfig(): Promise<EvolutionConfig> {
     const config: EvolutionConfig = {
       apiUrl: row?.apiUrl || process.env.EVOLUTION_API_URL || 'http://localhost:8080',
       apiKey: row?.apiKey || process.env.AUTHENTICATION_API_KEY || '',
-      webhookUrl: row?.webhookUrl || process.env.NEXT_PUBLIC_WEBHOOK_URL || '',
-      webhookToken: row?.webhookToken || process.env.NEXT_PUBLIC_EVOLUTION_WEBHOOK_TOKEN || '',
+      webhookUrl: row?.webhookUrl || process.env.NEXT_PUBLIC_WEBHOOK_URL || getDefaultWebhookUrl(),
+      webhookToken: row?.webhookToken || process.env.EVOLUTION_WEBHOOK_TOKEN || process.env.NEXT_PUBLIC_EVOLUTION_WEBHOOK_TOKEN || '',
       isActive: row?.isActive ?? true,
     };
 
@@ -53,8 +72,8 @@ export async function getEvolutionConfig(): Promise<EvolutionConfig> {
     return {
       apiUrl: process.env.EVOLUTION_API_URL || 'http://localhost:8080',
       apiKey: process.env.AUTHENTICATION_API_KEY || '',
-      webhookUrl: process.env.NEXT_PUBLIC_WEBHOOK_URL || '',
-      webhookToken: process.env.NEXT_PUBLIC_EVOLUTION_WEBHOOK_TOKEN || '',
+      webhookUrl: process.env.NEXT_PUBLIC_WEBHOOK_URL || getDefaultWebhookUrl(),
+      webhookToken: process.env.EVOLUTION_WEBHOOK_TOKEN || process.env.NEXT_PUBLIC_EVOLUTION_WEBHOOK_TOKEN || '',
       isActive: true,
     };
   }

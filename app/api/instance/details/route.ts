@@ -3,9 +3,7 @@ import { getTeamForUser } from '@/lib/db/queries';
 import { db } from '@/lib/db/drizzle'; 
 import { evolutionInstances } from '@/lib/db/schema'; 
 import { eq } from 'drizzle-orm';
-
-const MASTER_API_KEY = process.env.AUTHENTICATION_API_KEY;
-const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
+import { getEvolutionConfig } from '@/lib/whatsapp/config';
 
 type InstanceDetailItem = {
     dbId: number;
@@ -22,7 +20,8 @@ type InstanceDetailItem = {
 
 export async function GET(request: Request) {
   try {
-    if (!MASTER_API_KEY) {
+    const evoConfig = await getEvolutionConfig();
+    if (!evoConfig.apiKey) {
         console.error("API Key master not configured on server.");
         throw new Error("Server configuration incomplete.");
     }
@@ -87,12 +86,12 @@ export async function GET(request: Request) {
         }
 
         
-        const apiKeyToUse = dbInstance.accessToken || MASTER_API_KEY;
+        const apiKeyToUse = dbInstance.accessToken || evoConfig.apiKey;
         const identifier = dbInstance.evolutionInstanceId || dbInstance.instanceName;
 
         try {
             const stateResponse = await fetch(
-              `${EVOLUTION_API_URL}/instance/connectionState/${dbInstance.instanceName}`,
+              `${evoConfig.apiUrl}/instance/connectionState/${dbInstance.instanceName}`,
               { headers: { 'apikey': apiKeyToUse }, cache: 'no-store', signal: AbortSignal.timeout(10000) }
             );
 
@@ -102,7 +101,7 @@ export async function GET(request: Request) {
 
                 if (status === 'open') {
                     const detailsResponse = await fetch(
-                      `${EVOLUTION_API_URL}/instance/fetchInstances?instanceId=${identifier}`,
+                      `${evoConfig.apiUrl}/instance/fetchInstances?instanceId=${identifier}`,
                       { headers: { 'apikey': apiKeyToUse }, cache: 'no-store', signal: AbortSignal.timeout(10000) }
                     );
                     if (detailsResponse.ok) {

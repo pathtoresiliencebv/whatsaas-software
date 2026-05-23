@@ -4,9 +4,7 @@ import { db } from '@/lib/db/drizzle';
 import { ActivityType, evolutionInstances } from '@/lib/db/schema'; 
 import { eq, and } from 'drizzle-orm';
 import { logActivity } from '@/lib/db/activity';
-
-const MASTER_API_KEY = process.env.AUTHENTICATION_API_KEY;
-const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
+import { getEvolutionConfig } from '@/lib/whatsapp/config';
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -57,11 +55,12 @@ export async function DELETE(request: NextRequest) {
     }
 
     
-    const apiKeyToUse = dbInstance.accessToken || MASTER_API_KEY;
+    const evoConfig = await getEvolutionConfig();
+    const apiKeyToUse = dbInstance.accessToken || evoConfig.apiKey;
     if (!apiKeyToUse) throw new Error("API Key not configured.");
 
     const logoutResponse = await fetch(
-      `${EVOLUTION_API_URL}/instance/logout/${instanceName}`,
+      `${evoConfig.apiUrl}/instance/logout/${instanceName}`,
       {
         method: 'DELETE',
         headers: { 'apikey': apiKeyToUse },
@@ -79,7 +78,7 @@ export async function DELETE(request: NextRequest) {
 
     console.log(`Attempting to delete instance: ${instanceName}`);
     const deleteResponse = await fetch(
-      `${EVOLUTION_API_URL}/instance/delete/${instanceName}`,
+      `${evoConfig.apiUrl}/instance/delete/${instanceName}`,
       {
         method: 'DELETE',
         headers: { 'apikey': apiKeyToUse },

@@ -116,6 +116,7 @@ export async function handleOAuthSignIn(
     gatewaySubscriptionId: null,
     planName: null,
     subscriptionStatus: null,
+    billingInterval: null,
     isCanceled: false,
     trialEndsAt: null,
   };

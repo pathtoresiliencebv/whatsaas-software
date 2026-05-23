@@ -1,16 +1,12 @@
 
 import { NextResponse } from 'next/server';
 import { getTeamForUser } from '@/lib/db/queries';
-import { db } from '@/lib/db/drizzle';
-import { teams } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
-
-const MASTER_API_KEY = process.env.AUTHENTICATION_API_KEY;
-const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
+import { getEvolutionConfig } from '@/lib/whatsapp/config';
 
 export async function GET(request: Request) {
   try {
-    if (!MASTER_API_KEY) throw new Error("API Key not configured.");
+    const evoConfig = await getEvolutionConfig();
+    if (!evoConfig.apiKey) throw new Error("API Key not configured.");
 
     const team = await getTeamForUser();
     if (!team || !team.evolutionInstances || team.evolutionInstances.length === 0) {
@@ -21,10 +17,10 @@ export async function GET(request: Request) {
 
     
     const connectResponse = await fetch(
-      `${EVOLUTION_API_URL}/instance/connect/${instanceName}`,
+      `${evoConfig.apiUrl}/instance/connect/${instanceName}`,
       {
         method: 'GET',
-        headers: { 'apikey': MASTER_API_KEY },
+        headers: { 'apikey': evoConfig.apiKey },
         cache: 'no-store',
         signal: AbortSignal.timeout(10000),
       }

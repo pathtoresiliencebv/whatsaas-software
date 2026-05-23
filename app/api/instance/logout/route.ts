@@ -3,9 +3,7 @@ import { getTeamForUser } from '@/lib/db/queries';
 import { db } from '@/lib/db/drizzle';
 import { evolutionInstances } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
-
-const MASTER_API_KEY = process.env.AUTHENTICATION_API_KEY;
-const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://localhost:8080";
+import { getEvolutionConfig } from '@/lib/whatsapp/config';
 
 
 export async function POST(request: NextRequest) {
@@ -32,12 +30,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Instance not found or unauthorized' }, { status: 404 });
     }
 
-    const apiKeyToUse = dbInstance.accessToken || MASTER_API_KEY;
+    const evoConfig = await getEvolutionConfig();
+    const apiKeyToUse = dbInstance.accessToken || evoConfig.apiKey;
     if (!apiKeyToUse) throw new Error("API Key not configured.");
 
     
     const logoutResponse = await fetch(
-      `${EVOLUTION_API_URL}/instance/logout/${instanceName}`,
+      `${evoConfig.apiUrl}/instance/logout/${instanceName}`,
       {
         method: 'DELETE',
         headers: { 'apikey': apiKeyToUse },

@@ -5,12 +5,12 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const ContentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://connect.facebook.net",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' wss://*.pusher.com https://*.pusher.com",
-  "frame-src 'self'",
+  "connect-src 'self' wss://*.pusher.com https://*.pusher.com https://graph.facebook.com https://connect.facebook.net",
+  "frame-src 'self' https://www.facebook.com https://web.facebook.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
