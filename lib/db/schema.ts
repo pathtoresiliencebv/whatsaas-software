@@ -732,6 +732,13 @@ export const teamsRelations = relations(teams, ({ one, many }) => ({
   callCredits: one(callCredits),
   callLogs: many(callLogs),
   callCreditTransactions: many(callCreditTransactions),
+  voiceAgents: many(voiceAgents),
+  voiceAgentRuns: many(voiceAgentRuns),
+  voiceCampaigns: many(voiceCampaigns),
+  voiceModelConfigs: many(voiceModelConfigs),
+  voiceTools: many(voiceTools),
+  voiceFiles: many(voiceFiles),
+  voiceRecordings: many(voiceRecordings),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -1065,6 +1072,235 @@ export const callCreditTransactions = pgTable('call_credit_transactions', {
   teamIdIdx: index('call_credit_tx_team_id_idx').on(table.teamId),
 }));
 
+export const voiceModelConfigs = pgTable('voice_model_configs', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  llmProvider: varchar('llm_provider', { length: 50 }).notNull().default('openai'),
+  llmModel: varchar('llm_model', { length: 100 }).notNull().default('gpt-4o-mini'),
+  llmApiKey: text('llm_api_key'),
+  sttProvider: varchar('stt_provider', { length: 50 }).notNull().default('openai'),
+  sttModel: varchar('stt_model', { length: 100 }).notNull().default('gpt-4o-mini-transcribe'),
+  sttApiKey: text('stt_api_key'),
+  ttsProvider: varchar('tts_provider', { length: 50 }).notNull().default('openai'),
+  ttsModel: varchar('tts_model', { length: 100 }).notNull().default('gpt-4o-mini-tts'),
+  ttsVoice: varchar('tts_voice', { length: 100 }).notNull().default('alloy'),
+  ttsApiKey: text('tts_api_key'),
+  temperature: decimal('temperature', { precision: 2, scale: 1 }).default('0.7'),
+  maxOutputTokens: integer('max_output_tokens').default(1000),
+  isDefault: boolean('is_default').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamIdx: index('voice_model_configs_team_idx').on(table.teamId),
+  teamNameUnique: unique('voice_model_configs_team_name_idx').on(table.teamId, table.name),
+}));
+
+export const voiceAgents = pgTable('voice_agents', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  modelConfigId: integer('model_config_id').references(() => voiceModelConfigs.id, { onDelete: 'set null' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  status: varchar('status', { length: 30 }).notNull().default('draft'),
+  channelMode: varchar('channel_mode', { length: 30 }).notNull().default('whatsapp_voice'),
+  systemPrompt: text('system_prompt'),
+  firstMessage: text('first_message'),
+  defaultLanguage: varchar('default_language', { length: 20 }).notNull().default('en'),
+  isDefaultForWhatsapp: boolean('is_default_for_whatsapp').notNull().default(false),
+  isActive: boolean('is_active').notNull().default(false),
+  metadata: jsonb('metadata').$type<Record<string, any>>().default({}),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamIdx: index('voice_agents_team_idx').on(table.teamId),
+  activeIdx: index('voice_agents_active_idx').on(table.teamId, table.isActive),
+}));
+
+export const voiceAgentDefinitions = pgTable('voice_agent_definitions', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  agentId: integer('agent_id').notNull().references(() => voiceAgents.id, { onDelete: 'cascade' }),
+  version: integer('version').notNull().default(1),
+  status: varchar('status', { length: 30 }).notNull().default('draft'),
+  nodes: jsonb('nodes').$type<any[]>().default([]).notNull(),
+  edges: jsonb('edges').$type<any[]>().default([]).notNull(),
+  workflowJson: jsonb('workflow_json').$type<Record<string, any>>().default({}).notNull(),
+  variables: jsonb('variables').$type<Record<string, any>>().default({}).notNull(),
+  publishedAt: timestamp('published_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  agentIdx: index('voice_agent_definitions_agent_idx').on(table.agentId),
+  teamAgentVersionUnique: unique('voice_agent_definitions_agent_version_idx').on(table.agentId, table.version),
+}));
+
+export const voiceTelephonyConfigs = pgTable('voice_telephony_configs', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  provider: varchar('provider', { length: 50 }).notNull().default('twilio'),
+  credentials: jsonb('credentials').$type<Record<string, any>>().default({}).notNull(),
+  isDefaultOutbound: boolean('is_default_outbound').notNull().default(false),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamIdx: index('voice_telephony_configs_team_idx').on(table.teamId),
+  teamNameUnique: unique('voice_telephony_configs_team_name_idx').on(table.teamId, table.name),
+}));
+
+export const voicePhoneNumbers = pgTable('voice_phone_numbers', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  telephonyConfigId: integer('telephony_config_id').references(() => voiceTelephonyConfigs.id, { onDelete: 'set null' }),
+  agentId: integer('agent_id').references(() => voiceAgents.id, { onDelete: 'set null' }),
+  phoneNumber: varchar('phone_number', { length: 50 }).notNull(),
+  label: varchar('label', { length: 100 }),
+  providerPhoneSid: text('provider_phone_sid'),
+  isDefaultCallerId: boolean('is_default_caller_id').notNull().default(false),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  teamNumberUnique: unique('voice_phone_numbers_team_number_idx').on(table.teamId, table.phoneNumber),
+}));
+
+export const voiceCampaigns = pgTable('voice_campaigns', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  agentId: integer('agent_id').notNull().references(() => voiceAgents.id, { onDelete: 'cascade' }),
+  telephonyConfigId: integer('telephony_config_id').references(() => voiceTelephonyConfigs.id, { onDelete: 'set null' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  status: varchar('status', { length: 30 }).notNull().default('draft'),
+  sourceType: varchar('source_type', { length: 30 }).notNull().default('manual'),
+  totalLeads: integer('total_leads').notNull().default(0),
+  processedLeads: integer('processed_leads').notNull().default(0),
+  failedLeads: integer('failed_leads').notNull().default(0),
+  maxConcurrency: integer('max_concurrency').notNull().default(1),
+  retryConfig: jsonb('retry_config').$type<Record<string, any>>().default({}).notNull(),
+  scheduleConfig: jsonb('schedule_config').$type<Record<string, any>>().default({}).notNull(),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  startedAt: timestamp('started_at'),
+  completedAt: timestamp('completed_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamIdx: index('voice_campaigns_team_idx').on(table.teamId),
+  statusIdx: index('voice_campaigns_status_idx').on(table.teamId, table.status),
+}));
+
+export const voiceCampaignLeads = pgTable('voice_campaign_leads', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  campaignId: integer('campaign_id').notNull().references(() => voiceCampaigns.id, { onDelete: 'cascade' }),
+  phoneNumber: varchar('phone_number', { length: 50 }).notNull(),
+  contactId: integer('contact_id').references(() => contacts.id, { onDelete: 'set null' }),
+  variables: jsonb('variables').$type<Record<string, any>>().default({}).notNull(),
+  status: varchar('status', { length: 30 }).notNull().default('queued'),
+  attempts: integer('attempts').notNull().default(0),
+  lastError: text('last_error'),
+  scheduledAt: timestamp('scheduled_at'),
+  processedAt: timestamp('processed_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  campaignStatusIdx: index('voice_campaign_leads_campaign_status_idx').on(table.campaignId, table.status),
+}));
+
+export const voiceAgentRuns = pgTable('voice_agent_runs', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  agentId: integer('agent_id').notNull().references(() => voiceAgents.id, { onDelete: 'cascade' }),
+  definitionId: integer('definition_id').references(() => voiceAgentDefinitions.id, { onDelete: 'set null' }),
+  campaignId: integer('campaign_id').references(() => voiceCampaigns.id, { onDelete: 'set null' }),
+  campaignLeadId: integer('campaign_lead_id').references(() => voiceCampaignLeads.id, { onDelete: 'set null' }),
+  chatId: integer('chat_id').references(() => chats.id, { onDelete: 'set null' }),
+  contactId: integer('contact_id').references(() => contacts.id, { onDelete: 'set null' }),
+  callLogId: integer('call_log_id').references(() => callLogs.id, { onDelete: 'set null' }),
+  channel: varchar('channel', { length: 30 }).notNull(),
+  direction: varchar('direction', { length: 20 }).notNull().default('inbound'),
+  status: varchar('status', { length: 30 }).notNull().default('queued'),
+  fromNumber: varchar('from_number', { length: 50 }),
+  toNumber: varchar('to_number', { length: 50 }),
+  transcript: text('transcript'),
+  messages: jsonb('messages').$type<any[]>().default([]).notNull(),
+  variables: jsonb('variables').$type<Record<string, any>>().default({}).notNull(),
+  usage: jsonb('usage').$type<Record<string, any>>().default({}).notNull(),
+  cost: jsonb('cost').$type<Record<string, any>>().default({}).notNull(),
+  reservedCredits: integer('reserved_credits').notNull().default(0),
+  creditsUsed: integer('credits_used').notNull().default(0),
+  error: text('error'),
+  startedAt: timestamp('started_at'),
+  endedAt: timestamp('ended_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  teamIdx: index('voice_agent_runs_team_idx').on(table.teamId),
+  agentIdx: index('voice_agent_runs_agent_idx').on(table.agentId),
+  chatIdx: index('voice_agent_runs_chat_idx').on(table.chatId),
+}));
+
+export const voiceTools = pgTable('voice_tools', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  category: varchar('category', { length: 50 }).notNull().default('http_api'),
+  definition: jsonb('definition').$type<Record<string, any>>().default({}).notNull(),
+  status: varchar('status', { length: 30 }).notNull().default('active'),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamNameUnique: unique('voice_tools_team_name_idx').on(table.teamId, table.name),
+}));
+
+export const voiceFiles = pgTable('voice_files', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 500 }).notNull(),
+  mimeType: varchar('mime_type', { length: 100 }),
+  sizeBytes: integer('size_bytes'),
+  storageUrl: text('storage_url'),
+  contentText: text('content_text'),
+  processingStatus: varchar('processing_status', { length: 30 }).notNull().default('ready'),
+  metadata: jsonb('metadata').$type<Record<string, any>>().default({}).notNull(),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamIdx: index('voice_files_team_idx').on(table.teamId),
+}));
+
+export const voiceFileChunks = pgTable('voice_file_chunks', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  fileId: integer('file_id').notNull().references(() => voiceFiles.id, { onDelete: 'cascade' }),
+  chunkIndex: integer('chunk_index').notNull(),
+  content: text('content').notNull(),
+  metadata: jsonb('metadata').$type<Record<string, any>>().default({}).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  fileChunkUnique: unique('voice_file_chunks_file_chunk_idx').on(table.fileId, table.chunkIndex),
+}));
+
+export const voiceRecordings = pgTable('voice_recordings', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  agentId: integer('agent_id').references(() => voiceAgents.id, { onDelete: 'set null' }),
+  runId: integer('run_id').references(() => voiceAgentRuns.id, { onDelete: 'set null' }),
+  recordingId: varchar('recording_id', { length: 100 }).notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  transcript: text('transcript'),
+  storageUrl: text('storage_url'),
+  mimeType: varchar('mime_type', { length: 100 }),
+  durationSeconds: integer('duration_seconds'),
+  metadata: jsonb('metadata').$type<Record<string, any>>().default({}).notNull(),
+  isActive: boolean('is_active').notNull().default(true),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  teamRecordingUnique: unique('voice_recordings_team_recording_idx').on(table.teamId, table.recordingId),
+}));
+
 
 
 export const twilioConfigsRelations = relations(twilioConfigs, () => ({}));
@@ -1185,6 +1421,28 @@ export type CallCredits = typeof callCredits.$inferSelect;
 export type NewCallCredits = typeof callCredits.$inferInsert;
 export type CallCreditTransaction = typeof callCreditTransactions.$inferSelect;
 export type NewCallCreditTransaction = typeof callCreditTransactions.$inferInsert;
+export type VoiceAgent = typeof voiceAgents.$inferSelect;
+export type NewVoiceAgent = typeof voiceAgents.$inferInsert;
+export type VoiceAgentDefinition = typeof voiceAgentDefinitions.$inferSelect;
+export type NewVoiceAgentDefinition = typeof voiceAgentDefinitions.$inferInsert;
+export type VoiceAgentRun = typeof voiceAgentRuns.$inferSelect;
+export type NewVoiceAgentRun = typeof voiceAgentRuns.$inferInsert;
+export type VoiceCampaign = typeof voiceCampaigns.$inferSelect;
+export type NewVoiceCampaign = typeof voiceCampaigns.$inferInsert;
+export type VoiceCampaignLead = typeof voiceCampaignLeads.$inferSelect;
+export type NewVoiceCampaignLead = typeof voiceCampaignLeads.$inferInsert;
+export type VoiceTelephonyConfig = typeof voiceTelephonyConfigs.$inferSelect;
+export type NewVoiceTelephonyConfig = typeof voiceTelephonyConfigs.$inferInsert;
+export type VoicePhoneNumber = typeof voicePhoneNumbers.$inferSelect;
+export type NewVoicePhoneNumber = typeof voicePhoneNumbers.$inferInsert;
+export type VoiceModelConfig = typeof voiceModelConfigs.$inferSelect;
+export type NewVoiceModelConfig = typeof voiceModelConfigs.$inferInsert;
+export type VoiceTool = typeof voiceTools.$inferSelect;
+export type NewVoiceTool = typeof voiceTools.$inferInsert;
+export type VoiceFile = typeof voiceFiles.$inferSelect;
+export type NewVoiceFile = typeof voiceFiles.$inferInsert;
+export type VoiceRecording = typeof voiceRecordings.$inferSelect;
+export type NewVoiceRecording = typeof voiceRecordings.$inferInsert;
 
 export enum ActivityType {
   SIGN_UP = 'SIGN_UP',
