@@ -15,26 +15,26 @@
 --   3. Set trialDays to 14 for paid plans (STRIPE side)
 -- ============================================================
 
--- Example INSERT (adjust stripePriceId with your actual Stripe Price IDs):
--- INSERT INTO plans (name, description, stripeProductId, stripePriceId, amount, currency, "interval", trialDays, maxUsers, maxContacts, maxInstances, isAiEnabled, isFlowBuilderEnabled, isCampaignsEnabled, isTemplatesEnabled, isVoiceCallsEnabled)
+-- Example INSERT (adjust stripePriceId and stripeAnnualPriceId with your actual Stripe Price IDs):
+-- INSERT INTO plans (name, description, stripeProductId, stripePriceId, stripeAnnualPriceId, amount, amountAnnual, currency, "interval", trialDays, maxUsers, maxContacts, maxInstances, isAiEnabled, isFlowBuilderEnabled, isCampaignsEnabled, isTemplatesEnabled, isVoiceCallsEnabled)
 -- VALUES
 --   (
---     'free', 'Free plan for evaluation', '', '', 0, 'usd', 'month', 0,
+--     'free', 'Free plan for evaluation', '', '', '', 0, 0, 'usd', 'month', 0,
 --     1, 100, 1,
 --     false, false, false, false, false
 --   ),
 --   (
---     'starter', 'Starter plan for small teams', '', '', 2900, 'usd', 'month', 14,
+--     'starter', 'Starter plan for small teams', '', '', '', 2900, 23200, 'usd', 'month', 14,
 --     3, 1000, 1,
 --     false, true, false, true, false
 --   ),
 --   (
---     'pro', 'Pro plan with AI and advanced automation', '', '', 7900, 'usd', 'month', 14,
+--     'pro', 'Pro plan with AI and advanced automation', '', '', '', 7900, 63200, 'usd', 'month', 14,
 --     10, 10000, 3,
 --     true, true, true, true, false
 --   ),
 --   (
---     'enterprise', 'Enterprise plan with unlimited usage', '', '', 19900, 'usd', 'month', 14,
+--     'enterprise', 'Enterprise plan with unlimited usage', '', '', '', 19900, 159200, 'usd', 'month', 14,
 --     100, 100000, 10,
 --     true, true, true, true, true
 --   );

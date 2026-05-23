@@ -142,7 +142,10 @@ export async function handleSubscriptionChange(
     return;
   }
 
-  const planStripeProduct = subscription.items.data[0]?.price.product as string;
+  const priceItem = subscription.items.data[0]?.price;
+  const planStripeProduct = priceItem?.product as string;
+  const billingInterval = priceItem?.recurring?.interval === 'year' ? 'year' : 'month';
+
   let localPlanId = null;
   let planName = null;
 
@@ -167,6 +170,7 @@ export async function handleSubscriptionChange(
   const updateData: any = {
     stripeSubscriptionId: status === 'canceled' ? null : subscriptionId,
     subscriptionStatus: status,
+    billingInterval: status === 'canceled' ? null : billingInterval,
     isCanceled: subscription.cancel_at_period_end,
     trialEndsAt: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
     updatedAt: new Date()
@@ -179,6 +183,7 @@ export async function handleSubscriptionChange(
       updateData.subscriptionStatus = 'active';
       updateData.isCanceled = false;
       updateData.trialEndsAt = null;
+      updateData.billingInterval = null;
     }
   }
 

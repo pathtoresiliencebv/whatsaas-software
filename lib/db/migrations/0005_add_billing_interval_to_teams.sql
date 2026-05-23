@@ -1,0 +1,1 @@
+ALTER TABLE "teams" ADD COLUMN "billing_interval" varchar(10);

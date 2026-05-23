@@ -10,12 +10,11 @@ import {
   Settings,
   Zap,
   BarChart3,
-  CreditCard,
-  Plug,
   FolderKanban,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import Logo from '@/components/interface/Logo';
 
 const items = [
   { href: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -33,11 +32,8 @@ export function Sidebar() {
   return (
     <aside className="w-64 border-r bg-card h-full">
       <div className="p-4">
-        <Link href="/dashboard" className="flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold">K</span>
-          </div>
-          <span className="font-bold text-lg">Kyrn</span>
+        <Link href="/dashboard" className="mb-6">
+          <Logo className="h-8" />
         </Link>
 
         <nav className="space-y-1">

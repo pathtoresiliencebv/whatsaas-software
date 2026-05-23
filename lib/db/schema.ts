@@ -150,6 +150,7 @@ export const teams = pgTable('teams', {
   gatewaySubscriptionId: text('gateway_subscription_id'),
   planName: varchar('plan_name', { length: 50 }),
   subscriptionStatus: varchar('subscription_status', { length: 20 }),
+  billingInterval: varchar('billing_interval', { length: 10 }), // 'month' or 'year'
   isCanceled: boolean('is_canceled').default(false),
   trialEndsAt: timestamp('trial_ends_at'),
 });

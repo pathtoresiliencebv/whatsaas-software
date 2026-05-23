@@ -36,6 +36,13 @@
       "when": 1779040374918,
       "tag": "0004_aromatic_spyke",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779496023978,
+      "tag": "0005_add_billing_interval_to_teams",
+      "breakpoints": true
     }
   ]
 }

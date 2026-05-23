@@ -85,6 +85,8 @@ export async function GET(request: NextRequest) {
       throw new Error('User is not associated with any team.');
     }
 
+    const billingInterval = priceItem.recurring?.interval === 'year' ? 'year' : 'month';
+
     await db
       .update(teams)
       .set({
@@ -94,6 +96,7 @@ export async function GET(request: NextRequest) {
         stripeProductId: productId,
         planName: product.name,
         subscriptionStatus: subscription.status,
+        billingInterval,
         updatedAt: new Date(),
       })
       .where(eq(teams.id, userTeam[0].teamId));
