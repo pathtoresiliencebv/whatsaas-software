@@ -134,6 +134,8 @@ export async function createVoiceAgent(params: {
   systemPrompt?: string | null;
   channelMode?: string;
   isDefaultForWhatsapp?: boolean;
+  metadata?: Record<string, any>;
+  workflowJson?: Record<string, any>;
 }) {
   const [agent] = await db
     .insert(voiceAgents)
@@ -147,19 +149,24 @@ export async function createVoiceAgent(params: {
       isDefaultForWhatsapp: params.isDefaultForWhatsapp ?? false,
       isActive: true,
       status: 'active',
+      metadata: params.metadata ?? {},
     })
     .returning();
+
+  const workflowJson = params.workflowJson ?? {
+    nodes: [],
+    edges: [],
+    systemPrompt: params.systemPrompt ?? '',
+  };
 
   await db.insert(voiceAgentDefinitions).values({
     teamId: params.teamId,
     agentId: agent.id,
     version: 1,
     status: 'published',
-    workflowJson: {
-      nodes: [],
-      edges: [],
-      systemPrompt: params.systemPrompt ?? '',
-    },
+    nodes: Array.isArray(workflowJson.nodes) ? workflowJson.nodes : [],
+    edges: Array.isArray(workflowJson.edges) ? workflowJson.edges : [],
+    workflowJson,
     publishedAt: new Date(),
   });
 
@@ -182,6 +189,47 @@ export async function setDefaultWhatsappVoiceAgent(teamId: number, agentId: numb
       .set({ isDefaultForWhatsapp: true, isActive: true, status: 'active', updatedAt: new Date() })
       .where(and(eq(voiceAgents.teamId, teamId), eq(voiceAgents.id, agentId)));
   });
+}
+
+export async function updateVoiceAgent(params: {
+  teamId: number;
+  agentId: number;
+  name?: string;
+  description?: string | null;
+  systemPrompt?: string | null;
+  firstMessage?: string | null;
+  defaultLanguage?: string;
+  channelMode?: string;
+  status?: string;
+  isActive?: boolean;
+  metadata?: Record<string, any>;
+}) {
+  const values: Record<string, any> = { updatedAt: new Date() };
+  const assignIfDefined = (key: string, value: unknown) => {
+    if (value !== undefined) values[key] = value;
+  };
+
+  assignIfDefined('name', params.name);
+  assignIfDefined('description', params.description);
+  assignIfDefined('systemPrompt', params.systemPrompt);
+  assignIfDefined('firstMessage', params.firstMessage);
+  assignIfDefined('defaultLanguage', params.defaultLanguage);
+  assignIfDefined('channelMode', params.channelMode);
+  assignIfDefined('status', params.status);
+  assignIfDefined('isActive', params.isActive);
+  assignIfDefined('metadata', params.metadata);
+
+  const [agent] = await db
+    .update(voiceAgents)
+    .set(values)
+    .where(and(eq(voiceAgents.teamId, params.teamId), eq(voiceAgents.id, params.agentId)))
+    .returning();
+
+  if (!agent) {
+    throw new Error('Voice agent not found');
+  }
+
+  return agent;
 }
 
 export async function createVoiceRun(params: {

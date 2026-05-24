@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireVoicePermission, jsonError, readJson } from '@/lib/voice/api';
-import { createVoiceAgent, listVoiceSection, setDefaultWhatsappVoiceAgent } from '@/lib/voice/service';
+import { createVoiceAgent, listVoiceSection, setDefaultWhatsappVoiceAgent, updateVoiceAgent } from '@/lib/voice/service';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +34,8 @@ export async function POST(request: Request) {
       systemPrompt: body.systemPrompt,
       channelMode: body.channelMode,
       isDefaultForWhatsapp: body.isDefaultForWhatsapp === true,
+      metadata: body.metadata,
+      workflowJson: body.workflowJson || body.metadata?.workflowDefinition,
     });
 
     return NextResponse.json({ agent }, { status: 201 });
@@ -47,12 +49,44 @@ export async function PATCH(request: Request) {
   if (auth.error) return auth.error;
 
   try {
-    const body = await readJson<{ agentId?: number; isDefaultForWhatsapp?: boolean }>(request);
-    if (!body.agentId || body.isDefaultForWhatsapp !== true) {
-      return NextResponse.json({ error: 'agentId and isDefaultForWhatsapp are required' }, { status: 400 });
+    const body = await readJson<{
+      agentId?: number;
+      isDefaultForWhatsapp?: boolean;
+      name?: string;
+      description?: string | null;
+      systemPrompt?: string | null;
+      firstMessage?: string | null;
+      defaultLanguage?: string;
+      channelMode?: string;
+      status?: string;
+      isActive?: boolean;
+      metadata?: Record<string, any>;
+    }>(request);
+
+    if (!body.agentId) {
+      return NextResponse.json({ error: 'agentId is required' }, { status: 400 });
     }
-    await setDefaultWhatsappVoiceAgent(auth.context.teamId, body.agentId);
-    return NextResponse.json({ success: true });
+
+    if (body.isDefaultForWhatsapp === true) {
+      await setDefaultWhatsappVoiceAgent(auth.context.teamId, body.agentId);
+      return NextResponse.json({ success: true });
+    }
+
+    const agent = await updateVoiceAgent({
+      teamId: auth.context.teamId,
+      agentId: body.agentId,
+      name: body.name,
+      description: body.description,
+      systemPrompt: body.systemPrompt,
+      firstMessage: body.firstMessage,
+      defaultLanguage: body.defaultLanguage,
+      channelMode: body.channelMode,
+      status: body.status,
+      isActive: body.isActive,
+      metadata: body.metadata,
+    });
+
+    return NextResponse.json({ agent });
   } catch (error) {
     return jsonError(error);
   }
