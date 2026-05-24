@@ -1,0 +1,467 @@
+# Instincts generated from https://github.com/pathtoresiliencebv/whatsaas-software
+# Generated: 2026-05-24T16:07:35.082Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: whatsaas-software-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat
+
+## Evidence
+
+- 3 commits analyzed
+- Detected conventional commit pattern
+- Examples: feat: add native voice agents foundation, feat: add Kyrn homepage story
+
+---
+id: whatsaas-software-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Commit Length
+
+## Action
+
+Keep commit messages concise (~35 characters)
+
+## Evidence
+
+- Average commit message length: 35 chars
+- Based on 3 commits
+
+---
+id: whatsaas-software-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: whatsaas-software-import-alias
+trigger: "when importing modules"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Import Alias
+
+## Action
+
+Use path aliases (@/, ~/) instead of relative imports
+
+## Evidence
+
+- Import analysis shows alias pattern
+- Example: import { x } from '@/lib/x'
+
+---
+id: whatsaas-software-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Export Style
+
+## Action
+
+Prefer default exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: default
+
+---
+id: whatsaas-software-workflow-add-or-extend-voice-feature
+trigger: "when doing add or extend voice feature"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Workflow Add Or Extend Voice Feature
+
+## Action
+
+Follow the add-or-extend-voice-feature workflow:
+1. Create or update dashboard UI pages under app/[locale]/(dashboard)/voice/*/page.tsx
+2. Create or update API route files under app/api/voice/*/route.ts
+3. Implement or modify service logic in lib/voice/service.ts and related files
+4. Update or add database schema and migrations in lib/db/schema.ts and lib/db/migrations/*
+5. Update permissions in lib/permissions.ts if needed
+6. Add or update tests in lib/voice/__tests__/*
+7. Update shared components in components/voice/* or components/interface/*
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: app/[locale]/(dashboard)/voice/*/page.tsx, app/api/voice/*/route.ts, lib/voice/service.ts
+
+---
+id: whatsaas-software-instinct-file-naming
+trigger: "When creating or renaming a file"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct File Naming
+
+## Action
+
+Use camelCase for file names
+
+## Evidence
+
+- Pattern in namingConventions.files
+- Consistent with TypeScript project standards
+
+---
+id: whatsaas-software-instinct-function-naming
+trigger: "When defining a function"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Function Naming
+
+## Action
+
+Use camelCase for function names
+
+## Evidence
+
+- Pattern in namingConventions.functions
+
+---
+id: whatsaas-software-instinct-class-naming
+trigger: "When defining a class"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Class Naming
+
+## Action
+
+Use PascalCase for class names
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: whatsaas-software-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for constant names
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: whatsaas-software-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Import Style
+
+## Action
+
+Use alias import style
+
+## Evidence
+
+- Pattern in importStyle
+
+---
+id: whatsaas-software-instinct-export-style
+trigger: "When exporting modules or components"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Export Style
+
+## Action
+
+Use default exports
+
+## Evidence
+
+- Pattern in exportStyle
+
+---
+id: whatsaas-software-instinct-try-catch-errors
+trigger: "When handling errors in code"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Try Catch Errors
+
+## Action
+
+Use try-catch blocks for error handling
+
+## Evidence
+
+- Pattern in errorHandling.style
+
+---
+id: whatsaas-software-instinct-test-location
+trigger: "When adding or updating tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Test Location
+
+## Action
+
+Place tests in __tests__ folders adjacent to the code, especially under lib/voice/__tests__/
+
+## Evidence
+
+- Pattern in workflow files: lib/voice/__tests__/*
+
+---
+id: whatsaas-software-instinct-test-voice-feature
+trigger: "When adding or modifying a voice feature"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Test Voice Feature
+
+## Action
+
+Add or update tests in lib/voice/__tests__/
+
+## Evidence
+
+- Workflow: add-or-extend-voice-feature includes test updates
+- Example commits update lib/voice/__tests__/*
+
+---
+id: whatsaas-software-instinct-conventional-commits
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Conventional Commits
+
+## Action
+
+Use the conventional commit format, starting with 'feat:' for features
+
+## Evidence
+
+- Pattern in commits.prefixes
+- Examples: 'feat: add native voice agents foundation'
+
+---
+id: whatsaas-software-instinct-commit-length
+trigger: "When composing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Commit Length
+
+## Action
+
+Keep commit messages concise (around 35 characters on average)
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: whatsaas-software-instinct-voice-feature-ui
+trigger: "When adding or extending a voice feature"
+confidence: 0.92
+domain: workflow
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Voice Feature Ui
+
+## Action
+
+Create or update dashboard UI pages under app/[locale]/(dashboard)/voice/*/page.tsx
+
+## Evidence
+
+- Workflow: add-or-extend-voice-feature
+- Example commits and files
+
+---
+id: whatsaas-software-instinct-voice-feature-api
+trigger: "When adding or extending a voice feature"
+confidence: 0.92
+domain: workflow
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Voice Feature Api
+
+## Action
+
+Create or update API route files under app/api/voice/*/route.ts
+
+## Evidence
+
+- Workflow: add-or-extend-voice-feature
+- Example commits and files
+
+---
+id: whatsaas-software-instinct-voice-feature-service
+trigger: "When adding or extending a voice feature"
+confidence: 0.92
+domain: workflow
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Voice Feature Service
+
+## Action
+
+Implement or modify service logic in lib/voice/service.ts and related files
+
+## Evidence
+
+- Workflow: add-or-extend-voice-feature
+- Example commits and files
+
+---
+id: whatsaas-software-instinct-voice-feature-db-schema
+trigger: "When adding or extending a voice feature"
+confidence: 0.92
+domain: workflow
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Voice Feature Db Schema
+
+## Action
+
+Update or add database schema and migrations in lib/db/schema.ts and lib/db/migrations/*
+
+## Evidence
+
+- Workflow: add-or-extend-voice-feature
+- Example commits and files
+
+---
+id: whatsaas-software-instinct-voice-feature-permissions
+trigger: "When adding or extending a voice feature that changes access control"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Voice Feature Permissions
+
+## Action
+
+Update permissions in lib/permissions.ts if needed
+
+## Evidence
+
+- Workflow: add-or-extend-voice-feature
+- Example commits and files
+
+---
+id: whatsaas-software-instinct-voice-feature-shared-components
+trigger: "When adding or extending a voice feature"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: pathtoresiliencebv/whatsaas-software
+---
+
+# Whatsaas Software Instinct Voice Feature Shared Components
+
+## Action
+
+Update shared components in components/voice/* or components/interface/*
+
+## Evidence
+
+- Workflow: add-or-extend-voice-feature
+- Example commits and files
+
