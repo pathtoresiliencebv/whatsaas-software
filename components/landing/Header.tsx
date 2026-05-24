@@ -22,8 +22,8 @@ export function LandingHeader() {
   }, []);
 
   const navLinks = [
-    { href: '#features', label: t('nav_features') },
-    { href: '#how-it-works', label: t('nav_how') },
+    { href: '#sales-line', label: t('nav_features') },
+    { href: '#sales-flow-builder', label: t('nav_how') },
     { href: '#pricing', label: t('nav_pricing') },
     { href: '#faq', label: t('nav_faq') },
   ];
