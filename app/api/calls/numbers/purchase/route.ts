@@ -60,6 +60,11 @@ export async function POST(request: Request) {
       successUrl: `${baseUrl}/settings/voice?purchased=true`,
       cancelUrl: `${baseUrl}/settings/voice?canceled=true`,
       existingCustomerId: adapter.type === 'stripe' ? (team?.stripeCustomerId || undefined) : undefined,
+      metadata: {
+        type: 'phone_number_purchase',
+        teamId: teamId.toString(),
+        phoneNumber,
+      },
     });
 
     return NextResponse.json({ url: result.url });

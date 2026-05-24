@@ -3,6 +3,7 @@ import postgres from 'postgres';
 import * as schema from './schema';
 import dotenv from 'dotenv';
 
+dotenv.config({ path: '.env.local' });
 dotenv.config();
 
 if (!process.env.POSTGRES_URL) {

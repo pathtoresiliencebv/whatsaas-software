@@ -21,9 +21,9 @@ const items = [
   { href: '/dashboard', icon: Home, label: 'Dashboard' },
   { href: '/dashboard/chat', icon: MessageSquare, label: 'Chats' },
   { href: '/contacts', icon: Users, label: 'Contacts' },
-  { href: '/automation', icon: Zap, label: 'Automation' },
-  { href: '/voice', icon: Mic2, label: 'Voice Agents' },
+  { href: '/automation', icon: Zap, label: 'WhatsApp Agents' },
   { href: '/campaigns', icon: FolderKanban, label: 'Campaigns' },
+  { href: '/voice', icon: Mic2, label: 'Voice Agents' },
   { href: '/analytics', icon: BarChart3, label: 'Analytics' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ];

@@ -1,36 +1,43 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface OAuthButtonProps {
-  provider: 'google';
+  provider: 'google' | 'github';
   redirect?: string;
+  mode?: 'signin' | 'signup';
 }
 
-export function OAuthButton({ provider, redirect }: OAuthButtonProps) {
+export function OAuthButton({ provider, redirect, mode = 'signin' }: OAuthButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleClick = () => {
     setLoading(true);
     const state = redirect ? encodeURIComponent(redirect) : '';
-    window.location.href = `/api/auth/oauth/google${state ? `?state=${state}` : ''}`;
+    window.location.href = `/api/auth/oauth/${provider}${state ? `?state=${state}` : ''}`;
   };
+
+  const providerLabel = provider === 'google' ? 'Google' : 'GitHub';
+  const actionLabel = mode === 'signin' ? 'Sign in' : 'Sign up';
 
   return (
     <Button
       type="button"
       variant="outline"
-      className="w-full h-11 rounded-full text-base font-medium transition-all flex items-center justify-center gap-2"
+      className="relative h-11 w-full rounded-xl border-zinc-200 bg-white text-[15px] font-medium text-zinc-900 shadow-none transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
       onClick={handleClick}
       disabled={loading}
     >
       {loading ? (
-        <span className="animate-spin">⟳</span>
+        <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <>
-          <GoogleIcon />
-          <span>Continue with Google</span>
+          <span className="absolute left-4 flex h-5 w-5 items-center justify-center">
+            {provider === 'google' ? <GoogleIcon /> : <GitHubIcon />}
+          </span>
+          <span>{actionLabel} with {providerLabel}</span>
         </>
       )}
     </Button>
@@ -60,3 +67,10 @@ function GoogleIcon() {
   );
 }
 
+function GitHubIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current text-zinc-950 dark:text-zinc-50" aria-hidden="true">
+      <path d="M12 1.5C6.2 1.5 1.5 6.3 1.5 12.2c0 4.7 3 8.6 7.2 10 .5.1.7-.2.7-.5v-1.9c-2.9.6-3.5-1.3-3.5-1.3-.5-1.2-1.1-1.5-1.1-1.5-1-.7.1-.7.1-.7 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.5 1.1 3 .9.1-.7.4-1.1.7-1.4-2.3-.3-4.8-1.2-4.8-5.3 0-1.2.4-2.1 1.1-2.9-.1-.3-.5-1.4.1-2.9 0 0 .9-.3 3 1.1.9-.2 1.8-.4 2.7-.4.9 0 1.8.1 2.7.4 2-1.4 3-1.1 3-1.1.6 1.5.2 2.6.1 2.9.7.8 1.1 1.7 1.1 2.9 0 4.1-2.5 5-4.8 5.3.4.3.7 1 .7 2v2.9c0 .3.2.6.7.5 4.2-1.4 7.2-5.4 7.2-10C22.5 6.3 17.8 1.5 12 1.5Z" />
+    </svg>
+  );
+}

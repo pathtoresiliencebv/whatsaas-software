@@ -36,6 +36,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (process.env.API_ONLY_DEPLOYMENT === 'true') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   // Skip middleware for static assets and excluded paths
   if (
     pathname.startsWith('/api') ||

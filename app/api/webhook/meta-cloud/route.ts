@@ -10,6 +10,14 @@ export async function GET(request: Request) {
   const token = searchParams.get('hub.verify_token');
   const challenge = searchParams.get('hub.challenge');
 
+  if (!mode && !token && !challenge) {
+    return NextResponse.json({
+      ok: true,
+      service: 'meta-cloud-webhook',
+      verification: 'Provide hub.mode=subscribe, hub.verify_token, and hub.challenge to verify with Meta.',
+    });
+  }
+
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
     console.log('[Meta Webhook] Verification successful');
     return new Response(challenge, { status: 200, headers: { 'Content-Type': 'text/plain' } });

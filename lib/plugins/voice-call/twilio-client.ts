@@ -1,16 +1,25 @@
-// Twilio client stub - plugin not enabled
-export function createTwilioClient(config?: any) {
-  // Return a mock client structure for TypeScript compatibility
-  // The actual API routes check plugin enablement before using these methods
-  return {
-    availablePhoneNumbers: (country: string) => ({
-      tollFree: { list: async (params: any) => [] },
-      mobile: { list: async (params: any) => [] },
-      local: { list: async (params: any) => [] },
-    }),
-  };
+import twilio from 'twilio';
+
+export type TwilioClientConfig = {
+  accountSid: string;
+  authToken: string;
+  apiKeySid?: string;
+  apiKeySecret?: string;
+  twimlAppSid?: string | null;
+};
+
+export function createTwilioClient(config: TwilioClientConfig) {
+  if (!config.accountSid || !config.authToken) {
+    throw new Error('Twilio accountSid and authToken are required');
+  }
+
+  return twilio(config.accountSid, config.authToken);
 }
 
-export function getTwilioNumbers() {
-  return [];
+export async function getTwilioNumbers(config: TwilioClientConfig, country = 'US') {
+  const client = createTwilioClient(config);
+  return client.availablePhoneNumbers(country).local.list({
+    limit: 20,
+    voiceEnabled: true,
+  });
 }

@@ -15,6 +15,7 @@ export interface CheckoutOptions {
   gatewayProductId?: string;
   gatewayPriceId?: string;
   existingCustomerId?: string;
+  metadata?: Record<string, string>;
 }
 
 export interface CheckoutResult {

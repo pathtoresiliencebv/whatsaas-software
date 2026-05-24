@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/drizzle';
 import { twilioConfigs, teamPhoneNumbers } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { createInboundTwilioVoiceRuntime } from '@/lib/voice/service';
 
 
 
@@ -60,6 +61,35 @@ export async function POST(request: Request) {
         '<?xml version="1.0" encoding="UTF-8"?><Response><Say>No destination number provided.</Say></Response>',
         { status: 200, headers: { 'Content-Type': 'text/xml' } },
       );
+    }
+
+    const direction = formData['Direction'] || formData['direction'];
+    const callSid = formData['CallSid'] || formData['callSid'] || null;
+    if (!direction || direction.includes('inbound')) {
+      try {
+        const runtime = await createInboundTwilioVoiceRuntime({
+          toNumber,
+          fromNumber: fromIdentity,
+          callSid,
+        });
+
+        return new Response(runtime.twiml, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/xml',
+            'X-Voice-Runtime-Transport': runtime.transport,
+            'X-Voice-Run-Id': String(runtime.run.id),
+          },
+        });
+      } catch (error: any) {
+        if (error?.status !== 404) {
+          console.error('[Twilio Voice Runtime]', error.message);
+          return new Response(
+            '<?xml version="1.0" encoding="UTF-8"?><Response><Say>The voice agent is unavailable.</Say></Response>',
+            { status: 200, headers: { 'Content-Type': 'text/xml' } },
+          );
+        }
+      }
     }
 
     

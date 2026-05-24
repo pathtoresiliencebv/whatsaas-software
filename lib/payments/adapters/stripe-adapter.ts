@@ -17,7 +17,11 @@ export class StripeAdapter implements PaymentGatewayAdapter {
 
   async createCheckout(options: CheckoutOptions): Promise<CheckoutResult> {
     const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
-      metadata: { planId: options.planId.toString(), teamId: options.teamId.toString() },
+      metadata: {
+        planId: options.planId.toString(),
+        teamId: options.teamId.toString(),
+        ...(options.metadata || {}),
+      },
     };
 
     if (options.trialDays && options.trialDays > 0) {
@@ -48,6 +52,11 @@ export class StripeAdapter implements PaymentGatewayAdapter {
       cancel_url: options.cancelUrl,
       customer: options.existingCustomerId || undefined,
       client_reference_id: options.userId.toString(),
+      metadata: {
+        teamId: options.teamId.toString(),
+        userId: options.userId.toString(),
+        ...(options.metadata || {}),
+      },
       allow_promotion_codes: true,
       subscription_data: subscriptionData,
     });
