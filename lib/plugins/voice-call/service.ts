@@ -18,7 +18,7 @@ export async function generateClientToken(params: { teamId: number; userId?: num
 }
 
 export async function getCreditsBalance(teamId: number) {
-  return { balance: 0 };
+  return 0;
 }
 
 export async function handleCallStatusUpdate(
@@ -32,7 +32,7 @@ export async function handleCallStatusUpdate(
 }
 
 export async function addCredits(teamId: number, amount: number, currency?: string, note?: string) {
-  throw new Error('Voice call plugin is not enabled');
+  return 0;
 }
 
 export async function provisionPhoneNumber(teamId: number, phoneNumber: string, subscriptionId: string | null) {
