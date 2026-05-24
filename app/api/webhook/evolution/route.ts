@@ -13,6 +13,7 @@ import { sendPushNotification, sendPushToTeam } from '@/lib/push-notifications';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 import { dispatchWebhook } from '@/lib/webhooks/dispatcher';
 import { getEvolutionConfig } from '@/lib/whatsapp/config';
+import { processWhatsappVoiceAgent } from '@/lib/voice/service';
 
 async function downloadProfilePic(url: string): Promise<string | null> {
     if (!url || url.startsWith('/uploads/')) return null;
@@ -695,7 +696,24 @@ export async function POST(request: Request) {
         }
 
         if (!automationProcessed) {
-            scheduleAIProcessing(teamId, chatIdForAutomation, instanceId);
+            let voiceAgentProcessed = false;
+            if (textForAutomation) {
+              try {
+                voiceAgentProcessed = await processWhatsappVoiceAgent({
+                  teamId,
+                  chatId: chatIdForAutomation,
+                  instanceId,
+                  remoteJid,
+                  incomingText: textForAutomation,
+                });
+              } catch (voiceAgentError: any) {
+                console.error('[Evolution Webhook] Voice agent error:', voiceAgentError.message);
+              }
+            }
+
+            if (!voiceAgentProcessed) {
+              scheduleAIProcessing(teamId, chatIdForAutomation, instanceId);
+            }
         }
       }
 

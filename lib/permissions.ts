@@ -82,6 +82,7 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionResource> = {
   '/contacts': 'contacts',
   '/templates': 'templates',
   '/campaigns': 'campaigns',
+  '/voice': 'voiceCalls',
   '/settings/voice': 'voiceCalls',
   '/settings': 'settings',
 };

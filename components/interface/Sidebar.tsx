@@ -11,6 +11,7 @@ import {
   Zap,
   BarChart3,
   FolderKanban,
+  Mic2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ const items = [
   { href: '/dashboard/chat', icon: MessageSquare, label: 'Chats' },
   { href: '/contacts', icon: Users, label: 'Contacts' },
   { href: '/automation', icon: Zap, label: 'Automation' },
+  { href: '/voice', icon: Mic2, label: 'Voice Agents' },
   { href: '/campaigns', icon: FolderKanban, label: 'Campaigns' },
   { href: '/analytics', icon: BarChart3, label: 'Analytics' },
   { href: '/settings', icon: Settings, label: 'Settings' },

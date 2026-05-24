@@ -43,6 +43,13 @@
       "when": 1779496023978,
       "tag": "0005_add_billing_interval_to_teams",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779575211634,
+      "tag": "0006_curly_nightcrawler",
+      "breakpoints": true
     }
   ]
 }
