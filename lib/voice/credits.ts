@@ -18,7 +18,8 @@ type CreditDeps = {
 const defaultDeps: CreditDeps = {
   getCreditsBalance: async (teamId) => {
     const service = await import('@/lib/plugins/voice-call/service');
-    return service.getCreditsBalance(teamId);
+    const balanceResult = await service.getCreditsBalance(teamId) as number | { balance: number };
+    return typeof balanceResult === 'number' ? balanceResult : balanceResult.balance;
   },
   addCredits: async (teamId, amount, currency, note) => {
     const service = await import('@/lib/plugins/voice-call/service');
