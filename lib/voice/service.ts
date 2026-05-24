@@ -1,4 +1,6 @@
 import { and, count, desc, eq, sql } from 'drizzle-orm';
+import { RoomAgentDispatch, RoomConfiguration } from '@livekit/protocol';
+import { AccessToken } from 'livekit-server-sdk';
 import OpenAI from 'openai';
 import { db } from '@/lib/db/drizzle';
 import {
@@ -9,6 +11,7 @@ import {
   voiceAgents,
   voiceCampaignLeads,
   voiceCampaigns,
+  voiceFileChunks,
   voiceFiles,
   voiceModelConfigs,
   voicePhoneNumbers,
@@ -17,7 +20,25 @@ import {
   voiceTools,
 } from '@/lib/db/schema';
 import { sendTextViaProvider } from '@/lib/whatsapp/send-helpers';
+import { buildVoiceCampaignLeadQueue } from './campaigns';
 import { calculateVoiceCredits, finalizeVoiceRunCredits, reserveVoiceCredits } from './credits';
+import { chunkVoiceKnowledgeDocument, retrieveVoiceKnowledge } from './knowledge';
+import { getVoiceProviderCatalog } from './providers';
+import {
+  buildLiveKitAgentMetadata,
+  buildLiveKitSipTwiML,
+  buildPipecatWorkerConfig,
+  buildTwilioMediaStreamTwiML,
+  getRealtimeRuntimeConfig,
+} from './realtime-runtime';
+import { buildRuntimeSession, reduceRuntimeEvent, summarizeRunUsage, type VoiceRuntimeEvent } from './runtime';
+import { executeVoiceTool } from './tools';
+import {
+  buildDefaultVoiceWorkflow,
+  normalizeWorkflowDefinition,
+  validateWorkflowDefinition,
+  type VoiceWorkflowDefinition,
+} from './workflow';
 
 export type VoiceSection =
   | 'agents'
@@ -153,11 +174,18 @@ export async function createVoiceAgent(params: {
     })
     .returning();
 
-  const workflowJson = params.workflowJson ?? {
-    nodes: [],
-    edges: [],
-    systemPrompt: params.systemPrompt ?? '',
-  };
+  const workflowJson = params.workflowJson
+    ? normalizeWorkflowDefinition(params.workflowJson)
+    : buildDefaultVoiceWorkflow({
+        name: params.name,
+        useCase: params.description || params.name,
+        activityDescription: params.systemPrompt || params.description || undefined,
+      });
+
+  const validation = validateWorkflowDefinition(workflowJson);
+  if (!validation.valid) {
+    throw Object.assign(new Error(validation.errors.join(' ')), { status: 400, code: 'INVALID_VOICE_WORKFLOW' });
+  }
 
   await db.insert(voiceAgentDefinitions).values({
     teamId: params.teamId,
@@ -175,6 +203,119 @@ export async function createVoiceAgent(params: {
   }
 
   return agent;
+}
+
+export async function getVoiceAgentDefinition(teamId: number, agentId: number) {
+  const definition = await db.query.voiceAgentDefinitions.findFirst({
+    where: and(eq(voiceAgentDefinitions.teamId, teamId), eq(voiceAgentDefinitions.agentId, agentId)),
+    orderBy: [desc(voiceAgentDefinitions.version)],
+  });
+
+  if (!definition) {
+    throw Object.assign(new Error('Voice agent definition not found'), { status: 404 });
+  }
+
+  return definition;
+}
+
+export async function saveVoiceAgentDefinition(params: {
+  teamId: number;
+  agentId: number;
+  workflowJson: VoiceWorkflowDefinition | Record<string, any>;
+  variables?: Record<string, any>;
+}) {
+  const latest = await getVoiceAgentDefinition(params.teamId, params.agentId).catch(() => null);
+  const workflow = normalizeWorkflowDefinition(params.workflowJson);
+  const validation = validateWorkflowDefinition(workflow);
+  if (!validation.valid) {
+    throw Object.assign(new Error(validation.errors.join(' ')), { status: 400, code: 'INVALID_VOICE_WORKFLOW' });
+  }
+
+  const nextVersion = latest?.status === 'draft' ? latest.version : (latest?.version ?? 0) + 1;
+
+  if (latest?.status === 'draft') {
+    const [updated] = await db
+      .update(voiceAgentDefinitions)
+      .set({
+        nodes: workflow.nodes,
+        edges: workflow.edges,
+        workflowJson: workflow as any,
+        variables: params.variables || workflow.variables || {},
+      })
+      .where(and(eq(voiceAgentDefinitions.teamId, params.teamId), eq(voiceAgentDefinitions.id, latest.id)))
+      .returning();
+    return { definition: updated, validation };
+  }
+
+  const [created] = await db
+    .insert(voiceAgentDefinitions)
+    .values({
+      teamId: params.teamId,
+      agentId: params.agentId,
+      version: nextVersion,
+      status: 'draft',
+      nodes: workflow.nodes,
+      edges: workflow.edges,
+      workflowJson: workflow as any,
+      variables: params.variables || workflow.variables || {},
+    })
+    .returning();
+
+  return { definition: created, validation };
+}
+
+export async function publishVoiceAgentDefinition(params: {
+  teamId: number;
+  agentId: number;
+  definitionId?: number;
+}) {
+  const definition = params.definitionId
+    ? await db.query.voiceAgentDefinitions.findFirst({
+        where: and(
+          eq(voiceAgentDefinitions.teamId, params.teamId),
+          eq(voiceAgentDefinitions.agentId, params.agentId),
+          eq(voiceAgentDefinitions.id, params.definitionId),
+        ),
+      })
+    : await getVoiceAgentDefinition(params.teamId, params.agentId);
+
+  if (!definition) {
+    throw Object.assign(new Error('Voice agent definition not found'), { status: 404 });
+  }
+
+  const validation = validateWorkflowDefinition({
+    nodes: definition.nodes,
+    edges: definition.edges,
+  });
+  if (!validation.valid) {
+    throw Object.assign(new Error(validation.errors.join(' ')), { status: 400, code: 'INVALID_VOICE_WORKFLOW' });
+  }
+
+  await db
+    .update(voiceAgentDefinitions)
+    .set({ status: 'archived' })
+    .where(and(eq(voiceAgentDefinitions.teamId, params.teamId), eq(voiceAgentDefinitions.agentId, params.agentId)));
+
+  const [published] = await db
+    .update(voiceAgentDefinitions)
+    .set({ status: 'published', publishedAt: new Date() })
+    .where(and(eq(voiceAgentDefinitions.teamId, params.teamId), eq(voiceAgentDefinitions.id, definition.id)))
+    .returning();
+
+  await db
+    .update(voiceAgents)
+    .set({
+      status: 'active',
+      isActive: true,
+      updatedAt: new Date(),
+      metadata: sql`coalesce(${voiceAgents.metadata}, '{}'::jsonb) || ${JSON.stringify({
+        publishedDefinitionId: published.id,
+        publishedVersion: published.version,
+      })}::jsonb`,
+    })
+    .where(and(eq(voiceAgents.teamId, params.teamId), eq(voiceAgents.id, params.agentId)));
+
+  return { definition: published, validation };
 }
 
 export async function setDefaultWhatsappVoiceAgent(teamId: number, agentId: number) {
@@ -260,12 +401,14 @@ export async function createVoiceRun(params: {
     orderBy: [desc(voiceAgentDefinitions.version)],
   });
 
-  const credits = params.reserveCredits ?? 1;
-  await reserveVoiceCredits({
-    teamId: params.teamId,
-    credits,
-    description: `Voice agent run reservation: ${agent.name}`,
-  });
+  const credits = Math.max(0, params.reserveCredits ?? 1);
+  if (credits > 0) {
+    await reserveVoiceCredits({
+      teamId: params.teamId,
+      credits,
+      description: `Voice agent run reservation: ${agent.name}`,
+    });
+  }
 
   const [run] = await db
     .insert(voiceAgentRuns)
@@ -339,6 +482,490 @@ export async function completeVoiceRun(params: {
     .returning();
 
   return updated;
+}
+
+export async function endVoiceRun(params: {
+  teamId: number;
+  runId: number;
+  status?: 'completed' | 'failed';
+  usage?: Record<string, any>;
+  error?: string | null;
+}) {
+  const run = await db.query.voiceAgentRuns.findFirst({
+    where: and(eq(voiceAgentRuns.teamId, params.teamId), eq(voiceAgentRuns.id, params.runId)),
+  });
+  if (!run) throw Object.assign(new Error('Voice run not found'), { status: 404 });
+
+  const usageSummary = summarizeRunUsage(params.usage || {});
+  const actualCredits = params.status === 'failed' ? 0 : usageSummary.totalCredits;
+
+  await finalizeVoiceRunCredits({
+    teamId: params.teamId,
+    reservedCredits: run.reservedCredits,
+    actualCredits,
+    description: `Voice agent run reconciliation: #${run.id}`,
+  });
+
+  const messages = Array.isArray(run.messages) ? [...run.messages] : [];
+  if (params.status !== 'failed') {
+    messages.push({ role: 'system', content: 'Run ended by runtime.', at: new Date().toISOString() });
+  }
+
+  const [updated] = await db
+    .update(voiceAgentRuns)
+    .set({
+      status: params.status || 'completed',
+      messages,
+      usage: { ...((run.usage as Record<string, any>) || {}), ...(params.usage || {}), credits: usageSummary },
+      creditsUsed: actualCredits,
+      error: params.error || null,
+      endedAt: new Date(),
+    })
+    .where(and(eq(voiceAgentRuns.teamId, params.teamId), eq(voiceAgentRuns.id, params.runId)))
+    .returning();
+
+  return updated;
+}
+
+export async function ingestVoiceRuntimeEvent(params: {
+  teamId: number;
+  runId: number;
+  event: VoiceRuntimeEvent;
+}) {
+  const run = await db.query.voiceAgentRuns.findFirst({
+    where: and(eq(voiceAgentRuns.teamId, params.teamId), eq(voiceAgentRuns.id, params.runId)),
+  });
+  if (!run) throw Object.assign(new Error('Voice run not found'), { status: 404 });
+
+  const usage = (run.usage as Record<string, any>) || {};
+  const state = reduceRuntimeEvent(
+    {
+      messages: Array.isArray(run.messages) ? run.messages : [],
+      transcript: run.transcript || '',
+      usage,
+      events: Array.isArray(usage.events) ? usage.events : [],
+      status: run.status,
+      error: run.error,
+    },
+    params.event,
+  );
+
+  const [updated] = await db
+    .update(voiceAgentRuns)
+    .set({
+      messages: state.messages,
+      transcript: state.transcript,
+      usage: { ...state.usage, events: state.events },
+      status: state.status || run.status,
+      error: state.error ?? run.error,
+      endedAt: params.event.type === 'run.ended' ? new Date() : run.endedAt,
+    })
+    .where(and(eq(voiceAgentRuns.teamId, params.teamId), eq(voiceAgentRuns.id, params.runId)))
+    .returning();
+
+  return updated;
+}
+
+export async function createVoiceWebCallSession(params: {
+  teamId: number;
+  userId: number;
+  agentId: number;
+}) {
+  const { run, agent, definition } = await createVoiceRun({
+    teamId: params.teamId,
+    userId: params.userId,
+    agentId: params.agentId,
+    channel: 'browser',
+    direction: 'inbound',
+    input: 'Browser test call started.',
+    reserveCredits: process.env.VOICE_TEST_CALLS_REQUIRE_CREDITS === 'true' ? 1 : 0,
+  });
+
+  const session = buildRuntimeSession({
+    teamId: params.teamId,
+    agentId: agent.id,
+    runId: run.id,
+    channel: 'browser',
+  });
+
+  const runtimeConfig = getRealtimeRuntimeConfig();
+  const metadata = buildLiveKitAgentMetadata({
+    session,
+    agentName: runtimeConfig.agentName,
+    callbackBaseUrl: runtimeConfig.publicBaseUrl,
+    workflow: definition?.workflowJson || undefined,
+    variables: run.variables || {},
+  });
+  const token = await createLiveKitAccessToken({
+    identity: `team-${params.teamId}-user-${params.userId}`,
+    roomName: session.roomName,
+    agentName: runtimeConfig.agentName,
+    metadata,
+  });
+
+  return {
+    run,
+    session,
+    worker: buildPipecatWorkerConfig({
+      session,
+      livekitUrl: runtimeConfig.livekitUrl,
+      agentName: runtimeConfig.agentName,
+      callbackBaseUrl: runtimeConfig.publicBaseUrl,
+      runtimeSecret: runtimeConfig.runtimeSecret,
+      workflow: definition?.workflowJson || undefined,
+      variables: run.variables || {},
+    }),
+    livekit: {
+      url: runtimeConfig.livekitUrl,
+      token,
+      configured: runtimeConfig.livekitConfigured,
+      agentName: runtimeConfig.agentName,
+      dispatchMetadata: metadata,
+    },
+  };
+}
+
+export async function createInboundTwilioVoiceRuntime(params: {
+  toNumber: string;
+  fromNumber?: string | null;
+  callSid?: string | null;
+}) {
+  const phoneNumber = await db.query.voicePhoneNumbers.findFirst({
+    where: and(eq(voicePhoneNumbers.phoneNumber, params.toNumber), eq(voicePhoneNumbers.isActive, true)),
+  });
+
+  if (!phoneNumber?.agentId) {
+    throw Object.assign(new Error('No active voice agent is mapped to this phone number'), { status: 404 });
+  }
+
+  const { run, agent, definition } = await createVoiceRun({
+    teamId: phoneNumber.teamId,
+    agentId: phoneNumber.agentId,
+    channel: 'phone',
+    direction: 'inbound',
+    input: `Inbound call from ${params.fromNumber || 'unknown caller'}.`,
+    fromNumber: params.fromNumber || null,
+    toNumber: params.toNumber,
+    reserveCredits: 1,
+  });
+
+  const session = buildRuntimeSession({
+    teamId: phoneNumber.teamId,
+    agentId: agent.id,
+    runId: run.id,
+    channel: 'phone',
+  });
+  const runtimeConfig = getRealtimeRuntimeConfig();
+  const telephonyConfig = phoneNumber.telephonyConfigId
+    ? await db.query.voiceTelephonyConfigs.findFirst({
+        where: and(
+          eq(voiceTelephonyConfigs.teamId, phoneNumber.teamId),
+          eq(voiceTelephonyConfigs.id, phoneNumber.telephonyConfigId),
+          eq(voiceTelephonyConfigs.isActive, true),
+        ),
+      })
+    : null;
+  const credentials = (telephonyConfig?.credentials || {}) as Record<string, any>;
+
+  const canUseLiveKitSip = Boolean(credentials.sipHost && credentials.sipUsername && credentials.sipPassword);
+  const websocketBaseUrl = runtimeConfig.websocketBaseUrl || runtimeConfig.publicBaseUrl;
+  if (!canUseLiveKitSip && !websocketBaseUrl) {
+    throw Object.assign(new Error('PIPECAT_WEBSOCKET_BASE_URL or NEXT_PUBLIC_APP_URL is required for Twilio Media Streams'), {
+      status: 500,
+    });
+  }
+
+  const twiml = canUseLiveKitSip
+    ? buildLiveKitSipTwiML({
+        sipHost: String(credentials.sipHost),
+        sipUsername: String(credentials.sipUsername),
+        sipPassword: String(credentials.sipPassword),
+        phoneNumber: params.toNumber,
+      })
+    : buildTwilioMediaStreamTwiML({
+        websocketBaseUrl: websocketBaseUrl!,
+        session,
+        callSid: params.callSid,
+        from: params.fromNumber,
+        to: params.toNumber,
+      });
+
+  return {
+    run,
+    session,
+    twiml,
+    transport: canUseLiveKitSip ? 'livekit-sip' : 'twilio-media-streams',
+    worker: buildPipecatWorkerConfig({
+      session,
+      livekitUrl: runtimeConfig.livekitUrl,
+      agentName: runtimeConfig.agentName,
+      callbackBaseUrl: runtimeConfig.publicBaseUrl,
+      runtimeSecret: runtimeConfig.runtimeSecret,
+      workflow: definition?.workflowJson || undefined,
+      variables: run.variables || {},
+      transport: canUseLiveKitSip ? 'livekit' : 'twilio-media-streams',
+    }),
+  };
+}
+
+export async function getVoiceRuntimeWorkerConfig(params: {
+  teamId: number;
+  runId: number;
+}) {
+  const run = await db.query.voiceAgentRuns.findFirst({
+    where: and(eq(voiceAgentRuns.teamId, params.teamId), eq(voiceAgentRuns.id, params.runId)),
+  });
+  if (!run) throw Object.assign(new Error('Voice run not found'), { status: 404 });
+
+  const definition = run.definitionId
+    ? await db.query.voiceAgentDefinitions.findFirst({
+        where: and(eq(voiceAgentDefinitions.teamId, params.teamId), eq(voiceAgentDefinitions.id, run.definitionId)),
+      })
+    : null;
+  const runtimeConfig = getRealtimeRuntimeConfig();
+  const session = buildRuntimeSession({
+    teamId: run.teamId,
+    agentId: run.agentId,
+    runId: run.id,
+    channel: run.channel as any,
+  });
+
+  return buildPipecatWorkerConfig({
+    session,
+    livekitUrl: runtimeConfig.livekitUrl,
+    agentName: runtimeConfig.agentName,
+    callbackBaseUrl: runtimeConfig.publicBaseUrl,
+    runtimeSecret: runtimeConfig.runtimeSecret,
+    workflow: definition?.workflowJson || undefined,
+    variables: run.variables || {},
+    transport: run.channel === 'phone' ? 'twilio-media-streams' : 'livekit',
+  });
+}
+
+export async function executeTeamVoiceTool(params: {
+  teamId: number;
+  toolId: number;
+  input?: Record<string, any>;
+  variables?: Record<string, any>;
+}) {
+  const tool = await db.query.voiceTools.findFirst({
+    where: and(eq(voiceTools.teamId, params.teamId), eq(voiceTools.id, params.toolId)),
+  });
+  if (!tool) throw Object.assign(new Error('Voice tool not found'), { status: 404 });
+
+  return executeVoiceTool({
+    tool: {
+      name: tool.name,
+      category: tool.category,
+      definition: tool.definition || {},
+    },
+    input: params.input,
+    variables: params.variables,
+  });
+}
+
+export async function createVoiceFileWithChunks(params: {
+  teamId: number;
+  userId: number;
+  name: string;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+  storageUrl?: string | null;
+  contentText?: string | null;
+  metadata?: Record<string, any>;
+}) {
+  const [file] = await db
+    .insert(voiceFiles)
+    .values({
+      teamId: params.teamId,
+      createdBy: params.userId,
+      name: params.name,
+      mimeType: params.mimeType || 'text/plain',
+      sizeBytes: params.sizeBytes || null,
+      storageUrl: params.storageUrl || null,
+      contentText: params.contentText || '',
+      processingStatus: params.contentText ? 'ready' : 'uploaded',
+      metadata: params.metadata || {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .returning();
+
+  if (params.contentText?.trim()) {
+    const chunks = chunkVoiceKnowledgeDocument({ fileId: file.id, text: params.contentText });
+    if (chunks.length > 0) {
+      await db.insert(voiceFileChunks).values(
+        chunks.map((chunk) => ({
+          teamId: params.teamId,
+          fileId: file.id,
+          chunkIndex: chunk.chunkIndex,
+          content: chunk.content,
+          metadata: chunk.metadata || {},
+        })),
+      );
+    }
+  }
+
+  return file;
+}
+
+export async function searchVoiceKnowledge(params: {
+  teamId: number;
+  query: string;
+  limit?: number;
+}) {
+  const chunks = await db
+    .select({
+      fileId: voiceFileChunks.fileId,
+      chunkIndex: voiceFileChunks.chunkIndex,
+      content: voiceFileChunks.content,
+      metadata: voiceFileChunks.metadata,
+    })
+    .from(voiceFileChunks)
+    .where(eq(voiceFileChunks.teamId, params.teamId))
+    .limit(500);
+
+  return retrieveVoiceKnowledge({
+    query: params.query,
+    chunks,
+    limit: params.limit || 4,
+  });
+}
+
+export async function enqueueVoiceCampaignLeads(params: {
+  teamId: number;
+  campaignId: number;
+  rows: Array<Record<string, any>>;
+}) {
+  const campaign = await db.query.voiceCampaigns.findFirst({
+    where: and(eq(voiceCampaigns.teamId, params.teamId), eq(voiceCampaigns.id, params.campaignId)),
+  });
+  if (!campaign) throw Object.assign(new Error('Voice campaign not found'), { status: 404 });
+
+  const queue = buildVoiceCampaignLeadQueue(params.rows);
+  if (queue.validLeads.length > 0) {
+    await db.insert(voiceCampaignLeads).values(
+      queue.validLeads.map((lead) => ({
+        teamId: params.teamId,
+        campaignId: params.campaignId,
+        phoneNumber: lead.phoneNumber,
+        variables: lead.variables,
+        status: 'queued',
+        attempts: 0,
+        createdAt: new Date(),
+      })),
+    );
+  }
+
+  const [updatedCampaign] = await db
+    .update(voiceCampaigns)
+    .set({
+      totalLeads: sql`${voiceCampaigns.totalLeads} + ${queue.validLeads.length}`,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(voiceCampaigns.teamId, params.teamId), eq(voiceCampaigns.id, params.campaignId)))
+    .returning();
+
+  return {
+    campaign: updatedCampaign,
+    imported: queue.validLeads.length,
+    rejectedRows: queue.rejectedRows,
+  };
+}
+
+export async function updateVoiceCampaignStatus(params: {
+  teamId: number;
+  campaignId: number;
+  action: 'start' | 'pause' | 'resume';
+}) {
+  const status = params.action === 'pause' ? 'paused' : 'running';
+  const values: Record<string, any> = { status, updatedAt: new Date() };
+  if (params.action === 'start') values.startedAt = new Date();
+
+  const [campaign] = await db
+    .update(voiceCampaigns)
+    .set(values)
+    .where(and(eq(voiceCampaigns.teamId, params.teamId), eq(voiceCampaigns.id, params.campaignId)))
+    .returning();
+
+  if (!campaign) throw Object.assign(new Error('Voice campaign not found'), { status: 404 });
+  return campaign;
+}
+
+export async function getVoiceCatalog() {
+  return {
+    providers: getVoiceProviderCatalog(),
+    voices: [
+      {
+        id: 'kyrn-hope',
+        name: 'Hope',
+        provider: 'elevenlabs',
+        style: 'upbeat and clear',
+        language: 'multilingual',
+        isDefault: true,
+      },
+      {
+        id: 'chatterbox-turbo-clone',
+        name: 'Chatterbox Clone',
+        provider: 'chatterbox',
+        style: 'cloned reference voice',
+        language: 'en',
+        supportsCloning: true,
+      },
+      {
+        id: 'minimax-speech-turbo',
+        name: 'MiniMax Turbo',
+        provider: 'minimax',
+        style: 'fast realtime voice',
+        language: 'multilingual',
+      },
+      {
+        id: 'qwen-ethan',
+        name: 'Qwen Ethan',
+        provider: 'qwen',
+        style: 'realtime assistant voice',
+        language: 'multilingual',
+      },
+    ],
+  };
+}
+
+async function createLiveKitAccessToken(params: {
+  identity: string;
+  roomName: string;
+  agentName?: string;
+  metadata?: string;
+}) {
+  const apiKey = process.env.LIVEKIT_API_KEY || 'dev-livekit-key';
+  const apiSecret = process.env.LIVEKIT_API_SECRET;
+
+  if (!apiSecret) {
+    return `dev.${Buffer.from(JSON.stringify({ ...params, apiKey })).toString('base64url')}`;
+  }
+
+  const token = new AccessToken(apiKey, apiSecret, {
+    identity: params.identity,
+    ttl: '2h',
+  });
+  token.addGrant({
+    room: params.roomName,
+    roomJoin: true,
+    canPublish: true,
+    canSubscribe: true,
+  });
+
+  if (params.agentName) {
+    token.roomConfig = new RoomConfiguration({
+      agents: [
+        new RoomAgentDispatch({
+          agentName: params.agentName,
+          metadata: params.metadata,
+        }),
+      ],
+    });
+  }
+
+  return token.toJwt();
 }
 
 export async function generateVoiceAgentReply(params: {

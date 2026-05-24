@@ -1,9 +1,9 @@
 
 
 const installed = new Set([
-  //'voice-call',
+  'voice-call',
   'ai-chat',
-  //'meta-cloud',
+  'meta-cloud',
 ]);
 
 export function isPluginInstalled(pluginId: string): boolean {

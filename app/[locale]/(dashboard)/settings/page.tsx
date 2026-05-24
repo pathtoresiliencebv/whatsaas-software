@@ -1081,18 +1081,26 @@ function InviteTeamMember() {
 export default function SettingsPage() {
   const t = useTranslations('Settings');
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium mb-6">{t('team_title')}</h1>
-      <Suspense fallback={<SubscriptionSkeleton />}>
-        <ManageSubscription />
-      </Suspense>
-      
-      <Suspense fallback={<TeamMembersSkeleton />}>
-        <TeamMembers />
-      </Suspense>
-      <Suspense fallback={<InviteTeamMemberSkeleton />}>
-        <InviteTeamMember />
-      </Suspense>
+    <section className="min-h-full bg-[#f8f8f7] px-6 py-8 text-zinc-950 dark:bg-[#17191b] dark:text-white">
+      <div className="mx-auto w-full max-w-5xl">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold tracking-tight">Workspace Settings</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+            Manage your team, billing, roles, departments, and shared workspace access from one clean overview.
+          </p>
+        </div>
+
+        <Suspense fallback={<SubscriptionSkeleton />}>
+          <ManageSubscription />
+        </Suspense>
+
+        <Suspense fallback={<TeamMembersSkeleton />}>
+          <TeamMembers />
+        </Suspense>
+        <Suspense fallback={<InviteTeamMemberSkeleton />}>
+          <InviteTeamMember />
+        </Suspense>
+      </div>
     </section>
   );
 }

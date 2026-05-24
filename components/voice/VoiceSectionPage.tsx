@@ -1,7 +1,7 @@
 'use client';
 
 import '@xyflow/react/dist/style.css';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -51,6 +51,7 @@ import {
   Settings2,
   ShieldCheck,
   Sparkles,
+  Trash2,
   Upload,
   Users,
   Wrench,
@@ -235,6 +236,8 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
   const [testMode, setTestMode] = useState<'audio' | 'chat'>('audio');
   const [testRunning, setTestRunning] = useState(false);
   const [testEnded, setTestEnded] = useState(false);
+  const [testTranscript, setTestTranscript] = useState<Array<{ role: 'user' | 'assistant' | 'system'; content: string }>>([]);
+  const [runtimeSession, setRuntimeSession] = useState<any>(null);
   const [unsaved, setUnsaved] = useState(false);
   const [firstCallTip, setFirstCallTip] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState('start');
@@ -252,6 +255,14 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
     telephonyConfigId: '',
     sourceType: 'csv',
     maxConcurrency: 1,
+    leadRows: [] as Array<Record<string, string>>,
+    leadFileName: '',
+    aiPrompt: '',
+    selectedTemplate: '',
+    manualLeadText: '',
+    contactSegment: '',
+    retryCount: 2,
+    callWindow: 'business',
   });
   const [modelTab, setModelTab] = useState<'llm' | 'voice' | 'transcriber' | 'embedding'>('llm');
   const [modelForm, setModelForm] = useState({
@@ -272,6 +283,10 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
     name: '',
     category: 'http_api',
     description: '',
+    endpoint: '',
+    method: 'POST',
+    transferNumber: '',
+    expression: '',
   });
   const [fileForm, setFileForm] = useState({
     name: '',
@@ -289,6 +304,7 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
   const routePanel = searchParams.get('panel') as AgentPanel | null;
   const activeAgent = selectedAgent || (routeAgentId ? agents.find((agent) => Number(agent.id) === routeAgentId) : null) || null;
   const activeAgentPanel: AgentPanel = routePanel === 'workflow' || routePanel === 'branches' || routePanel === 'widget' || routePanel === 'tests' || routePanel === 'users' ? routePanel : 'agent';
+  const { data: definitionData } = useSWR(activeAgent?.id ? `/api/voice/agents/${activeAgent.id}/definition` : null, fetcher);
 
   async function postJson(url: string, body: Record<string, any>) {
     setBusy(true);
@@ -358,17 +374,36 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
   async function createCampaign() {
     const agentId = Number(campaignForm.agentId || agents[0]?.id);
     if (!campaignForm.name.trim() || !agentId) return;
-    await postJson('/api/voice/campaigns', {
+    const result = await postJson('/api/voice/campaigns', {
       name: campaignForm.name,
       agentId,
       telephonyConfigId: campaignForm.telephonyConfigId || null,
       sourceType: campaignForm.sourceType,
-      totalLeads: 0,
+      totalLeads: campaignForm.leadRows.length,
       maxConcurrency: campaignForm.maxConcurrency,
-      retryConfig: { retries: 2, retryDelayMinutes: 30 },
-      scheduleConfig: { timezone: 'Europe/Amsterdam', windows: [] },
+      retryConfig: { retries: campaignForm.retryCount || 2, retryDelayMinutes: 30 },
+      scheduleConfig: { timezone: 'Europe/Amsterdam', windows: [], callWindow: campaignForm.callWindow || 'business' },
     });
-    setCampaignForm({ name: '', agentId: '', telephonyConfigId: '', sourceType: 'csv', maxConcurrency: 1 });
+    if (campaignForm.leadRows.length && result.campaign?.id) {
+      await postJson(`/api/voice/campaigns/${result.campaign.id}/leads`, {
+        rows: campaignForm.leadRows,
+      });
+    }
+    setCampaignForm({
+      name: '',
+      agentId: '',
+      telephonyConfigId: '',
+      sourceType: 'csv',
+      maxConcurrency: 1,
+      leadRows: [],
+      leadFileName: '',
+      aiPrompt: '',
+      selectedTemplate: '',
+      manualLeadText: '',
+      contactSegment: '',
+      retryCount: 2,
+      callWindow: 'business',
+    });
     setDialog(null);
   }
 
@@ -409,10 +444,16 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
       name: toolForm.name,
       description: toolForm.description,
       category: toolForm.category,
-      definition: { method: 'POST', timeoutMs: 10000 },
+      definition: {
+        endpoint: toolForm.endpoint,
+        method: toolForm.method,
+        transferNumber: toolForm.transferNumber,
+        expression: toolForm.expression,
+        timeoutMs: 10000,
+      },
       status: 'active',
     });
-    setToolForm({ name: '', category: 'http_api', description: '' });
+    setToolForm({ name: '', category: 'http_api', description: '', endpoint: '', method: 'POST', transferNumber: '', expression: '' });
     setDialog(null);
   }
 
@@ -443,18 +484,81 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
   async function runAgent(agent: any) {
     setTestRunning(true);
     setTestEnded(false);
+    setTestTranscript([{ role: 'system', content: 'Browser test call is starting...' }]);
     try {
-      await postJson('/api/voice/runs', {
+      const session = await postJson('/api/voice/web-call/token', {
         agentId: agent.id,
-        channel: 'browser',
-        direction: 'inbound',
-        input: 'Hi there, I am testing this Kyrn voice agent in the browser.',
-        reserveCredits: 1,
+      });
+      setRuntimeSession(session);
+      setTestTranscript((current) => [
+        ...current,
+        { role: 'user', content: 'Hi there, I am testing this Kyrn voice agent in the browser.' },
+      ]);
+
+      await postJson('/api/voice/runtime/events', {
+        runId: session.run.id,
+        event: {
+          type: 'transcript.user',
+          text: 'Hi there, I am testing this Kyrn voice agent in the browser.',
+          at: new Date().toISOString(),
+        },
+      });
+      await postJson('/api/voice/runtime/events', {
+        runId: session.run.id,
+        event: {
+          type: 'transcript.agent',
+          text: agent.firstMessage || 'Hi there, I am your Kyrn voice agent. How can I help you today?',
+          at: new Date().toISOString(),
+        },
+      });
+      setTestTranscript((current) => [
+        ...current,
+        { role: 'assistant', content: agent.firstMessage || 'Hi there, I am your Kyrn voice agent. How can I help you today?' },
+      ]);
+      await postJson(`/api/voice/runs/${session.run.id}/end`, {
+        status: 'completed',
+        usage: {
+          durationSeconds: 7,
+          llmTokens: 400,
+          ttsCharacters: 120,
+          telephonySeconds: 0,
+        },
       });
       mutate('/api/voice/runs');
     } finally {
       setTestEnded(true);
       setTestRunning(false);
+    }
+  }
+
+  async function saveWorkflow(agent: any, currentNodes: FlowNode[], publish = false) {
+    setBusy(true);
+    try {
+      const response = await fetch(`/api/voice/agents/${agent.id}/definition`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workflowJson: buildWorkflowPayload(agent, currentNodes),
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'Workflow could not be saved');
+
+      if (publish) {
+        const publishResponse = await fetch(`/api/voice/agents/${agent.id}/publish`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ definitionId: payload.definition?.id }),
+        });
+        const publishPayload = await publishResponse.json().catch(() => ({}));
+        if (!publishResponse.ok) throw new Error(publishPayload.error || 'Workflow could not be published');
+      }
+
+      setUnsaved(false);
+      mutate(`/api/voice/agents/${agent.id}/definition`);
+      mutate('/api/voice/agents');
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -473,9 +577,11 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
   const visibleEditorAgent = editorAgent || (section === 'agents' && activeAgentPanel === 'workflow' ? activeAgent : null);
   const visibleEditorNodes = editorAgent
     ? nodes
-    : nodeSeeds.map((node) => (
-      node.id === 'start' && visibleEditorAgent?.systemPrompt ? { ...node, prompt: visibleEditorAgent.systemPrompt } : node
-    ));
+    : definitionData?.definition
+      ? definitionToFlowNodes(definitionData.definition)
+      : nodeSeeds.map((node) => (
+        node.id === 'start' && visibleEditorAgent?.systemPrompt ? { ...node, prompt: visibleEditorAgent.systemPrompt } : node
+      ));
 
   if (section === 'agents' && visibleEditorAgent) {
     return (
@@ -515,8 +621,11 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
           setTestMode={setTestMode}
           testRunning={testRunning}
           testEnded={testEnded}
+          testTranscript={testTranscript}
+          runtimeSession={runtimeSession}
           unsaved={unsaved}
           setUnsaved={setUnsaved}
+          onSaveWorkflow={(publish) => saveWorkflow(visibleEditorAgent, visibleEditorNodes, publish)}
           firstCallTip={firstCallTip}
           setFirstCallTip={setFirstCallTip}
         />
@@ -614,7 +723,13 @@ export function VoiceSectionPage({ section }: { section: SectionKey }) {
         />
       )}
       {section === 'telephony' && (
-        <TelephonyView telephony={telephony} onAdd={() => setDialog('telephony')} />
+        <TelephonyView
+          telephony={telephony}
+          onAdd={(provider) => {
+            if (provider) setTelephonyForm((current) => ({ ...current, provider }));
+            setDialog('telephony');
+          }}
+        />
       )}
       {section === 'tools' && (
         <ToolsView tools={rows} onCreate={() => setDialog('tool')} />
@@ -1574,147 +1689,1312 @@ function CampaignsView({
   busy: boolean;
   onCreate: () => void;
 }) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [mode, setMode] = useState<'generate' | 'template' | 'blank'>('generate');
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [previewState, setPreviewState] = useState<'idle' | 'running' | 'paused'>('idle');
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | number>(campaigns[0]?.id || 'draft');
+  const [campaignActionBusy, setCampaignActionBusy] = useState<string | number | null>(null);
+  const [campaignActionStatus, setCampaignActionStatus] = useState('');
+  const templates = campaignTemplates();
+  const activeAgent = agents.find((agent) => String(agent.id) === String(form.agentId)) || agents[0];
+  const activeTelephony = telephony.find((config) => String(config.id) === String(form.telephonyConfigId)) || telephony[0];
+  const selectedCampaign = campaigns.find((campaign) => String(campaign.id) === String(selectedCampaignId)) || campaigns[0];
+  const leadCount = form.leadRows?.length || 0;
+  const queueProgress = previewState === 'running' ? Math.min(72, Math.max(18, leadCount ? 28 + leadCount * 9 : 18)) : previewState === 'paused' ? 42 : 0;
+  const queueStats = {
+    queued: leadCount,
+    active: previewState === 'running' ? Math.min(Number(form.maxConcurrency || 1), Math.max(1, leadCount)) : 0,
+    completed: previewState === 'idle' ? 0 : Math.floor(leadCount / 3),
+  };
+  const canCreateCampaign = Boolean(form.name.trim() && (form.agentId || agents[0]?.id));
+
+  async function runCampaignAction(campaign: any, action: 'start' | 'pause' | 'resume') {
+    if (!campaign?.id) return;
+    setCampaignActionBusy(campaign.id);
+    setCampaignActionStatus('');
+    try {
+      const response = await fetch(`/api/voice/campaigns/${campaign.id}/${action}`, { method: 'POST' });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || `Could not ${action} campaign`);
+      await mutate('/api/voice/campaigns');
+      await mutate('/api/voice/overview');
+      setCampaignActionStatus(`${campaign.name} ${action === 'start' ? 'started' : action === 'pause' ? 'paused' : 'resumed'}.`);
+    } catch (error) {
+      setCampaignActionStatus(error instanceof Error ? error.message : 'Campaign action failed.');
+    } finally {
+      setCampaignActionBusy(null);
+    }
+  }
+
+  function nextCampaignAction(campaign: any): 'start' | 'pause' | 'resume' {
+    if (campaign?.status === 'running') return 'pause';
+    if (campaign?.status === 'paused') return 'resume';
+    return 'start';
+  }
+
+  async function handleCsvFile(file?: File) {
+    if (!file) return;
+    const text = await file.text();
+    const leadRows = parseCsvRows(text);
+    setForm({
+      ...form,
+      sourceType: 'csv',
+      leadRows,
+      leadFileName: file.name,
+    });
+  }
+
+  function generateCampaignSetup() {
+    const prompt = String(form.aiPrompt || '').trim();
+    if (!prompt) return;
+    const lower = prompt.toLowerCase();
+    const name = lower.includes('demo')
+      ? 'AI generated demo follow-up'
+      : lower.includes('reactivation')
+        ? 'AI generated reactivation campaign'
+        : 'AI generated voice campaign';
+    setForm({
+      ...form,
+      name: form.name || name,
+      sourceType: form.sourceType || 'csv',
+      maxConcurrency: lower.includes('slow') ? 2 : 5,
+    });
+    setAdvancedOpen(true);
+    setPreviewState('paused');
+  }
+
+  function applyTemplate(template: ReturnType<typeof campaignTemplates>[number]) {
+    setMode('template');
+    setForm({
+      ...form,
+      selectedTemplate: template.id,
+      name: form.name || template.name,
+      maxConcurrency: template.concurrency,
+      sourceType: 'csv',
+    });
+    setPreviewState('paused');
+  }
+
+  function loadManualLeads() {
+    const leadRows = parseManualLeadRows(form.manualLeadText || '');
+    setForm({
+      ...form,
+      sourceType: 'manual',
+      leadRows,
+      leadFileName: leadRows.length ? 'Manual lead list' : '',
+    });
+    if (leadRows.length) setPreviewState('paused');
+  }
+
+  function selectContactSegment(segment: string) {
+    const sampleRows = [
+      { phone_number: '+31600000001', first_name: 'Sophie', segment, context: 'Requested a callback' },
+      { phone_number: '+31600000002', first_name: 'Daan', segment, context: 'Interested in demo' },
+      { phone_number: '+31600000003', first_name: 'Mila', segment, context: 'Needs pricing follow-up' },
+    ];
+    setForm({
+      ...form,
+      sourceType: 'contacts',
+      contactSegment: segment,
+      leadRows: sampleRows,
+      leadFileName: `${segment} contacts`,
+    });
+    setPreviewState('paused');
+  }
+
+  function loadSampleLeads() {
+    const sampleRows = [
+      { phone_number: '+31600000011', first_name: 'Nora', company: 'Studio North', context: 'Asked for a product demo' },
+      { phone_number: '+31600000012', first_name: 'Mats', company: 'Peak Sales', context: 'Needs pricing before Friday' },
+      { phone_number: '+31600000013', first_name: 'Lina', company: 'Bright Ops', context: 'Wants WhatsApp and voice together' },
+      { phone_number: '+31600000014', first_name: 'Omar', company: 'Scale Desk', context: 'Missed last callback' },
+    ];
+    setForm({
+      ...form,
+      sourceType: 'csv',
+      leadRows: sampleRows,
+      leadFileName: 'Sample campaign leads.csv',
+    });
+    setPreviewState('paused');
+  }
+
   return (
-    <CenteredPage>
-      <div className={`w-full max-w-[624px] rounded-lg p-6 ${voicePanelClass}`}>
-        <h1 className="text-xl font-bold">Campaign Details</h1>
-        <p className={`mt-1 text-sm ${voicePageMuted}`}>Configure your campaign settings</p>
-        <div className="mt-6 space-y-5">
-          <VoiceField label="Campaign Name" help="Choose a descriptive name for your campaign">
-            <Input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Enter campaign name" className={inputClass} />
-          </VoiceField>
-          <VoiceField label="Workflow" help="Select the workflow to execute for each row in the data source">
-            <NativeSelect value={form.agentId} onChange={(value) => setForm({ ...form, agentId: value })}>
-              <option value="">Select a workflow</option>
-              {agents.map((agent) => <option key={agent.id} value={agent.id}>{agent.name}</option>)}
-            </NativeSelect>
-          </VoiceField>
-          <VoiceField label="Telephony Configuration" help="Outbound calls for this campaign will use this configuration's caller IDs">
-            {telephony.length === 0 ? (
-              <div className={`rounded-md border border-dashed border-zinc-300 px-4 py-3 text-sm dark:border-[#333] ${voicePageMuted}`}>
-                No telephony configurations yet. Add one to create a campaign.
+    <SectionPage
+      title="Campaigns"
+      description="Create outbound voice campaigns with a selected agent, lead source, retry rules, and live queue tracking."
+      action={<VoiceButton aria-label="Create campaign from header" onClick={onCreate} disabled={busy || !canCreateCampaign}><Plus className="h-4 w-4" /> Create campaign</VoiceButton>}
+    >
+      <div className={`rounded-[22px] p-5 ${voicePanelClass}`}>
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-center">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[hsl(240_1.7%_11.2%)] text-white dark:bg-white dark:text-zinc-950">
+                <Sparkles className="h-5 w-5" />
               </div>
-            ) : (
-              <NativeSelect value={form.telephonyConfigId} onChange={(value) => setForm({ ...form, telephonyConfigId: value })}>
-                <option value="">Default telephony configuration</option>
-                {telephony.map((config) => <option key={config.id} value={config.id}>{config.name}</option>)}
-              </NativeSelect>
-            )}
-          </VoiceField>
-          <VoiceField label="Data Source Type" help="Choose where your contact data is stored">
-            <NativeSelect value={form.sourceType} onChange={(value) => setForm({ ...form, sourceType: value })}>
-              <option value="csv">CSV File</option>
-              <option value="manual">Manual Leads</option>
-              <option value="contacts">Kyrn Contacts</option>
-            </NativeSelect>
-          </VoiceField>
-          <VoiceField label="CSV File" help="Upload a CSV with a phone_number column. Max 10MB.">
-            <VoiceButton variant="ghost"><Upload className="h-4 w-4" /> Upload CSV File</VoiceButton>
-          </VoiceField>
-          <button className={`flex w-full items-center justify-between rounded-lg px-4 py-4 text-left font-semibold ${voiceSoftPanelClass} ${voiceHoverSurface}`}>
-            Advanced Settings
-            <ChevronDown className="-rotate-90 h-4 w-4" />
-          </button>
-          <div className="flex gap-3 pt-4">
-            <VoiceButton onClick={onCreate} disabled={busy || !form.name.trim() || !agents.length}>Create Campaign</VoiceButton>
-            <VoiceButton variant="ghost">Cancel</VoiceButton>
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold">Campaign command center</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>Generate, attach leads, preview the queue, then launch from one workspace.</p>
+              </div>
+            </div>
+            <div className="mt-5 flex min-h-14 items-center gap-3 rounded-2xl border border-zinc-200 bg-[#f8f8f7] px-4 py-3 dark:border-[#303030] dark:bg-[#101010]">
+              <MessageSquare className={`h-5 w-5 shrink-0 ${voicePageMuted}`} />
+              <input
+                value={form.aiPrompt}
+                onChange={(event) => setForm({ ...form, aiPrompt: event.target.value })}
+                placeholder="Describe a campaign: call warm demo leads, qualify budget, book meetings..."
+                aria-label="Campaign generation prompt"
+                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+              />
+              <button
+                type="button"
+                onClick={loadSampleLeads}
+                aria-label="Attach sample campaign leads"
+                className="hidden rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-[hsl(240_1.7%_11.2%)] transition hover:bg-[#0000170b] dark:border-[#343434] dark:bg-[#181818] dark:text-white dark:hover:bg-[#242424] md:inline-flex"
+              >
+                Attach sample
+              </button>
+              <button
+                type="button"
+                onClick={generateCampaignSetup}
+                disabled={!String(form.aiPrompt || '').trim()}
+                aria-label="Generate campaign setup from prompt"
+                className="inline-flex h-9 items-center gap-2 rounded-xl bg-[hsl(240_1.7%_11.2%)] px-4 text-xs font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100"
+              >
+                <Sparkles className="h-4 w-4" />
+                Generate
+              </button>
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3 xl:w-[420px]">
+            {[
+              ['Agent', activeAgent?.name || 'Select agent'],
+              ['Leads', `${leadCount} ready`],
+              ['Concurrency', `${form.maxConcurrency || 1} calls`],
+            ].map(([label, value]) => (
+              <div key={label} className={`rounded-2xl px-4 py-3 ${voiceSoftPanelClass}`}>
+                <p className={`text-[11px] font-semibold uppercase tracking-wide ${voicePageMuted}`}>{label}</p>
+                <p className="mt-2 truncate text-sm font-bold">{value}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-      {campaigns.length > 0 && (
-        <div className={`mt-5 w-full max-w-[624px] rounded-lg p-4 text-sm ${voicePanelClass}`}>
-          {campaigns.length} campaign{campaigns.length === 1 ? '' : 's'} configured.
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_420px]">
+        <div className="space-y-6">
+          <div className={`rounded-2xl p-2 ${voicePanelClass}`}>
+            <div className="grid gap-2 md:grid-cols-3">
+              {[
+                { key: 'generate', title: 'Generate with AI', text: 'Describe a campaign and let Kyrn shape the setup.', icon: Sparkles },
+                { key: 'template', title: 'Use template', text: 'Start from a proven outbound campaign pattern.', icon: FileText },
+                { key: 'blank', title: 'Blank campaign', text: 'Build every setting manually.', icon: Pencil },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setMode(item.key as typeof mode)}
+                    className={`rounded-xl p-4 text-left transition ${mode === item.key ? 'bg-[hsl(240_1.7%_11.2%)] text-white shadow-sm dark:bg-white dark:text-zinc-950' : `${voiceHoverSurface}`}`}
+                  >
+                    <Icon className="mb-4 h-5 w-5" />
+                    <p className="font-semibold">{item.title}</p>
+                    <p className={`mt-2 text-sm leading-5 ${mode === item.key ? 'text-white/70 dark:text-zinc-600' : voicePageMuted}`}>{item.text}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {mode === 'generate' && (
+            <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-bold">Generate campaign setup</h2>
+                  <p className={`mt-1 text-sm ${voicePageMuted}`}>Describe the outcome, audience and tone. Kyrn fills the first setup pass.</p>
+                </div>
+                <Sparkles className="h-5 w-5 text-cyan-500" />
+              </div>
+              <Textarea
+                value={form.aiPrompt}
+                onChange={(event) => setForm({ ...form, aiPrompt: event.target.value })}
+                rows={4}
+                placeholder="Example: Call warm demo leads from last week, qualify timeline and book a meeting if they are ready."
+                className={`${inputClass} mt-5`}
+              />
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <p className={`text-sm ${voicePageMuted}`}>This stays editable after generation.</p>
+                <VoiceButton variant="ghost" onClick={generateCampaignSetup} disabled={!String(form.aiPrompt || '').trim()}>
+                  <Sparkles className="h-4 w-4" /> Generate setup
+                </VoiceButton>
+              </div>
+            </div>
+          )}
+
+          {mode === 'template' && (
+            <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-bold">Campaign templates</h2>
+                  <p className={`mt-1 text-sm ${voicePageMuted}`}>Start from a reusable outbound pattern.</p>
+                </div>
+                <FileText className="h-5 w-5 text-zinc-500" />
+              </div>
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                {templates.map((template) => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => applyTemplate(template)}
+                    className={`rounded-xl border p-4 text-left transition ${form.selectedTemplate === template.id ? 'border-cyan-500 bg-cyan-500/10' : 'border-zinc-200 bg-white hover:bg-[#0000170b] dark:border-[#343434] dark:bg-[#181818] dark:hover:bg-[#242424]'}`}
+                  >
+                    <p className="font-semibold">{template.name}</p>
+                    <p className={`mt-2 text-sm leading-5 ${voicePageMuted}`}>{template.description}</p>
+                    <p className="mt-4 text-xs font-semibold text-cyan-600 dark:text-cyan-300">{template.concurrency} concurrent calls</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold">Campaign setup</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>Name the campaign, choose the agent, then attach leads.</p>
+              </div>
+              <Badge className={`${previewState === 'running' ? 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300'}`}>
+                {previewState === 'running' ? 'Preview running' : 'Draft'}
+              </Badge>
+            </div>
+            <div className="mt-7 grid gap-5 md:grid-cols-2">
+              <VoiceField label="Campaign name" help="Shown in reports, runs, and lead queues.">
+                <Input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="e.g. June demo follow-up" className={inputClass} />
+              </VoiceField>
+              <VoiceField label="Voice agent" help="The workflow used for every call.">
+                <NativeSelect value={form.agentId} onChange={(value) => setForm({ ...form, agentId: value })} className="w-full">
+                  <option value="">Select an agent</option>
+                  {agents.map((agent) => <option key={agent.id} value={agent.id}>{agent.name}</option>)}
+                </NativeSelect>
+              </VoiceField>
+              <VoiceField label="Telephony" help="Caller ID and outbound provider.">
+                {telephony.length === 0 ? (
+                  <div className={`rounded-lg border border-dashed border-zinc-300 px-4 py-3 text-sm dark:border-[#333] ${voicePageMuted}`}>
+                    No telephony configuration yet. Add one in Telephony to start calling.
+                  </div>
+                ) : (
+                  <NativeSelect value={form.telephonyConfigId} onChange={(value) => setForm({ ...form, telephonyConfigId: value })} className="w-full">
+                    <option value="">Default telephony configuration</option>
+                    {telephony.map((config) => <option key={config.id} value={config.id}>{config.name}</option>)}
+                  </NativeSelect>
+                )}
+              </VoiceField>
+              <VoiceField label="Lead source" help="CSV is active now; contacts and manual lists are prepared.">
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    ['csv', 'CSV'],
+                    ['manual', 'Manual'],
+                    ['contacts', 'Contacts'],
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setForm({ ...form, sourceType: value })}
+                      className={`rounded-lg border px-3 py-2 text-sm font-semibold transition ${form.sourceType === value ? 'border-[hsl(240_1.7%_11.2%)] bg-[hsl(240_1.7%_11.2%)] text-white dark:border-white dark:bg-white dark:text-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:bg-[#0000170b] dark:border-[#343434] dark:bg-[#181818] dark:text-zinc-300'}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </VoiceField>
+            </div>
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold">Lead source</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>Load the people this campaign should call.</p>
+              </div>
+              <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(event) => handleCsvFile(event.target.files?.[0])} />
+              {form.sourceType === 'csv' && <VoiceButton variant="ghost" onClick={() => fileInputRef.current?.click()}><Upload className="h-4 w-4" /> Upload CSV</VoiceButton>}
+            </div>
+            <div className={`mt-5 rounded-xl p-5 ${voiceSoftPanelClass}`}>
+              {form.sourceType === 'manual' ? (
+                <div>
+                  <Textarea
+                    value={form.manualLeadText}
+                    onChange={(event) => setForm({ ...form, manualLeadText: event.target.value })}
+                    rows={6}
+                    placeholder="+31600000001, Sophie, Requested demo&#10;+31600000002, Daan, Asked about pricing"
+                    className={inputClass}
+                  />
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <p className={`text-sm ${voicePageMuted}`}>One lead per line: phone, name, context.</p>
+                    <VoiceButton variant="ghost" onClick={loadManualLeads}>Load manual leads</VoiceButton>
+                  </div>
+                </div>
+              ) : form.sourceType === 'contacts' ? (
+                <div className="grid gap-3 md:grid-cols-3">
+                  {['Hot leads', 'Demo requested', 'No reply 7d'].map((segment) => (
+                    <button
+                      key={segment}
+                      type="button"
+                      onClick={() => selectContactSegment(segment)}
+                      className={`rounded-xl border p-4 text-left transition ${form.contactSegment === segment ? 'border-cyan-500 bg-cyan-500/10' : 'border-zinc-200 bg-white hover:bg-[#0000170b] dark:border-[#343434] dark:bg-[#181818] dark:hover:bg-[#242424]'}`}
+                    >
+                      <Users className="mb-4 h-5 w-5" />
+                      <p className="font-semibold">{segment}</p>
+                      <p className={`mt-2 text-sm ${voicePageMuted}`}>Load a contact segment preview.</p>
+                    </button>
+                  ))}
+                </div>
+              ) : form.leadRows?.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{form.leadFileName || 'Uploaded CSV'}</p>
+                      <p className={`text-sm ${voicePageMuted}`}>{form.leadRows.length} leads ready to queue</p>
+                    </div>
+                    <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">Valid import</Badge>
+                  </div>
+                  <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-[#303030]">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-[#0000170b] text-zinc-500 dark:bg-[#202020]">
+                        <tr>
+                          {Object.keys(form.leadRows[0] || {}).slice(0, 4).map((key) => <th key={key} className="px-3 py-2 font-semibold">{key}</th>)}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {form.leadRows.slice(0, 3).map((row: Record<string, string>, index: number) => (
+                          <tr key={index} className="border-t border-zinc-200 dark:border-[#303030]">
+                            {Object.keys(form.leadRows[0] || {}).slice(0, 4).map((key) => <td key={key} className="px-3 py-2">{row[key] || '-'}</td>)}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex min-h-[176px] w-full flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 text-center transition hover:bg-[#0000170b] dark:border-[#3a3a3a] dark:hover:bg-[#242424]"
+                >
+                  <Upload className={`mb-4 h-8 w-8 ${voicePageMuted}`} />
+                  <span className="font-semibold">Drop or choose your leads CSV</span>
+                  <span className={`mt-2 text-sm ${voicePageMuted}`}>phone_number, first_name, company, context</span>
+                </button>
+              )}
+              {!form.leadRows?.length && form.sourceType === 'csv' && (
+                <div className="mt-4 flex justify-center">
+                  <VoiceButton variant="ghost" onClick={loadSampleLeads}>
+                    <Sparkles className="h-4 w-4" />
+                    Load sample leads
+                  </VoiceButton>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <button type="button" onClick={() => setAdvancedOpen(!advancedOpen)} className="flex w-full items-center justify-between text-left">
+              <div>
+                <h2 className="text-xl font-bold">Advanced settings</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>Concurrency, retry policy, and call windows.</p>
+              </div>
+              <ChevronDown className={`h-5 w-5 transition ${advancedOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {advancedOpen && (
+              <div className="mt-6 grid gap-5 md:grid-cols-3">
+                <VoiceField label="Concurrency">
+                  <Input value={form.maxConcurrency} type="number" min={1} max={25} onChange={(event) => setForm({ ...form, maxConcurrency: Number(event.target.value || 1) })} className={inputClass} />
+                </VoiceField>
+                <VoiceField label="Retry attempts">
+                  <Input value={form.retryCount || 2} type="number" min={0} max={10} onChange={(event) => setForm({ ...form, retryCount: Number(event.target.value || 0) })} className={inputClass} />
+                </VoiceField>
+                <VoiceField label="Call window">
+                  <NativeSelect value={form.callWindow || 'business'} onChange={(value) => setForm({ ...form, callWindow: value })} className="w-full">
+                    <option value="business">Business hours</option>
+                    <option value="evening">Evening follow-up</option>
+                    <option value="custom">Custom</option>
+                  </NativeSelect>
+                </VoiceField>
+              </div>
+            )}
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold">Launch preview</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>Simulate the queue before creating the campaign.</p>
+              </div>
+              <div className="flex gap-2">
+                <VoiceButton variant="ghost" onClick={() => setPreviewState(previewState === 'running' ? 'paused' : 'running')} disabled={!leadCount}>
+                  {previewState === 'running' ? <RefreshCw className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  {previewState === 'running' ? 'Pause preview' : 'Run preview'}
+                </VoiceButton>
+                <VoiceButton variant="ghost" onClick={() => setPreviewState('idle')} disabled={previewState === 'idle'}>
+                  Reset
+                </VoiceButton>
+              </div>
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <CampaignStat label="Queued" value={queueStats.queued} />
+              <CampaignStat label="Active calls" value={queueStats.active} />
+              <CampaignStat label="Completed" value={queueStats.completed} />
+            </div>
+            <div className="mt-6">
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className={voicePageMuted}>Batch progress</span>
+                <span className="font-semibold">{queueProgress}%</span>
+              </div>
+              <div className="h-3 overflow-hidden rounded-full bg-zinc-200 dark:bg-[#303030]">
+                <div className="h-full rounded-full bg-cyan-500 transition-all duration-500" style={{ width: `${queueProgress}%` }} />
+              </div>
+            </div>
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
+              {[
+                ['Agent', activeAgent?.name || 'Select an agent'],
+                ['Provider', activeTelephony?.name || 'Default telephony'],
+                ['Retry policy', `${form.retryCount || 2} retries · ${form.callWindow || 'business'} window`],
+                ['Lead source', form.leadFileName || form.sourceType || 'CSV'],
+              ].map(([label, value]) => (
+                <div key={label} className={`rounded-xl p-4 ${voiceSoftPanelClass}`}>
+                  <p className={`text-xs font-semibold uppercase tracking-wide ${voicePageMuted}`}>{label}</p>
+                  <p className="mt-2 truncate font-semibold">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
-    </CenteredPage>
+
+        <aside className="space-y-6">
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="font-bold">Campaign cockpit</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>A quick operational view before launch.</p>
+              </div>
+              <Radio className="h-5 w-5 text-cyan-500" />
+            </div>
+            <div className="mt-5 space-y-3">
+              {[
+                ['Prepare audience', leadCount ? 'done' : 'waiting'],
+                ['Reserve credits', leadCount && activeAgent ? 'ready' : 'waiting'],
+                ['Dial batch', previewState],
+                ['Report outcome', previewState === 'running' ? 'streaming' : 'idle'],
+              ].map(([label, status], index) => (
+                <div key={label} className="flex items-center gap-3">
+                  <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${status === 'done' || status === 'ready' || status === 'streaming' ? 'bg-emerald-500 text-white' : status === 'running' ? 'bg-cyan-500 text-white' : 'bg-zinc-200 text-zinc-500 dark:bg-[#303030]'}`}>
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold">{label}</p>
+                    <p className={`text-xs capitalize ${voicePageMuted}`}>{status}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <h2 className="font-bold">Campaign readiness</h2>
+            <div className="mt-5 space-y-3">
+              <ReadinessRow done={Boolean(form.name.trim())} label="Campaign named" />
+              <ReadinessRow done={Boolean(form.agentId || agents[0]?.id)} label="Agent selected" />
+              <ReadinessRow done={telephony.length > 0} label="Telephony connected" />
+              <ReadinessRow done={form.leadRows?.length > 0} label="Leads uploaded" />
+            </div>
+            <VoiceButton aria-label="Create campaign from readiness" onClick={onCreate} disabled={busy || !form.name.trim() || !agents.length} className="mt-6 w-full justify-center">
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+              Create campaign
+            </VoiceButton>
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <h2 className="font-bold">Existing campaigns</h2>
+            {campaigns.length === 0 ? (
+              <p className={`mt-4 text-sm leading-6 ${voicePageMuted}`}>No campaigns yet. Your first campaign will appear here with progress, retries, and reports.</p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {campaigns.slice(0, 4).map((campaign) => (
+                  <div
+                    key={campaign.id}
+                    className={`w-full rounded-xl p-4 text-left transition ${selectedCampaignId === campaign.id ? 'border border-cyan-500 bg-cyan-500/10' : voiceSoftPanelClass}`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCampaignId(campaign.id)}
+                      className="w-full rounded-lg text-left outline-none transition hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-cyan-500 dark:hover:bg-white/[0.04]"
+                      aria-label={`Select campaign ${campaign.name}`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-semibold">{campaign.name}</p>
+                        <Badge variant="outline" className="border-zinc-200 text-zinc-600 dark:border-[#343434] dark:text-zinc-300">{campaign.status || 'draft'}</Badge>
+                      </div>
+                      <p className={`mt-2 text-sm ${voicePageMuted}`}>{campaign.totalLeads || 0} leads · concurrency {campaign.maxConcurrency || 1}</p>
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-[#303030]">
+                        <div className="h-full rounded-full bg-cyan-500" style={{ width: `${Math.min(Number(campaign.completedLeads || campaign.totalLeads || 0) / Math.max(Number(campaign.totalLeads || 1), 1) * 100, 100)}%` }} />
+                      </div>
+                    </button>
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <span className={`text-xs ${voicePageMuted}`}>Updated {formatDate(campaign.updatedAt || campaign.createdAt)}</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          runCampaignAction(campaign, nextCampaignAction(campaign));
+                        }}
+                        className="inline-flex h-8 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 text-xs font-bold text-[hsl(240_1.7%_11.2%)] transition hover:bg-[#0000170b] dark:border-[#343434] dark:bg-[#181818] dark:text-white dark:hover:bg-[#242424]"
+                        aria-label={`${nextCampaignAction(campaign)} ${campaign.name}`}
+                      >
+                        {campaignActionBusy === campaign.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+                        {nextCampaignAction(campaign)}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {campaignActionStatus && (
+              <p className={`mt-4 rounded-xl px-3 py-2 text-sm ${campaignActionStatus.toLowerCase().includes('could not') || campaignActionStatus.toLowerCase().includes('failed') ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>
+                {campaignActionStatus}
+              </p>
+            )}
+          </div>
+
+          {selectedCampaign && (
+            <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="font-bold">Selected campaign</h2>
+                  <p className={`mt-1 text-sm ${voicePageMuted}`}>{selectedCampaign.name}</p>
+                </div>
+                <Badge className="bg-cyan-500/15 text-cyan-700 dark:text-cyan-300">{selectedCampaign.status || 'draft'}</Badge>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <CampaignStat label="Leads" value={Number(selectedCampaign.totalLeads || 0)} />
+                <CampaignStat label="Completed" value={Number(selectedCampaign.completedLeads || 0)} />
+              </div>
+              <div className="mt-5 flex gap-2">
+                {(['start', 'pause', 'resume'] as const).map((action) => (
+                  <button
+                    key={action}
+                    type="button"
+                    onClick={() => runCampaignAction(selectedCampaign, action)}
+                    disabled={campaignActionBusy === selectedCampaign.id}
+                    className={`h-9 flex-1 rounded-lg text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                      nextCampaignAction(selectedCampaign) === action
+                        ? 'bg-[hsl(240_1.7%_11.2%)] text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950'
+                        : 'border border-zinc-200 bg-white text-[hsl(240_1.7%_11.2%)] hover:bg-[#0000170b] dark:border-[#343434] dark:bg-[#181818] dark:text-white'
+                    }`}
+                  >
+                    {campaignActionBusy === selectedCampaign.id && nextCampaignAction(selectedCampaign) === action ? 'Working...' : action}
+                  </button>
+                ))}
+              </div>
+              <p className={`mt-4 text-xs leading-5 ${voicePageMuted}`}>These controls call the native campaign runner endpoints, so the status updates in the same data layer used by reports and runs.</p>
+            </div>
+          )}
+        </aside>
+      </div>
+    </SectionPage>
   );
 }
 
 function ModelsView({ models, modelTab, setModelTab, form, setForm, busy, onSave }: any) {
   const tabs = ['llm', 'voice', 'transcriber', 'embedding'] as const;
+  const { data: voiceCatalog } = useSWR('/api/voice/voices', fetcher);
+  const providers = voiceCatalog?.providers?.[modelTab === 'voice' ? 'tts' : modelTab === 'transcriber' ? 'stt' : 'llm'] || [];
+  const displayedVoices = voiceCatalog?.voices?.length ? voiceCatalog.voices : fallbackVoices();
+  const [customModel, setCustomModel] = useState(false);
+  const [apiKeySlots, setApiKeySlots] = useState<Array<{ id: string; value: string }>>([{ id: 'primary', value: form.apiKey || '' }]);
+  const [selectedVoice, setSelectedVoice] = useState('kyrn-hope');
+  const [previewVoice, setPreviewVoice] = useState('');
+  const [testStatus, setTestStatus] = useState('');
+  const [selectedPreset, setSelectedPreset] = useState('fast');
+  const [connectionCheck, setConnectionCheck] = useState<'idle' | 'checking' | 'ok'>('idle');
+  const modelOptions = modelOptionsForProvider(form.provider, modelTab);
+  const recommendedStacks = modelTab === 'voice'
+    ? [
+        { id: 'quality', title: 'Premium voice', text: 'ElevenLabs for polished sales and support calls.', provider: 'elevenlabs', model: 'eleven_flash_v2_5' },
+        { id: 'multilingual', title: 'Multilingual voice', text: 'MiniMax for expressive multilingual campaigns.', provider: 'minimax', model: 'speech-02-hd' },
+        { id: 'clone', title: 'Voice clone', text: 'Chatterbox/Resemble style clone previews.', provider: 'chatterbox', model: 'chatterbox-tts' },
+      ]
+    : [
+        { id: 'fast', title: 'Fast realtime', text: 'Qwen realtime or OpenAI realtime for low-latency calls.', provider: modelTab === 'embedding' ? 'openai' : 'qwen', model: modelTab === 'embedding' ? 'text-embedding-3-small' : 'qwen3-30b-a3b' },
+        { id: 'sales', title: 'Sales quality', text: 'MiniMax or OpenAI for richer reasoning and tool use.', provider: 'minimax', model: modelTab === 'transcriber' ? 'speech-01' : 'abab6.5s-chat' },
+        { id: 'experimental', title: 'Experimental', text: 'Xiaomi MiMo slot for upcoming provider tests.', provider: 'xiaomi-mimo', model: 'mimo-vl-7b' },
+      ];
+
+  function selectProvider(providerId: string) {
+    const firstModel = modelOptionsForProvider(providerId, modelTab)[0] || 'default';
+    setForm({ ...form, provider: providerId, model: firstModel });
+    setTestStatus(`${providerId} selected for ${modelTab}`);
+  }
+
+  function updateApiKeySlot(index: number, value: string) {
+    setApiKeySlots((slots) =>
+      slots.map((slot, slotIndex) => (slotIndex === index ? { ...slot, value } : slot))
+    );
+    if (index === 0) {
+      setForm({ ...form, apiKey: value });
+    }
+  }
+
+  function addApiKeySlot() {
+    setApiKeySlots((slots) => [...slots, { id: `key-${Date.now().toString(36)}`, value: '' }]);
+    setTestStatus('Extra API key slot added');
+  }
+
+  function removeApiKeySlot(index: number) {
+    setApiKeySlots((slots) => slots.filter((_, slotIndex) => slotIndex !== index));
+    setTestStatus('Extra API key slot removed');
+  }
+
+  function chooseVoice(voice: any) {
+    setSelectedVoice(voice.id);
+    setPreviewVoice('');
+    setForm({
+      ...form,
+      provider: voice.provider || form.provider,
+      model: voice.model || voice.id,
+    });
+    setTestStatus(`${voice.name} selected as primary voice`);
+  }
+
+  function previewVoiceSample(voice: any) {
+    setPreviewVoice(voice.id);
+    setTestStatus(`Playing preview for ${voice.name}`);
+  }
+
+  function applyRecommendedStack(stack: (typeof recommendedStacks)[number]) {
+    setSelectedPreset(stack.id);
+    setConnectionCheck('idle');
+    setForm({
+      ...form,
+      provider: stack.provider,
+      model: stack.model,
+      realtime: stack.id === 'fast' || stack.provider === 'qwen',
+    });
+    setTestStatus(`${stack.title} applied: ${stack.provider} · ${stack.model}`);
+  }
+
+  function runConnectionCheck() {
+    setConnectionCheck('checking');
+    window.setTimeout(() => {
+      setConnectionCheck('ok');
+      setTestStatus(`${form.provider || 'Provider'} connection profile is ready for saving`);
+    }, 650);
+  }
+
   return (
-    <CenteredPage>
-      <div className="w-full max-w-[672px]">
-        <h1 className="text-3xl font-bold">AI Models Configuration</h1>
-        <p className={`mt-2 ${voicePageMuted}`}>Configure your AI model, voice, and transcription services. <span className="underline">Learn more</span></p>
-        <div className={`mt-7 rounded-lg p-4 ${voicePanelClass}`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold">Realtime Mode</h2>
-              <p className={`text-xs ${voicePageMuted}`}>Uses a single speech-to-speech model. An LLM is still required for extraction and QA.</p>
+    <SectionPage
+      title="Models"
+      description="Configure LLM, voice, transcription and embedding providers for your agents."
+      action={<VoiceButton onClick={onSave} disabled={busy}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save configuration</VoiceButton>}
+    >
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="space-y-6">
+          <div className={`rounded-2xl p-4 ${voicePanelClass}`}>
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+              {tabs.map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setModelTab(tab)}
+                  className={`rounded-xl px-4 py-3 text-sm font-semibold capitalize transition ${modelTab === tab ? 'bg-[hsl(240_1.7%_11.2%)] text-white dark:bg-white dark:text-zinc-950' : 'text-zinc-500 hover:bg-[#0000170b] dark:text-zinc-400 dark:hover:bg-[#242424]'}`}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
-            <Toggle checked={form.realtime} onChange={() => setForm({ ...form, realtime: !form.realtime })} />
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <div className="flex items-center justify-between gap-6">
+              <div>
+                <h2 className="text-xl font-bold">Realtime mode</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>Use a speech-to-speech model where available, with LLM fallback for tools and QA.</p>
+              </div>
+              <Toggle checked={form.realtime} onChange={() => setForm({ ...form, realtime: !form.realtime })} />
+            </div>
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold">Provider</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>Choose the service Kyrn should use for {modelTab}.</p>
+              </div>
+              <Badge variant="outline" className="border-zinc-200 text-zinc-600 dark:border-[#343434] dark:text-zinc-300">{providers.length || 4} available</Badge>
+            </div>
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              {(providers.length ? providers : fallbackProvidersForTab(modelTab)).map((provider: any) => (
+                <button
+                  key={provider.id}
+                  type="button"
+                  onClick={() => selectProvider(provider.id)}
+                  className={`rounded-xl border p-4 text-left transition ${form.provider === provider.id ? 'border-[hsl(240_1.7%_11.2%)] bg-[#0000170b] dark:border-white dark:bg-white/10' : 'border-zinc-200 bg-white hover:bg-[#0000170b] dark:border-[#343434] dark:bg-[#181818] dark:hover:bg-[#242424]'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <ProviderMark provider={provider.id} />
+                    <div className="min-w-0">
+                      <p className="font-semibold">{provider.name}</p>
+                      <p className={`mt-1 truncate text-xs ${voicePageMuted}`}>{provider.description || providerCapability(provider.id, modelTab)}</p>
+                    </div>
+                    {form.provider === provider.id && <CheckCircle2 className="ml-auto h-4 w-4 text-emerald-500" />}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <div className="grid gap-5 md:grid-cols-2">
+              <VoiceField label="Model">
+                {customModel ? (
+                  <Input value={form.model} onChange={(event) => setForm({ ...form, model: event.target.value })} placeholder="Enter custom model name" className={inputClass} />
+                ) : (
+                  <NativeSelect value={form.model} onChange={(value) => setForm({ ...form, model: value })} className="w-full">
+                    {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
+                  </NativeSelect>
+                )}
+                <label className={`mt-3 flex cursor-pointer items-center gap-2 text-sm ${voicePageMuted}`}>
+                  <input type="checkbox" checked={customModel} onChange={() => setCustomModel(!customModel)} className="accent-cyan-500" />
+                  Enter custom value
+                </label>
+              </VoiceField>
+              <VoiceField label="Default usage">
+                <div className={`rounded-xl p-4 ${voiceSoftPanelClass}`}>
+                  <p className="font-semibold">{modelTab === 'voice' ? 'Primary voice stack' : `Primary ${modelTab} stack`}</p>
+                  <p className={`mt-2 text-sm ${voicePageMuted}`}>New agents will use this config unless overridden.</p>
+                </div>
+              </VoiceField>
+            </div>
+
+            <div className="mt-6">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <p className="font-semibold">API keys</p>
+                  <p className={`text-sm ${voicePageMuted}`}>Keys are masked and stored against your team configuration.</p>
+                </div>
+                <VoiceButton variant="ghost" onClick={addApiKeySlot}><Plus className="h-4 w-4" /> Add key</VoiceButton>
+              </div>
+              <div className="space-y-3">
+                {apiKeySlots.map((slot, index) => (
+                  <div key={slot.id} className="flex gap-2">
+                    <Input
+                      value={index === 0 ? form.apiKey : slot.value}
+                      onChange={(event) => updateApiKeySlot(index, event.target.value)}
+                      placeholder={index === 0 ? 'sk-...' : 'Additional masked key slot'}
+                      type="password"
+                      className={inputClass}
+                    />
+                    {index > 0 && (
+                      <VoiceButton
+                        variant="ghost"
+                        onClick={() => removeApiKeySlot(index)}
+                        aria-label="Remove API key slot"
+                        className="px-3"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </VoiceButton>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {testStatus && (
+                <div className="mt-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-700 dark:text-cyan-200">
+                  {testStatus}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-        <div className={`mt-4 rounded-lg p-6 ${voicePanelClass}`}>
-          <div className="grid grid-cols-4 rounded-lg bg-[#0000170b] p-1 dark:bg-[#262626]">
-            {tabs.map((tab) => (
-              <button key={tab} onClick={() => setModelTab(tab)} className={`rounded-md px-3 py-2 text-sm font-semibold capitalize ${modelTab === tab ? 'bg-white text-[hsl(240_1.7%_11.2%)] shadow-sm dark:bg-[#353535] dark:text-white' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                {tab}
-              </button>
-            ))}
+
+        <aside className="space-y-6">
+          {modelTab === 'voice' ? (
+            <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+              <h2 className="font-bold">Voice library</h2>
+              <p className={`mt-1 text-sm ${voicePageMuted}`}>Preview and choose the primary agent voice.</p>
+              <div className="mt-5 space-y-3">
+                {displayedVoices.map((voice: any) => (
+                  <button
+                    key={voice.id}
+                    type="button"
+                    onClick={() => chooseVoice(voice)}
+                    className={`w-full rounded-xl border p-4 text-left transition ${selectedVoice === voice.id ? 'border-cyan-500 bg-cyan-500/10' : 'border-zinc-200 hover:bg-[#0000170b] dark:border-[#343434] dark:hover:bg-[#242424]'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-[conic-gradient(from_90deg,#0b5fff,#66e4d5,#e8fbff,#0b5fff)]" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold">{voice.name}</p>
+                        <p className={`text-xs ${voicePageMuted}`}>{voice.provider} · {voice.style}</p>
+                      </div>
+                      {selectedVoice === voice.id && <Badge className="bg-cyan-500/15 text-cyan-700 dark:text-cyan-300">Primary</Badge>}
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          previewVoiceSample(voice);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            previewVoiceSample(voice);
+                          }
+                        }}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-700 transition hover:bg-[#0000170b] dark:border-[#343434] dark:bg-[#181818] dark:text-zinc-200 dark:hover:bg-[#242424]"
+                        aria-label={`Preview ${voice.name}`}
+                      >
+                        <Play className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <div className={`mt-4 h-7 rounded-full ${previewVoice === voice.id ? 'animate-pulse bg-[repeating-linear-gradient(90deg,rgba(20,184,166,.85)_0_5px,transparent_5px_11px)]' : 'bg-[repeating-linear-gradient(90deg,rgba(20,184,166,.35)_0_4px,transparent_4px_10px)]'}`} />
+                    {previewVoice === voice.id && <p className="mt-3 text-xs font-semibold text-cyan-600 dark:text-cyan-300">Preview playing</p>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+              <h2 className="font-bold">Recommended stack</h2>
+              <div className="mt-5 space-y-3">
+                {recommendedStacks.map((stack) => (
+                  <button
+                    key={stack.id}
+                    type="button"
+                    onClick={() => applyRecommendedStack(stack)}
+                    className={`w-full rounded-xl p-4 text-left transition ${selectedPreset === stack.id ? 'border border-cyan-500 bg-cyan-500/10' : voiceSoftPanelClass}`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-semibold">{stack.title}</p>
+                      {selectedPreset === stack.id && <CheckCircle2 className="h-4 w-4 text-cyan-500" />}
+                    </div>
+                    <p className={`mt-2 text-sm leading-5 ${voicePageMuted}`}>{stack.text}</p>
+                    <p className="mt-3 text-xs font-semibold text-cyan-600 dark:text-cyan-300">{stack.provider} · {stack.model}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <h2 className="font-bold">Connection check</h2>
+            <p className={`mt-1 text-sm ${voicePageMuted}`}>Validate the visible stack before saving it for agents.</p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className={`rounded-xl p-4 ${voiceSoftPanelClass}`}>
+                <p className={`text-xs font-semibold uppercase tracking-wide ${voicePageMuted}`}>Provider</p>
+                <p className="mt-2 truncate font-semibold">{form.provider || 'Not selected'}</p>
+              </div>
+              <div className={`rounded-xl p-4 ${voiceSoftPanelClass}`}>
+                <p className={`text-xs font-semibold uppercase tracking-wide ${voicePageMuted}`}>Model</p>
+                <p className="mt-2 truncate font-semibold">{form.model || 'Default'}</p>
+              </div>
+            </div>
+            <VoiceButton variant="ghost" onClick={runConnectionCheck} className="mt-5 w-full justify-center">
+              {connectionCheck === 'checking' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+              {connectionCheck === 'ok' ? 'Profile ready' : connectionCheck === 'checking' ? 'Checking...' : 'Run check'}
+            </VoiceButton>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <VoiceField label="Provider">
-              <NativeSelect value={form.provider} onChange={(value) => setForm({ ...form, provider: value })}>
-                <option value="openai">OpenAI</option>
-                <option value="dograh">Dograh</option>
-                <option value="google">Google</option>
-                <option value="elevenlabs">ElevenLabs</option>
-              </NativeSelect>
-            </VoiceField>
-            <VoiceField label="Model">
-              <NativeSelect value={form.model} onChange={(value) => setForm({ ...form, model: value })}>
-                <option value="gpt-4o-mini">gpt-4o-mini</option>
-                <option value="gpt-4o-realtime-preview">gpt-4o-realtime-preview</option>
-                <option value="default">default</option>
-              </NativeSelect>
-              <label className="mt-3 flex items-center gap-2 text-sm text-zinc-300">
-                <input type="checkbox" className="accent-cyan-500" /> Enter Custom Value
-              </label>
-            </VoiceField>
-          </div>
-          <VoiceField label="API Key(s)" className="mt-6">
-            <Input value={form.apiKey} onChange={(event) => setForm({ ...form, apiKey: event.target.value })} placeholder="sk-..." type="password" className={inputClass} />
-            <VoiceButton variant="ghost" className="mt-2"><Plus className="h-4 w-4" /> Add API Key</VoiceButton>
-          </VoiceField>
-        </div>
-        <VoiceButton onClick={onSave} disabled={busy} className="mt-6 w-full justify-center">Save Configuration</VoiceButton>
-        {models.length > 0 && <p className="mt-4 text-sm text-zinc-500">{models.length} saved model configuration{models.length === 1 ? '' : 's'}.</p>}
+
+          <Panel title="Saved configurations" subtitle="Reusable model stacks for this team">
+            {models.length === 0 ? (
+              <p className={`text-sm leading-6 ${voicePageMuted}`}>No saved model configs yet. Save this setup to make it available for agents.</p>
+            ) : (
+              <RecordList rows={models.slice(0, 4)} detail={(row) => `${row.llmProvider || row.ttsProvider || 'provider'} · ${row.llmModel || row.ttsModel || 'default'}`} />
+            )}
+          </Panel>
+        </aside>
       </div>
-    </CenteredPage>
+    </SectionPage>
   );
 }
 
-function TelephonyView({ telephony, onAdd }: { telephony: any[]; onAdd: () => void }) {
+function TelephonyView({ telephony, onAdd }: { telephony: any[]; onAdd: (provider?: string) => void }) {
+  const [selectedProvider, setSelectedProvider] = useState('twilio');
+  const [selectedConfigId, setSelectedConfigId] = useState<string | number>(telephony[0]?.id || 'new');
+  const [routedNumbers, setRoutedNumbers] = useState<Record<string, string>>({});
+  const [lastTestedNumber, setLastTestedNumber] = useState('');
+  const [telephonyCheck, setTelephonyCheck] = useState('');
+  const [copiedWebhook, setCopiedWebhook] = useState(false);
+  const selectedConfig = telephony.find((config) => config.id === selectedConfigId);
+  const providers = [
+    { id: 'twilio', name: 'Twilio', text: 'Production-ready inbound and outbound calls', icon: Phone },
+    { id: 'sip', name: 'LiveKit SIP', text: 'Recommended for realtime runtime routing', icon: Radio },
+    { id: 'asterisk_ari', name: 'Asterisk ARI', text: 'Self-hosted PBX connection', icon: Cable },
+  ];
+
+  useEffect(() => {
+    if (selectedConfigId !== 'new' || !telephony.length) return;
+    setSelectedConfigId(telephony[0].id);
+    setSelectedProvider(telephony[0].provider || 'twilio');
+  }, [selectedConfigId, telephony]);
+
   return (
     <SectionPage
-      title="Telephony configurations"
-      description="Connect one or more telephony provider accounts. Each phone number can route inbound calls to one agent."
-      action={<VoiceButton onClick={onAdd}><Plus className="h-4 w-4" /> Add configuration</VoiceButton>}
+      title="Telephony"
+      description="Connect call providers, assign phone numbers, and route inbound traffic to the right voice agent."
+      action={<VoiceButton onClick={() => onAdd(selectedProvider)}><Plus className="h-4 w-4" /> Add configuration</VoiceButton>}
     >
-      <Panel>
-        {telephony.length === 0 ? (
-          <EmptyBlock title="No telephony configurations yet" description="Add one to enable outbound calls and receive inbound calls." action={<VoiceButton onClick={onAdd}><Plus className="h-4 w-4" /> Add configuration</VoiceButton>} />
-        ) : (
-          <RecordList rows={telephony} detail={(row) => `${row.provider || 'twilio'} provider ${row.isDefaultOutbound ? 'default outbound' : ''}`} />
-        )}
-      </Panel>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="space-y-6">
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold">Providers</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>Choose a provider to configure or review routing status.</p>
+              </div>
+              <Badge className="bg-cyan-500/15 text-cyan-700 dark:text-cyan-300">Runtime ready</Badge>
+            </div>
+            <div className="mt-6 grid gap-3 md:grid-cols-3">
+              {providers.map((provider) => {
+                const Icon = provider.icon;
+                return (
+                  <button
+                    key={provider.id}
+                    type="button"
+                    onClick={() => setSelectedProvider(provider.id)}
+                    className={`rounded-xl border p-4 text-left transition ${selectedProvider === provider.id ? 'border-[hsl(240_1.7%_11.2%)] bg-[#0000170b] dark:border-white dark:bg-white/10' : 'border-zinc-200 bg-white hover:bg-[#0000170b] dark:border-[#343434] dark:bg-[#181818] dark:hover:bg-[#242424]'}`}
+                  >
+                    <Icon className="mb-5 h-5 w-5" />
+                    <p className="font-semibold">{provider.name}</p>
+                    <p className={`mt-2 text-sm leading-5 ${voicePageMuted}`}>{provider.text}</p>
+                    <span className="mt-5 inline-flex text-xs font-semibold text-cyan-600 dark:text-cyan-300">
+                      {selectedProvider === provider.id ? 'Selected' : 'Select'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-5 flex justify-end">
+              <VoiceButton variant="ghost" onClick={() => onAdd(selectedProvider)}>
+                <Plus className="h-4 w-4" /> Configure {providers.find((provider) => provider.id === selectedProvider)?.name}
+              </VoiceButton>
+            </div>
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold">Configurations</h2>
+                <p className={`mt-1 text-sm ${voicePageMuted}`}>Provider accounts available for test calls and campaigns.</p>
+              </div>
+              <VoiceButton variant="ghost" onClick={() => onAdd(selectedProvider)}><Plus className="h-4 w-4" /> New config</VoiceButton>
+            </div>
+            {telephony.length === 0 ? (
+              <div className={`mt-6 rounded-xl p-6 ${voiceSoftPanelClass}`}>
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-300">
+                    <Phone className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">No telephony configurations yet</p>
+                    <p className={`mt-2 text-sm leading-6 ${voicePageMuted}`}>Add Twilio or LiveKit SIP settings to enable browser calls, inbound numbers, outbound tests and campaign dialing.</p>
+                    <VoiceButton onClick={() => onAdd(selectedProvider)} className="mt-5"><Plus className="h-4 w-4" /> Add configuration</VoiceButton>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 grid gap-3">
+                {telephony.map((config) => (
+                  <button
+                    key={config.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedConfigId(config.id);
+                      setSelectedProvider(config.provider || 'twilio');
+                      setTelephonyCheck('');
+                    }}
+                    className={`w-full rounded-xl p-4 text-left transition ${selectedConfigId === config.id ? 'border border-cyan-500 bg-cyan-500/10' : voiceSoftPanelClass}`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold">{config.name}</p>
+                        <p className={`mt-1 text-sm ${voicePageMuted}`}>{config.provider || 'twilio'} · {config.isDefaultOutbound ? 'default outbound' : 'manual selection'}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {selectedConfigId === config.id && <CheckCircle2 className="h-4 w-4 text-cyan-500" />}
+                        <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">Connected</Badge>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <aside className="space-y-6">
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <h2 className="font-bold">Selected setup</h2>
+            <p className={`mt-1 text-sm ${voicePageMuted}`}>{selectedConfig ? 'Inspect this provider before routing live calls.' : 'Select a provider card or create a configuration.'}</p>
+            <div className={`mt-5 rounded-xl p-4 ${voiceSoftPanelClass}`}>
+              <p className={`text-xs font-semibold uppercase tracking-wide ${voicePageMuted}`}>Provider</p>
+              <p className="mt-2 font-semibold">{selectedConfig?.name || providers.find((provider) => provider.id === selectedProvider)?.name || 'New configuration'}</p>
+              <p className={`mt-1 text-sm ${voicePageMuted}`}>{selectedConfig?.provider || selectedProvider} · {selectedConfig?.isDefaultOutbound ? 'default outbound' : 'ready to configure'}</p>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <VoiceButton
+                variant="ghost"
+                onClick={() => setTelephonyCheck(`Inbound route checked for ${selectedConfig?.name || selectedProvider}`)}
+                className="justify-center"
+              >
+                <Phone className="h-4 w-4" /> Test inbound
+              </VoiceButton>
+              <VoiceButton
+                variant="ghost"
+                onClick={() => {
+                  setCopiedWebhook(true);
+                  setTelephonyCheck('Webhook URL copied for runtime events');
+                }}
+                className="justify-center"
+              >
+                <Code2 className="h-4 w-4" /> {copiedWebhook ? 'Copied' : 'Webhook'}
+              </VoiceButton>
+            </div>
+            {telephonyCheck && (
+              <div className="mt-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-700 dark:text-cyan-200">
+                {telephonyCheck}
+              </div>
+            )}
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <h2 className="font-bold">Phone numbers</h2>
+            <p className={`mt-1 text-sm ${voicePageMuted}`}>Route each number to a voice agent.</p>
+            <div className="mt-5 space-y-3">
+              {[
+                ['+31 20 000 0000', 'Inbound demo number', 'Unassigned'],
+                ['+1 555 0199', 'Outbound caller ID', 'Default'],
+              ].map(([number, label, status]) => (
+                <div key={number} className={`rounded-xl p-4 ${voiceSoftPanelClass}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{number}</p>
+                      <p className={`mt-1 text-sm ${voicePageMuted}`}>{label}</p>
+                      {routedNumbers[number] && <p className="mt-2 text-xs font-semibold text-cyan-600 dark:text-cyan-300">Routed to {routedNumbers[number]}</p>}
+                      {lastTestedNumber === number && <p className="mt-2 text-xs font-semibold text-emerald-600 dark:text-emerald-300">Test event sent</p>}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge variant="outline" className="border-zinc-200 text-zinc-600 dark:border-[#343434] dark:text-zinc-300">{routedNumbers[number] ? 'Assigned' : status}</Badge>
+                      <button
+                        type="button"
+                        aria-label={`${routedNumbers[number] ? 'Clear route for' : 'Assign'} ${number}`}
+                        onClick={() => setRoutedNumbers((current) => ({ ...current, [number]: current[number] ? '' : 'Default voice agent' }))}
+                        className="text-xs font-semibold text-cyan-600 hover:underline dark:text-cyan-300"
+                      >
+                        {routedNumbers[number] ? 'Clear route' : 'Assign'}
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Test ${number}`}
+                        onClick={() => setLastTestedNumber(number)}
+                        className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                      >
+                        Test
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <h2 className="font-bold">Call routing</h2>
+            <div className="mt-5 space-y-3">
+              <ReadinessRow done={telephony.length > 0} label="Provider credentials" />
+              <ReadinessRow done={telephony.length > 0} label="Outbound caller ID" />
+              <ReadinessRow done={Object.values(routedNumbers).some(Boolean)} label="Inbound number mapping" />
+              <ReadinessRow done={lastTestedNumber.length > 0} label="Test route event" />
+            </div>
+          </div>
+        </aside>
+      </div>
     </SectionPage>
   );
 }
 
 function ToolsView({ tools, onCreate }: { tools: any[]; onCreate: () => void }) {
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('all');
+  const [enabledSystemTools, setEnabledSystemTools] = useState(['end_call', 'calculator']);
+  const [selectedToolId, setSelectedToolId] = useState<string | number>('system:end_call');
+  const [transferNumber, setTransferNumber] = useState('+31 20 000 0000');
+  const [toolTestStatus, setToolTestStatus] = useState('');
+  const filteredTools = tools.filter((tool) => {
+    const matchesQuery = !query || `${tool.name || ''} ${tool.description || ''}`.toLowerCase().includes(query.toLowerCase());
+    const matchesCategory = category === 'all' || tool.category === category;
+    return matchesQuery && matchesCategory;
+  });
+  const systemTools = [
+    ['end_call', 'End conversation', 'Allow the agent to end a call cleanly.'],
+    ['transfer_call', 'Transfer to number', 'Send a caller to a human or department.'],
+    ['calculator', 'Calculator', 'Perform simple arithmetic during a conversation.'],
+    ['webhook', 'Webhook tool', 'Call an internal event endpoint.'],
+  ];
+  const selectedCustomTool = tools.find((tool) => tool.id === selectedToolId);
+  const selectedSystemTool = systemTools.find(([id]) => selectedToolId === `system:${id}`);
+
+  function runToolTest() {
+    if (selectedCustomTool) {
+      setToolTestStatus(`${selectedCustomTool.name} test payload prepared`);
+      return;
+    }
+    if (selectedSystemTool) {
+      if (!enabledSystemTools.includes(selectedSystemTool[0])) {
+        setToolTestStatus(`Enable ${selectedSystemTool[1]} before testing it`);
+        return;
+      }
+      setToolTestStatus(`${selectedSystemTool[1]} is ready in the runtime tool palette`);
+    }
+  }
+
   return (
     <SectionPage
       title="Tools"
-      description="Manage reusable tools that can be used across your workflows. Learn more"
+      description="Manage reusable actions your voice agents can call during a conversation."
       action={<VoiceButton onClick={onCreate}><Plus className="h-4 w-4" /> Create Tool</VoiceButton>}
     >
-      <Panel title="Your Tools" subtitle="Create and manage tools for your organization">
-        <SearchRow placeholder="Search tools..." />
-        {tools.length === 0 ? <div className="min-h-[220px]" /> : <RecordList rows={tools} detail={(row) => row.description || row.category} />}
-      </Panel>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold">Your tools</h2>
+              <p className={`mt-1 text-sm ${voicePageMuted}`}>HTTP APIs, transfers, call controls and utility tools.</p>
+            </div>
+            <VoiceButton variant="ghost" onClick={onCreate}><Plus className="h-4 w-4" /> Add tool</VoiceButton>
+          </div>
+          <div className="mt-6 flex flex-col gap-3 md:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+              <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tools..." className={`${inputClass} pl-9`} />
+            </div>
+            <NativeSelect value={category} onChange={setCategory}>
+              <option value="all">All types</option>
+              <option value="http_api">HTTP API</option>
+              <option value="end_call">End call</option>
+              <option value="transfer_call">Transfer</option>
+              <option value="calculator">Calculator</option>
+            </NativeSelect>
+          </div>
+          {filteredTools.length === 0 ? (
+            <div className={`mt-6 rounded-xl p-8 text-center ${voiceSoftPanelClass}`}>
+              <Wrench className={`mx-auto mb-4 h-8 w-8 ${voicePageMuted}`} />
+              <p className="font-semibold">{tools.length ? 'No tools match this filter' : 'No custom tools yet'}</p>
+              <p className={`mx-auto mt-2 max-w-md text-sm leading-6 ${voicePageMuted}`}>Create an HTTP tool, transfer action, calculator, or webhook so agents can do useful work mid-call.</p>
+              <VoiceButton onClick={onCreate} className="mt-5"><Plus className="h-4 w-4" /> Create Tool</VoiceButton>
+            </div>
+          ) : (
+            <div className="mt-5 divide-y divide-zinc-200 overflow-hidden rounded-xl border border-zinc-200 dark:divide-[#303030] dark:border-[#303030]">
+              {filteredTools.map((tool) => (
+                <button
+                  key={tool.id}
+                  type="button"
+                  onClick={() => setSelectedToolId(tool.id)}
+                  className={`flex w-full items-center justify-between gap-4 px-4 py-4 text-left transition ${selectedToolId === tool.id ? 'bg-cyan-500/10' : 'hover:bg-[#0000170b] dark:hover:bg-[#242424]'}`}
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0000170b] text-[hsl(240_1.7%_11.2%)] dark:bg-cyan-500/10 dark:text-cyan-300">
+                      <Wrench className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold">{tool.name}</p>
+                      <p className={`truncate text-sm ${voicePageMuted}`}>{tool.description || tool.category}</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="border-zinc-200 text-zinc-600 dark:border-[#343434] dark:text-zinc-300">{tool.category || 'tool'}</Badge>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <aside className="space-y-6">
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <h2 className="font-bold">System tools</h2>
+            <p className={`mt-1 text-sm ${voicePageMuted}`}>Built-in actions available to the runtime.</p>
+            <div className="mt-5 space-y-3">
+              {systemTools.map(([id, title, description]) => (
+                <div
+                  key={id}
+                  className={`w-full rounded-xl p-4 transition ${selectedToolId === `system:${id}` ? 'bg-cyan-500/10 ring-1 ring-cyan-500/50' : voiceSoftPanelClass}`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedToolId(`system:${id}`)}
+                      className="min-w-0 flex-1 text-left"
+                    >
+                      <p className="font-semibold">{title}</p>
+                      <p className={`mt-2 text-sm leading-5 ${voicePageMuted}`}>{description}</p>
+                    </button>
+                    <Toggle
+                      checked={enabledSystemTools.includes(id)}
+                      ariaLabel={`${enabledSystemTools.includes(id) ? 'Disable' : 'Enable'} ${title}`}
+                      onChange={() => {
+                        setEnabledSystemTools((current) =>
+                          current.includes(id) ? current.filter((toolId) => toolId !== id) : [...current, id]
+                        );
+                        setToolTestStatus(
+                          enabledSystemTools.includes(id)
+                            ? `${title} disabled for runtime`
+                            : `${title} enabled for runtime`
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={`rounded-2xl p-6 ${voicePanelClass}`}>
+            <h2 className="font-bold">Tool detail</h2>
+            {selectedCustomTool ? (
+              <div className="mt-5 space-y-4">
+                <div className={`rounded-xl p-4 ${voiceSoftPanelClass}`}>
+                  <p className="font-semibold">{selectedCustomTool.name}</p>
+                  <p className={`mt-2 text-sm leading-6 ${voicePageMuted}`}>{selectedCustomTool.description || 'No description yet.'}</p>
+                </div>
+                <ReadinessRow done label="Available to agents" />
+                <ReadinessRow done={selectedCustomTool.status === 'active'} label="Active status" />
+                <VoiceButton variant="ghost" onClick={runToolTest} className="w-full justify-center"><Play className="h-4 w-4" /> Test payload</VoiceButton>
+                <VoiceButton variant="ghost" onClick={onCreate} className="w-full justify-center"><Plus className="h-4 w-4" /> Add another tool</VoiceButton>
+              </div>
+            ) : selectedSystemTool ? (
+              <div className="mt-5 space-y-4">
+                <div className={`rounded-xl p-4 ${voiceSoftPanelClass}`}>
+                  <p className="font-semibold">{selectedSystemTool[1]}</p>
+                  <p className={`mt-2 text-sm leading-6 ${voicePageMuted}`}>{selectedSystemTool[2]}</p>
+                </div>
+                {selectedSystemTool[0] === 'transfer_call' && (
+                  <VoiceField label="Transfer number" help="Used when a workflow node enables call transfer.">
+                    <Input value={transferNumber} onChange={(event) => setTransferNumber(event.target.value)} className={inputClass} />
+                  </VoiceField>
+                )}
+                <ReadinessRow done={enabledSystemTools.includes(selectedSystemTool[0])} label="Enabled for runtime" />
+                <ReadinessRow done label="No credentials required" />
+                <ReadinessRow done={selectedSystemTool[0] !== 'transfer_call' || Boolean(transferNumber.trim())} label={selectedSystemTool[0] === 'transfer_call' ? 'Transfer number configured' : 'Ready to execute'} />
+                <VoiceButton variant="ghost" onClick={runToolTest} className="w-full justify-center"><Play className="h-4 w-4" /> Test tool</VoiceButton>
+              </div>
+            ) : (
+              <p className={`mt-5 text-sm leading-6 ${voicePageMuted}`}>Select a custom or system tool to inspect how agents can use it.</p>
+            )}
+            {toolTestStatus && (
+              <div className="mt-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-700 dark:text-cyan-200">
+                {toolTestStatus}
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
     </SectionPage>
   );
 }
@@ -1897,12 +3177,15 @@ function EditorView(props: {
   setTestMode: (mode: 'audio' | 'chat') => void;
   testRunning: boolean;
   testEnded: boolean;
+  testTranscript: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+  runtimeSession: any;
   unsaved: boolean;
   setUnsaved: (value: boolean) => void;
+  onSaveWorkflow: (publish?: boolean) => Promise<void>;
   firstCallTip: boolean;
   setFirstCallTip: (value: boolean) => void;
 }) {
-  const { agent, nodes, selectedNodeId, setSelectedNodeId, setEditNode, onBack, onRun, testMode, setTestMode, testRunning, testEnded, unsaved, setUnsaved, firstCallTip, setFirstCallTip } = props;
+  const { agent, nodes, selectedNodeId, setSelectedNodeId, setEditNode, onBack, onRun, testMode, setTestMode, testRunning, testEnded, testTranscript, runtimeSession, unsaved, onSaveWorkflow, firstCallTip, setFirstCallTip } = props;
   const reactFlowNodes = useMemo(() => nodes.map((node) => ({
     id: node.id,
     type: 'kyrnVoiceNode',
@@ -1911,10 +3194,10 @@ function EditorView(props: {
     selected: node.id === selectedNodeId,
   })), [nodes, selectedNodeId, setEditNode]);
   const reactFlowEdges = useMemo(() => [
-    { id: 'start-agent', source: 'start', target: 'agent', type: 'kyrnVoiceEdge', data: { label: 'Move to Main Agenda' } },
-    { id: 'start-end', source: 'start', target: 'end', type: 'kyrnVoiceEdge', data: { label: 'End call' } },
-    { id: 'agent-end', source: 'agent', target: 'end', type: 'kyrnVoiceEdge', data: { label: 'End call' } },
-  ], []);
+    { id: 'start-agent', source: nodeIdByKind(nodes, 'start'), target: nodeIdByKind(nodes, 'agent'), type: 'kyrnVoiceEdge', data: { label: 'Move to Main Agenda' } },
+    { id: 'global-agent', source: nodeIdByKind(nodes, 'global'), target: nodeIdByKind(nodes, 'agent'), type: 'kyrnVoiceEdge', data: { label: 'Apply context' } },
+    { id: 'agent-end', source: nodeIdByKind(nodes, 'agent'), target: nodeIdByKind(nodes, 'end'), type: 'kyrnVoiceEdge', data: { label: 'End call' } },
+  ].filter((edge) => edge.source && edge.target), [nodes]);
   const nodeTypes = useMemo(() => ({ kyrnVoiceNode: KyrnReactFlowNode }), []);
   const edgeTypes = useMemo(() => ({ kyrnVoiceEdge: KyrnReactFlowEdge }), []);
 
@@ -1931,7 +3214,8 @@ function EditorView(props: {
           {unsaved && <span className="rounded-md border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-300">Unsaved changes</span>}
           <VoiceButton variant="ghost"><Phone className="h-4 w-4" /> Phone Call</VoiceButton>
           <VoiceButton variant="ghost" onClick={onRun}><Bot className="h-4 w-4" /> Test Agent</VoiceButton>
-          <VoiceButton onClick={() => setUnsaved(false)} className="bg-[#0f8f85] text-white hover:bg-[#0b746c]"><Save className="h-4 w-4" /> Save</VoiceButton>
+          <VoiceButton onClick={() => onSaveWorkflow(false)} className="bg-[#0f8f85] text-white hover:bg-[#0b746c]"><Save className="h-4 w-4" /> Save</VoiceButton>
+          <VoiceButton variant="ghost" onClick={() => onSaveWorkflow(true)}>Publish</VoiceButton>
           <MoreVertical className="h-5 w-5 text-zinc-400" />
         </div>
       </div>
@@ -1989,9 +3273,27 @@ function EditorView(props: {
                   <span className={`rounded-full px-3 py-1 text-xs font-semibold ${testEnded ? 'bg-zinc-800 text-zinc-400' : 'bg-emerald-500/15 text-emerald-300'}`}>{testEnded ? 'Ended' : 'Live'}</span>
                 </div>
                 <div className="mb-6 flex justify-center"><span className="rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-1 text-xs text-blue-300">start call</span></div>
-                <p className="mb-2 text-xs text-zinc-400">Reasoning Delay: 1076ms</p>
-                <div className="rounded-xl border border-zinc-500 bg-[#202020] p-4 text-sm text-zinc-200">
-                  Hi there, I'm your Voice AI Agent. How can I help you today?
+                <p className="mb-2 text-xs text-zinc-400">
+                  {runtimeSession?.session?.roomName ? `Room: ${runtimeSession.session.roomName}` : 'Preparing runtime session...'}
+                </p>
+                <div className="space-y-3 overflow-auto pr-1">
+                  {testTranscript.map((message, index) => (
+                    <div key={`${message.role}-${index}`} className={`rounded-xl border p-4 text-sm ${
+                      message.role === 'assistant'
+                        ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100'
+                        : message.role === 'user'
+                          ? 'border-blue-500/40 bg-blue-500/10 text-blue-100'
+                          : 'border-zinc-700 bg-[#202020] text-zinc-300'
+                    }`}>
+                      <span className="mb-1 block text-[11px] uppercase tracking-wide text-zinc-500">{message.role}</span>
+                      {message.content}
+                    </div>
+                  ))}
+                  {testTranscript.length === 0 && (
+                    <div className="rounded-xl border border-zinc-500 bg-[#202020] p-4 text-sm text-zinc-200">
+                      Hi there, I'm your Voice AI Agent. How can I help you today?
+                    </div>
+                  )}
                   <p className="mt-3 text-xs italic text-zinc-500">{testEnded ? 'completed' : 'speaking...'}</p>
                 </div>
                 <div className="mt-auto">
@@ -2325,6 +3627,17 @@ function TelephonyDialog({ form, setForm, busy, onClose, onCreate }: any) {
 }
 
 function ToolDialog({ form, setForm, busy, onClose, onCreate }: any) {
+  const canCreateTool = Boolean(
+    form.name &&
+      (form.category === 'http_api'
+        ? form.endpoint
+        : form.category === 'transfer_call'
+          ? form.transferNumber
+          : form.category === 'calculator'
+            ? form.expression
+            : true)
+  );
+
   return (
     <SmallDialog title="Create New Tool" description="Create a new tool that can be used in your workflows." onClose={onClose}>
       <VoiceField label="Tool Type" help="Make HTTP requests to external APIs">
@@ -2341,7 +3654,37 @@ function ToolDialog({ form, setForm, busy, onClose, onCreate }: any) {
       <VoiceField label="Description (Optional)" help="Provide a description that makes it easy for the LLM to understand what this tool does">
         <Input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="What does this tool do?" className={inputClass} />
       </VoiceField>
-      <DialogActions busy={busy} onClose={onClose} onCreate={onCreate} createLabel="Create Tool" disabled={!form.name} />
+      {form.category === 'http_api' && (
+        <div className="grid gap-4 sm:grid-cols-[140px_1fr]">
+          <VoiceField label="Method">
+            <NativeSelect value={form.method} onChange={(value) => setForm({ ...form, method: value })} className="w-full">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+            </NativeSelect>
+          </VoiceField>
+          <VoiceField label="Endpoint URL">
+            <Input value={form.endpoint} onChange={(event) => setForm({ ...form, endpoint: event.target.value })} placeholder="https://api.example.com/bookings" className={inputClass} />
+          </VoiceField>
+        </div>
+      )}
+      {form.category === 'transfer_call' && (
+        <VoiceField label="Transfer number" help="The phone number or SIP target the caller should be transferred to.">
+          <Input value={form.transferNumber} onChange={(event) => setForm({ ...form, transferNumber: event.target.value })} placeholder="+31..." className={inputClass} />
+        </VoiceField>
+      )}
+      {form.category === 'calculator' && (
+        <VoiceField label="Default expression" help="Agents can override this with live variables during execution.">
+          <Input value={form.expression} onChange={(event) => setForm({ ...form, expression: event.target.value })} placeholder="subtotal * 1.21" className={inputClass} />
+        </VoiceField>
+      )}
+      {form.category === 'end_call' && (
+        <div className={`rounded-xl p-4 text-sm leading-6 ${voiceSoftPanelClass} ${voicePageMuted}`}>
+          This built-in action lets the agent close the call after a final summary or goodbye message.
+        </div>
+      )}
+      <DialogActions busy={busy} onClose={onClose} onCreate={onCreate} createLabel="Create Tool" disabled={!canCreateTool} />
     </SmallDialog>
   );
 }
@@ -2474,9 +3817,15 @@ function VoiceButton({ children, variant = 'primary', className = '', ...props }
   );
 }
 
-function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+function Toggle({ checked, onChange, ariaLabel = 'Toggle setting' }: { checked: boolean; onChange: () => void; ariaLabel?: string }) {
   return (
-    <button type="button" onClick={onChange} className={`relative h-5 w-9 rounded-full transition ${checked ? 'bg-cyan-500' : 'bg-zinc-700'}`}>
+    <button
+      type="button"
+      onClick={onChange}
+      aria-label={ariaLabel}
+      aria-pressed={checked}
+      className={`relative h-5 w-9 rounded-full transition ${checked ? 'bg-cyan-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}
+    >
       <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${checked ? 'left-4' : 'left-0.5'}`} />
     </button>
   );
@@ -2591,12 +3940,176 @@ function MetricPanel({ title, value, description }: { title: string; value: numb
   );
 }
 
+function CampaignStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className={`rounded-xl p-4 ${voiceSoftPanelClass}`}>
+      <p className={`text-xs font-semibold uppercase tracking-wide ${voicePageMuted}`}>{label}</p>
+      <p className="mt-3 text-2xl font-bold">{value}</p>
+    </div>
+  );
+}
+
 function CreditPill({ credits }: { credits?: number }) {
   return (
     <div className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm text-[hsl(240_1.7%_11.2%)] shadow-sm dark:border-[#303030] dark:bg-[#151515] dark:text-zinc-300">
       {credits ?? 0} team credits
     </div>
   );
+}
+
+function ReadinessRow({ done, label }: { done: boolean; label: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className={`text-sm ${voicePageMuted}`}>{label}</span>
+      <span className={`flex h-6 w-6 items-center justify-center rounded-full ${done ? 'bg-emerald-500 text-white' : 'bg-zinc-200 text-zinc-500 dark:bg-[#303030]'}`}>
+        {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5" />}
+      </span>
+    </div>
+  );
+}
+
+function ProviderMark({ provider }: { provider: string }) {
+  const letter = (provider || 'k').charAt(0).toUpperCase();
+  return (
+    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[conic-gradient(from_90deg,#0b5fff,#66e4d5,#e8fbff,#0b5fff)] text-sm font-bold text-white shadow-sm">
+      {letter}
+    </span>
+  );
+}
+
+function fallbackProvidersForTab(tab: 'llm' | 'voice' | 'transcriber' | 'embedding') {
+  if (tab === 'voice') {
+    return [
+      { id: 'elevenlabs', name: 'ElevenLabs', description: 'Low-latency premium voices' },
+      { id: 'minimax', name: 'MiniMax', description: 'Expressive multilingual TTS' },
+      { id: 'qwen', name: 'Qwen TTS', description: 'Realtime voice stack' },
+      { id: 'chatterbox', name: 'Chatterbox', description: 'Open-source voice cloning' },
+    ];
+  }
+  if (tab === 'transcriber') {
+    return [
+      { id: 'deepgram', name: 'Deepgram', description: 'Fast streaming STT' },
+      { id: 'openai', name: 'OpenAI', description: 'General transcription' },
+      { id: 'qwen', name: 'Qwen ASR', description: 'Realtime ASR slot' },
+    ];
+  }
+  return [
+    { id: 'openai', name: 'OpenAI', description: 'General reasoning and tools' },
+    { id: 'qwen', name: 'Qwen', description: 'Realtime and multilingual agent models' },
+    { id: 'minimax', name: 'MiniMax', description: 'Voice-agent friendly model stack' },
+    { id: 'xiaomi-mimo', name: 'Xiaomi MiMo', description: 'Experimental provider slot' },
+  ];
+}
+
+function providerCapability(provider: string, tab: string) {
+  if (provider.includes('eleven')) return 'Premium voice synthesis';
+  if (provider.includes('mini')) return 'Multilingual voice and LLM provider';
+  if (provider.includes('qwen')) return 'Realtime speech and LLM stack';
+  if (provider.includes('chatterbox')) return 'Open-source voice clone service';
+  if (tab === 'embedding') return 'Knowledge retrieval embeddings';
+  return 'Configurable voice-agent provider';
+}
+
+function modelOptionsForProvider(provider: string, tab: string) {
+  if (tab === 'voice') {
+    if (provider === 'elevenlabs') return ['eleven_turbo_v2_5', 'eleven_multilingual_v2', 'eleven_flash_v2_5'];
+    if (provider === 'minimax') return ['speech-02-hd', 'speech-02-turbo', 'speech-01-turbo'];
+    if (provider === 'qwen') return ['qwen-tts-realtime', 'qwen-tts'];
+    if (provider === 'chatterbox') return ['chatterbox-multilingual', 'chatterbox-turbo'];
+    return ['gpt-4o-mini-tts', 'default'];
+  }
+  if (tab === 'transcriber') {
+    if (provider === 'deepgram') return ['nova-3', 'nova-2', 'base'];
+    if (provider === 'qwen') return ['qwen-asr-realtime', 'qwen-asr'];
+    return ['gpt-4o-mini-transcribe', 'whisper-1', 'default'];
+  }
+  if (tab === 'embedding') return ['text-embedding-3-large', 'text-embedding-3-small', 'qwen-text-embedding'];
+  if (provider === 'qwen') return ['qwen3-235b-a22b', 'qwen3-32b', 'qwen-realtime'];
+  if (provider === 'minimax') return ['abab6.5s-chat', 'MiniMax-Text-01'];
+  if (provider === 'xiaomi-mimo') return ['mimo-experimental'];
+  return ['gpt-4o-mini', 'gpt-4o', 'gpt-4o-realtime-preview'];
+}
+
+function fallbackVoices() {
+  return [
+    { id: 'kyrn-hope', name: 'Hope', provider: 'ElevenLabs', style: 'upbeat and clear' },
+    { id: 'kyrn-jasper', name: 'Jasper', provider: 'MiniMax', style: 'calm sales assistant' },
+    { id: 'kyrn-nova', name: 'Nova', provider: 'Chatterbox', style: 'cloned brand voice' },
+  ];
+}
+
+function parseCsvRows(text: string) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length < 2) return [];
+  const headers = splitCsvLine(lines[0]).map((header) => header.trim());
+  return lines.slice(1).map((line) => {
+    const values = splitCsvLine(line);
+    return headers.reduce<Record<string, string>>((row, header, index) => {
+      row[header] = values[index]?.trim() || '';
+      return row;
+    }, {});
+  });
+}
+
+function parseManualLeadRows(text: string) {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [phone_number = '', first_name = '', context = ''] = splitCsvLine(line).map((part) => part.trim());
+      return { phone_number, first_name, context };
+    })
+    .filter((row) => row.phone_number);
+}
+
+function campaignTemplates() {
+  return [
+    {
+      id: 'demo-follow-up',
+      name: 'Demo follow-up',
+      description: 'Call warm leads, confirm fit, and book the next meeting.',
+      concurrency: 4,
+    },
+    {
+      id: 'reactivation',
+      name: 'Reactivation',
+      description: 'Re-engage older leads with a short low-pressure call.',
+      concurrency: 3,
+    },
+    {
+      id: 'appointment-reminder',
+      name: 'Appointment reminder',
+      description: 'Confirm bookings and collect reschedule requests.',
+      concurrency: 8,
+    },
+  ];
+}
+
+function splitCsvLine(line: string) {
+  const values: string[] = [];
+  let current = '';
+  let quoted = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    const next = line[index + 1];
+    if (char === '"' && next === '"') {
+      current += '"';
+      index += 1;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === ',' && !quoted) {
+      values.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  values.push(current);
+  return values;
 }
 
 function buildAgentPrompt(useCase: string, activityDescription: string, callType: string) {
@@ -2609,6 +4122,77 @@ Activity description:
 ${activityDescription}
 
 Greet the user naturally, collect the important details, use available tools and files when needed, and keep every response short enough for a live voice or WhatsApp conversation.`;
+}
+
+function buildWorkflowPayload(agent: any, nodes: FlowNode[]) {
+  const startId = nodeIdByKind(nodes, 'start');
+  const globalId = nodeIdByKind(nodes, 'global');
+  const agentId = nodeIdByKind(nodes, 'agent');
+  const endId = nodeIdByKind(nodes, 'end');
+
+  return {
+    name: agent.name || 'Kyrn Voice Agent',
+    version: 1,
+    nodes: nodes.map((node) => ({
+      id: node.id,
+      type: flowKindToWorkflowType(node.kind),
+      position: { x: node.x, y: node.y },
+      data: {
+        name: node.title,
+        prompt: node.prompt,
+        allowInterruptions: true,
+        waitForUserResponse: node.kind === 'agent',
+      },
+    })),
+    edges: [
+      { id: 'edge-start-agent', source: startId, target: agentId, label: 'Move to Main Agenda' },
+      { id: 'edge-global-agent', source: globalId, target: agentId, label: 'Apply context' },
+      { id: 'edge-agent-end', source: agentId, target: endId, label: 'End call' },
+    ].filter((edge) => edge.source && edge.target),
+    variables: {},
+    metadata: {
+      source: 'kyrn_editor',
+      agentId: agent.id,
+      savedAt: new Date().toISOString(),
+    },
+  };
+}
+
+function nodeIdByKind(nodes: FlowNode[], kind: FlowNode['kind']) {
+  return nodes.find((node) => node.kind === kind)?.id || '';
+}
+
+function definitionToFlowNodes(definition: any): FlowNode[] {
+  const workflowNodes = Array.isArray(definition.nodes) ? definition.nodes : [];
+  if (!workflowNodes.length) return nodeSeeds;
+
+  return workflowNodes.map((node: any, index: number) => {
+    const kind = workflowTypeToFlowKind(node.type);
+    const fallback = nodeSeeds.find((seed) => seed.kind === kind) || nodeSeeds[Math.min(index, nodeSeeds.length - 1)];
+    return {
+      id: node.id || fallback.id,
+      kind,
+      title: node.data?.name || fallback.title,
+      badge: fallback.badge,
+      prompt: node.data?.prompt || fallback.prompt,
+      x: node.position?.x ?? fallback.x,
+      y: node.position?.y ?? fallback.y,
+    };
+  });
+}
+
+function flowKindToWorkflowType(kind: FlowNode['kind']) {
+  if (kind === 'start') return 'startCall';
+  if (kind === 'global') return 'globalNode';
+  if (kind === 'end') return 'endCall';
+  return 'agentNode';
+}
+
+function workflowTypeToFlowKind(type: string): FlowNode['kind'] {
+  if (type === 'startCall') return 'start';
+  if (type === 'globalNode') return 'global';
+  if (type === 'endCall') return 'end';
+  return 'agent';
 }
 
 function extractPromptFromWorkflow(workflow: any) {

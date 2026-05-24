@@ -19,6 +19,7 @@ import { Sidebar } from '@/components/interface/Sidebar';
 import Logo from '@/components/interface/Logo';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { WhatsAppWorkspace } from '@/components/automation/WhatsAppWorkspace';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -131,6 +132,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isHomePage = pathname === '/' || /^\/[a-z]{2}$/.test(pathname);
+  const isVoiceWorkspace = /^\/(?:[a-z]{2}\/)?voice(?:\/|$)/.test(pathname);
+  const isWhatsAppWorkspace = /^\/(?:[a-z]{2}\/)?(?:automation|campaigns|contacts|templates|analytics|dashboard|settings|calls)(?:\/|$)/.test(pathname);
   
   const { data: team } = useSWR('/api/team', fetcher);
 
@@ -152,9 +155,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  if (isWhatsAppWorkspace && !isVoiceWorkspace) {
+    return <WhatsAppWorkspace>{children}</WhatsAppWorkspace>;
+  }
+
   return (
     <div className="flex h-screen bg-muted overflow-hidden">
-      <Sidebar />
+      {!isVoiceWorkspace && <Sidebar />}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         {children}
       </main>

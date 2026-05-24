@@ -69,6 +69,11 @@ export async function POST(request: Request) {
       successUrl: `${baseUrl}/settings/voice?credits=success`,
       cancelUrl: `${baseUrl}/settings/voice?credits=cancel`,
       existingCustomerId: adapter.type === 'stripe' ? (team?.stripeCustomerId || undefined) : undefined,
+      metadata: {
+        type: 'voice_credits',
+        teamId: teamId.toString(),
+        creditAmount: creditAmount.toString(),
+      },
     });
 
     
