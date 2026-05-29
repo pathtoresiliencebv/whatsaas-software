@@ -25,7 +25,9 @@ export async function POST(request: Request) {
       where: and(eq(wabaTemplates.id, parseInt(templateId)), eq(wabaTemplates.teamId, team.id)),
     });
 
-    if (!instance || !instance.metaToken || !instance.metaPhoneNumberId) {
+    const metaToken = instance?.metaToken || instance?.accessToken;
+
+    if (!instance || !metaToken || !instance.metaPhoneNumberId) {
       return NextResponse.json({ error: 'Invalid or unconnected WABA instance' }, { status: 400 });
     }
     if (!template) {
@@ -78,7 +80,7 @@ export async function POST(request: Request) {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${instance.metaToken}`,
+          'Authorization': `Bearer ${metaToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(metaPayload),

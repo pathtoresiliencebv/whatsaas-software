@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Home,
   MessageSquare,
@@ -17,19 +18,19 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/interface/Logo';
 
-const items = [
-  { href: '/dashboard', icon: Home, label: 'Dashboard' },
-  { href: '/dashboard/chat', icon: MessageSquare, label: 'Chats' },
-  { href: '/contacts', icon: Users, label: 'Contacts' },
-  { href: '/automation', icon: Zap, label: 'Automation' },
-  { href: '/voice', icon: Mic2, label: 'Voice Agents' },
-  { href: '/campaigns', icon: FolderKanban, label: 'Campaigns' },
-  { href: '/analytics', icon: BarChart3, label: 'Analytics' },
-  { href: '/settings', icon: Settings, label: 'Settings' },
-];
-
 export function Sidebar() {
+  const t = useTranslations('Sidebar');
   const pathname = usePathname();
+  const items = [
+    { href: '/dashboard', icon: Home, label: t('dashboard') },
+    { href: '/dashboard/chat', icon: MessageSquare, label: t('chats') },
+    { href: '/contacts', icon: Users, label: t('contacts') },
+    { href: '/automation', icon: Zap, label: t('whatsapp_agents') },
+    { href: '/campaigns', icon: FolderKanban, label: t('campaigns') },
+    { href: '/voice', icon: Mic2, label: t('voice_agents') },
+    { href: '/analytics', icon: BarChart3, label: t('analytics') },
+    { href: '/settings', icon: Settings, label: t('settings') },
+  ];
 
   return (
     <aside className="w-64 border-r bg-card h-full">

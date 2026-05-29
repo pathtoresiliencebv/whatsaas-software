@@ -20,7 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, Download, ExternalLink } from 'lucide-react';
+import { CheckCircle2, CreditCard, Download, ExternalLink, Sparkles } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -196,9 +196,50 @@ function InvoicesList() {
 
 export function BillingClient() {
   const t = useTranslations('Billing');
+  const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
+  const currentPlan = teamData?.planName || 'Free';
+  const status = teamData?.subscriptionStatus || 'free';
 
   return (
     <div className="space-y-6">
+      <Card className="overflow-hidden border-zinc-200 bg-white shadow-sm dark:border-[#303630] dark:bg-[#111412]">
+        <CardContent className="p-0">
+          <div className="flex flex-col gap-5 p-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#e8f9ed] text-[#14933a]">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Huidig plan</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <h2 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">{currentPlan}</h2>
+                  <Badge className="rounded-full bg-[#e8f9ed] px-2.5 text-[#14933a] hover:bg-[#e8f9ed]">
+                    <CheckCircle2 className="mr-1 h-3 w-3" />
+                    {status}
+                  </Badge>
+                </div>
+                <p className="mt-2 max-w-xl text-sm text-zinc-500 dark:text-zinc-400">
+                  Je plan bepaalt teamleden, WhatsApp-verbindingen, campagnes, AI-agents en toegang tot facturering.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" className="rounded-lg" asChild>
+                <a href="/pricing">Change plan</a>
+              </Button>
+              {teamData?.stripeCustomerId && (
+                <form action={customerPortalAction}>
+                  <Button type="submit" className="w-full rounded-lg bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200">
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    {t('billing_portal')}
+                  </Button>
+                </form>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       <InvoicesList />
     </div>
   );

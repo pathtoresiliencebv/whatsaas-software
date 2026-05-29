@@ -28,10 +28,6 @@ export const checkoutAction = withTeam(async (formData, team) => {
     ? plan.stripeAnnualPriceId
     : plan.stripePriceId;
 
-  if (!priceId) {
-    throw new Error('No price configured for this plan');
-  }
-
   if (plan.gatewayId) {
     const adapter = await getGatewayById(plan.gatewayId);
 
@@ -67,9 +63,34 @@ export const checkoutAction = withTeam(async (formData, team) => {
       redirect(result.url);
     }
   } else {
+    if (priceId) {
+      const { createCheckoutSession } = await import('./stripe');
+      await createCheckoutSession({ team, priceId });
+    }
 
-    const { createCheckoutSession } = await import('./stripe');
-    await createCheckoutSession({ team, priceId });
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('No price configured for this plan');
+    }
+
+    const adapter = new StripeAdapter(process.env.STRIPE_SECRET_KEY);
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const result = await adapter.createCheckout({
+      planId: plan.id,
+      planName: plan.name,
+      amount: billingCycle === 'year' && plan.amountAnnual ? plan.amountAnnual : plan.amount,
+      currency: plan.currency,
+      interval: billingCycle === 'year' ? 'year' : (plan.interval as 'month' | 'year'),
+      trialDays: plan.trialDays || 0,
+      teamId: team.id,
+      userId: user.id,
+      successUrl: `${baseUrl}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/pricing`,
+      existingCustomerId: team.stripeCustomerId || undefined,
+    });
+
+    if (result.url) {
+      redirect(result.url);
+    }
   }
 });
 
@@ -139,5 +160,5 @@ export const joinFreePlanAction = withTeam(async (formData, team) => {
     updatedAt: new Date()
   }).where(eq(teams.id, team.id));
 
-  redirect('/dashboard');
+  redirect('/dashboard?onboarding=free');
 });

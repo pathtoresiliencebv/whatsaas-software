@@ -19,17 +19,19 @@ export async function GET() {
 
     
     let metaAppId = '';
+    let metaConfigId = '';
     if (metaActive && metaPlugin) {
       const [row] = await db.select({ metaAppId: channelConfigs.metaAppId, metaConfigId: channelConfigs.metaConfigId })
         .from(channelConfigs)
         .where(eq(channelConfigs.channel, 'meta-cloud'))
         .limit(1);
       metaAppId = row?.metaAppId || process.env.NEXT_PUBLIC_META_APP_ID || '';
+      metaConfigId = row?.metaConfigId || process.env.NEXT_PUBLIC_META_CONFIG_ID || '';
     }
 
     return NextResponse.json({
       evolution: { active: evoActive },
-      metaCloud: { active: metaActive && metaPlugin, appId: metaAppId },
+      metaCloud: { active: metaActive && metaPlugin, appId: metaAppId, configId: metaConfigId },
     });
   } catch (error: any) {
     console.error('[Channels Status]', error.message);

@@ -88,6 +88,9 @@ export default function DevelopersPage() {
         return `${key.substring(0, 8)}...${key.substring(key.length - 4)}`;
     };
 
+    const apiBase = 'https://api.kyrn.nl/v1';
+    const authHeader = '-H "Authorization: Bearer sk_live_..."';
+
     return (
         <section className="flex-1 p-4 lg:p-8 max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-6">
@@ -155,69 +158,70 @@ export default function DevelopersPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Terminal className="h-5 w-5" /> {t('documentation_card_title')}</CardTitle>
-                        <CardDescription>{t('documentation_card_desc')}</CardDescription>
+                        <CardDescription>Volledige API voor WhatsApp, templates, chats en voice agents.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Tabs defaultValue="text">
-                            <TabsList className="mb-4">
-                                <TabsTrigger value="text">{t('send_text_tab')}</TabsTrigger>
-                                <TabsTrigger value="media">{t('send_media_tab')}</TabsTrigger>
-                                <TabsTrigger value="audio">{t('send_audio_tab')}</TabsTrigger>
+                        <div className="mb-6 grid gap-3 md:grid-cols-3">
+                            {[
+                                ['Authenticatie', 'Gebruik Authorization: Bearer sk_live_...'],
+                                ['WhatsApp', 'Berichten, instances, chats en templates.'],
+                                ['Voice agents', 'Agents, workflow definitions en API-runs.'],
+                            ].map(([title, description]) => (
+                                <div key={title} className="rounded-lg border bg-muted/30 p-3">
+                                    <p className="text-sm font-semibold">{title}</p>
+                                    <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <Tabs defaultValue="whatsapp-send">
+                            <TabsList className="mb-4 flex h-auto flex-wrap justify-start">
+                                <TabsTrigger value="whatsapp-send">WhatsApp verzenden</TabsTrigger>
+                                <TabsTrigger value="whatsapp-data">WhatsApp data</TabsTrigger>
+                                <TabsTrigger value="voice-agents">Voice Agents</TabsTrigger>
+                                <TabsTrigger value="voice-runs">Voice runs</TabsTrigger>
+                                <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
                             </TabsList>
 
-                            <TabsContent value="text" className="space-y-4">
+                            <TabsContent value="whatsapp-send" className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label>{t('endpoint_label')}</Label>
-                                    <div className="bg-muted p-2 rounded-md font-mono text-sm">POST /api/v1/send</div>
+                                    <Label>Endpoint</Label>
+                                    <div className="bg-muted p-2 rounded-md font-mono text-sm">POST /v1/send</div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>{t('example_request_curl_label')}</Label>
+                                    <Label>Tekstbericht</Label>
                                     <pre className="bg-zinc-950 text-zinc-50 p-4 rounded-md overflow-x-auto text-xs font-mono">
-                                        {`curl -X POST "${typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'}/api/v1/send" \\
-  -H "Authorization: Bearer sk_live_..." \\
+                                        {`curl -X POST "${apiBase}/send" \\
+  ${authHeader} \\
   -H "Content-Type: application/json" \\
   -d '{
     "instanceName": "my-instance-name",
     "number": "5511999999999",
     "type": "text",
-    "message": "Hello from API!"
+    "message": "Hallo vanuit de API!"
   }'`}
                                     </pre>
                                 </div>
-                            </TabsContent>
-
-                            <TabsContent value="media" className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label>{t('endpoint_label')}</Label>
-                                    <div className="bg-muted p-2 rounded-md font-mono text-sm">POST /api/v1/send</div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>{t('example_request_label')}</Label>
+                                    <Label>Media of document</Label>
                                     <pre className="bg-zinc-950 text-zinc-50 p-4 rounded-md overflow-x-auto text-xs font-mono">
-                                        {`curl -X POST "${typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'}/api/v1/send" \\
-  -H "Authorization: Bearer sk_live_..." \\
+                                        {`curl -X POST "${apiBase}/send" \\
+  ${authHeader} \\
   -H "Content-Type: application/json" \\
   -d '{
     "instanceName": "my-instance-name",
     "number": "5511999999999",
-    "type": "image",  // other types: video, document
+    "type": "image",
     "mediaUrl": "https://example.com/image.png",
-    "message": "Caption for image (optional)"
+    "message": "Optionele tekst bij de afbeelding"
   }'`}
                                     </pre>
                                 </div>
-                            </TabsContent>
-
-                            <TabsContent value="audio" className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label>{t('endpoint_label')}</Label>
-                                    <div className="bg-muted p-2 rounded-md font-mono text-sm">POST /api/v1/send</div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>{t('example_request_label')}</Label>
+                                    <Label>Audio</Label>
                                     <pre className="bg-zinc-950 text-zinc-50 p-4 rounded-md overflow-x-auto text-xs font-mono">
-                                        {`curl -X POST "${typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'}/api/v1/send" \\
-  -H "Authorization: Bearer sk_live_..." \\
+                                        {`curl -X POST "${apiBase}/send" \\
+  ${authHeader} \\
   -H "Content-Type: application/json" \\
   -d '{
     "instanceName": "my-instance-name",
@@ -226,6 +230,91 @@ export default function DevelopersPage() {
     "mediaUrl": "https://example.com/audio.mp3"
   }'`}
                                     </pre>
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="whatsapp-data" className="space-y-4">
+                                <div className="grid gap-3 md:grid-cols-3">
+                                    <EndpointPill method="GET" path="/v1/whatsapp/instances" />
+                                    <EndpointPill method="GET" path="/v1/whatsapp/chats?instanceName=my-instance-name&limit=50" />
+                                    <EndpointPill method="GET" path="/v1/whatsapp/templates?instanceName=my-instance-name" />
+                                </div>
+                                <pre className="bg-zinc-950 text-zinc-50 p-4 rounded-md overflow-x-auto text-xs font-mono">
+                                    {`curl "${apiBase}/whatsapp/chats?instanceName=my-instance-name&limit=50" \\
+  ${authHeader}`}
+                                </pre>
+                                <div className="rounded-lg border bg-muted/30 p-3 text-sm text-muted-foreground">
+                                    Gebruik deze endpoints om gekoppelde WhatsApp instances, inboxgesprekken en WABA templates uit je workspace te lezen.
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="voice-agents" className="space-y-4">
+                                <div className="grid gap-3 md:grid-cols-2">
+                                    <EndpointPill method="GET" path="/v1/voice/agents" />
+                                    <EndpointPill method="POST" path="/v1/voice/agents" />
+                                    <EndpointPill method="GET" path="/v1/voice/agents/{agentId}/definition" />
+                                    <EndpointPill method="PATCH" path="/v1/voice/agents/{agentId}/definition" />
+                                    <EndpointPill method="POST" path="/v1/voice/agents/{agentId}/definition" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Voice agent aanmaken</Label>
+                                    <pre className="bg-zinc-950 text-zinc-50 p-4 rounded-md overflow-x-auto text-xs font-mono">
+                                        {`curl -X POST "${apiBase}/voice/agents" \\
+  ${authHeader} \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "name": "Inbound support agent",
+    "description": "Handelt inkomende gesprekken en WhatsApp-overdracht af",
+    "channelMode": "whatsapp_voice",
+    "systemPrompt": "Begroet de beller, kwalificeer de aanvraag en vat de vervolgstappen samen.",
+    "isDefaultForWhatsapp": true
+  }'`}
+                                    </pre>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Workflow opslaan of publiceren</Label>
+                                    <pre className="bg-zinc-950 text-zinc-50 p-4 rounded-md overflow-x-auto text-xs font-mono">
+                                        {`curl -X PATCH "${apiBase}/voice/agents/3/definition" \\
+  ${authHeader} \\
+  -H "Content-Type: application/json" \\
+  -d '{ "workflowJson": { "nodes": [], "edges": [] } }'
+
+curl -X POST "${apiBase}/voice/agents/3/definition" \\
+  ${authHeader} \\
+  -H "Content-Type: application/json" \\
+  -d '{ "definitionId": 12 }'`}
+                                    </pre>
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="voice-runs" className="space-y-4">
+                                <div className="grid gap-3 md:grid-cols-2">
+                                    <EndpointPill method="GET" path="/v1/voice/runs?agentId=3&limit=50" />
+                                    <EndpointPill method="POST" path="/v1/voice/runs" />
+                                </div>
+                                <pre className="bg-zinc-950 text-zinc-50 p-4 rounded-md overflow-x-auto text-xs font-mono">
+                                    {`curl -X POST "${apiBase}/voice/runs" \\
+  ${authHeader} \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "agentId": 3,
+    "channel": "api",
+    "direction": "outbound",
+    "input": "Start een kwalificatiegesprek voor een nieuwe lead.",
+    "toNumber": "+31612345678"
+  }'`}
+                                </pre>
+                            </TabsContent>
+
+                            <TabsContent value="webhooks" className="space-y-4">
+                                <div className="grid gap-3 md:grid-cols-2">
+                                    <EndpointPill method="POST" path="/api/webhook/evolution" />
+                                    <EndpointPill method="POST" path="/api/webhook/meta-cloud" />
+                                    <EndpointPill method="POST" path="/api/webhook/twilio/voice" />
+                                    <EndpointPill method="POST" path="/api/voice/runtime/events" />
+                                </div>
+                                <div className="rounded-lg border bg-muted/30 p-3 text-sm text-muted-foreground">
+                                    Webhooks verwerken inkomende WhatsApp-events, Meta Cloud events, Twilio voice callbacks en realtime voice runtime events. Gebruik API keys voor outbound v1 endpoints; provider webhook secrets blijven apart ingesteld.
                                 </div>
                             </TabsContent>
                         </Tabs>
@@ -280,5 +369,14 @@ export default function DevelopersPage() {
                 </DialogContent>
             </Dialog>
         </section>
+    );
+}
+
+function EndpointPill({ method, path }: { method: string; path: string }) {
+    return (
+        <div className="rounded-lg border bg-muted/30 p-3">
+            <span className="mr-2 rounded bg-background px-2 py-1 font-mono text-xs font-semibold">{method}</span>
+            <code className="break-all text-xs">{path}</code>
+        </div>
     );
 }

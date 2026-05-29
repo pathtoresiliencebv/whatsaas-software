@@ -16,19 +16,19 @@ export function SubscriptionCard({ subscription }: { subscription?: Subscription
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Current Subscription</CardTitle>
+        <CardTitle>Huidig abonnement</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Badge variant="default">{subscription?.plan || 'Free'}</Badge>
-            <Badge variant="secondary">{subscription?.status || 'active'}</Badge>
+            <Badge variant="default">{subscription?.plan || 'Gratis'}</Badge>
+            <Badge variant="secondary">{subscription?.status || 'actief'}</Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            Current period ends: {subscription?.currentPeriodEnd || 'N/A'}
+            Huidige periode eindigt: {subscription?.currentPeriodEnd || 'n.v.t.'}
           </p>
           <Button variant="outline" className="w-full">
-            Manage Subscription
+            Abonnement beheren
           </Button>
         </div>
       </CardContent>

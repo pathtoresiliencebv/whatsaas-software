@@ -39,7 +39,8 @@ export type Reaction = {
 export type QuickReply = {
   id: number;
   shortcut: string;
-  message: string;
+  message?: string;
+  content?: string;
 };
 
 export type NewMessagePayload = {

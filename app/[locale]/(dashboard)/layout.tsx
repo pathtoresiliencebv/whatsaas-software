@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, Suspense, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { LogOut, Settings, MessageCircle, Menu, X } from 'lucide-react';
 import {
@@ -19,10 +20,14 @@ import { Sidebar } from '@/components/interface/Sidebar';
 import Logo from '@/components/interface/Logo';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { WhatsAppWorkspace } from '@/components/automation/WhatsAppWorkspace';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function UserMenu() {
+  const authT = useTranslations('Auth');
+  const sidebarT = useTranslations('Sidebar');
+  const pricingT = useTranslations('Pricing');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: user } = useSWR<User>('/api/user', fetcher);
   const router = useRouter();
@@ -40,10 +45,10 @@ function UserMenu() {
           href="/#pricing"
           className="text-sm font-medium text-muted-foreground hover:text-foreground"
         >
-          Pricing
+          {pricingT('nav_label')}
         </Link>
         <Button asChild className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground">
-          <Link href="/sign-up">Sign Up</Link>
+          <Link href="/sign-up">{authT('sign_up')}</Link>
         </Button>
       </>
     );
@@ -66,20 +71,20 @@ function UserMenu() {
         <DropdownMenuItem className="cursor-pointer">
           <Link href="/dashboard" className="flex w-full items-center">
             <MessageCircle className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+            <span>{sidebarT('dashboard')}</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer">
           <Link href="/settings" className="flex w-full items-center">
             <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+            <span>{sidebarT('settings')}</span>
           </Link>
         </DropdownMenuItem>
         <form action={handleSignOut} className="w-full">
           <button type="submit" className="flex w-full">
             <DropdownMenuItem className="w-full flex-1 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Sign out</span>
+              <span>{sidebarT('sign_out')}</span>
             </DropdownMenuItem>
           </button>
         </form>
@@ -131,6 +136,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isHomePage = pathname === '/' || /^\/[a-z]{2}$/.test(pathname);
+  const isVoiceWorkspace = /^\/(?:[a-z]{2}\/)?voice(?:\/|$)/.test(pathname);
+  const isWhatsAppWorkspace = /^\/(?:[a-z]{2}\/)?(?:automation|campaigns|contacts|templates|analytics|dashboard|settings|calls)(?:\/|$)/.test(pathname);
   
   const { data: team } = useSWR('/api/team', fetcher);
 
@@ -152,9 +159,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  if (isWhatsAppWorkspace && !isVoiceWorkspace) {
+    return <WhatsAppWorkspace>{children}</WhatsAppWorkspace>;
+  }
+
   return (
     <div className="flex h-screen bg-muted overflow-hidden">
-      <Sidebar />
+      {!isVoiceWorkspace && <Sidebar />}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         {children}
       </main>

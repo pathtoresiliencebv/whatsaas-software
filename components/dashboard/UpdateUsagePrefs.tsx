@@ -11,32 +11,32 @@ export function UpdateUsagePrefs() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Usage Preferences</CardTitle>
-        <CardDescription>Configure how your account uses resources.</CardDescription>
+        <CardTitle>Gebruiksvoorkeuren</CardTitle>
+        <CardDescription>Stel in hoe je account middelen gebruikt.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Label>Auto-refresh Dashboard</Label>
-            <p className="text-sm text-muted-foreground">Automatically update dashboard data</p>
+            <Label>Dashboard automatisch verversen</Label>
+            <p className="text-sm text-muted-foreground">Werk dashboardgegevens automatisch bij</p>
           </div>
           <Switch defaultChecked />
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <Label>Email Notifications</Label>
-            <p className="text-sm text-muted-foreground">Receive email alerts for important events</p>
+            <Label>E-mailmeldingen</Label>
+            <p className="text-sm text-muted-foreground">Ontvang e-mailalerts voor belangrijke gebeurtenissen</p>
           </div>
           <Switch defaultChecked />
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <Label>Browser Notifications</Label>
-            <p className="text-sm text-muted-foreground">Show desktop notifications for new messages</p>
+            <Label>Browsermeldingen</Label>
+            <p className="text-sm text-muted-foreground">Toon desktopmeldingen voor nieuwe berichten</p>
           </div>
           <Switch defaultChecked />
         </div>
-        <Button>Save Preferences</Button>
+        <Button>Voorkeuren opslaan</Button>
       </CardContent>
     </Card>
   );

@@ -6,8 +6,6 @@ import {
   MessageSquare,
   Zap,
   Users,
-  BarChart3,
-  Smartphone,
   Bot,
   Search,
   MoreVertical,
@@ -30,15 +28,9 @@ import Logo from '@/components/interface/Logo';
 import { LogoCarouselClient } from '@/components/interface/LogoCarousel';
 import { FAQ } from '@/components/landing/FAQ';
 import { SchemaMarkup } from '@/components/landing/SchemaMarkup';
-import { TrustBadges } from '@/components/landing/TrustBadges';
 import { Testimonials } from '@/components/landing/Testimonials';
-import { Stats } from '@/components/landing/Stats';
-import { StepSection } from '@/components/landing/StepSection';
-import { UseCases } from '@/components/landing/UseCases';
-import { Integrations } from '@/components/landing/Integrations';
-import { WhyKyrn } from '@/components/landing/WhyKyrn';
-import { RiskReversal } from '@/components/landing';
 import { LandingHeader } from '@/components/landing/Header';
+import { WhatomateSections } from '@/components/landing/WhatomateSections';
 import { useTranslations } from 'next-intl';
 import { getTranslations, getLocale } from 'next-intl/server';
 
@@ -91,8 +83,8 @@ function DashboardPreview() {
               {[
                 { name: "Alice Freeman", msg: t('chat_1_msg'), time: "10:23 AM", active: true, unread: 0 },
                 { name: "Tech Solutions", msg: t('chat_2_msg'), time: "09:45 AM", active: false, unread: 2 },
-                { name: "John Doe", msg: t('chat_3_msg'), time: "Yesterday", active: false, unread: 0 },
-                { name: "Sarah Smith", msg: t('chat_4_msg'), time: "Yesterday", active: false, unread: 0 },
+            { name: "John Doe", msg: t('chat_3_msg'), time: t('yesterday'), active: false, unread: 0 },
+            { name: "Sarah Smith", msg: t('chat_4_msg'), time: t('yesterday'), active: false, unread: 0 },
               ].map((chat, i) => (
                 <div key={i} className={`p-3 rounded-xl flex gap-3 cursor-default ${chat.active ? 'bg-primary/5 border border-primary/10' : 'hover:bg-muted/50 border border-transparent'}`}>
                   <div className="relative">
@@ -179,7 +171,7 @@ function DashboardPreview() {
               <div className="flex items-center gap-3 bg-muted/30 p-2 rounded-xl border border-border/50">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary"><Plus className="h-5 w-5" /></Button>
                 <div className="h-6 w-[1px] bg-border" />
-                <input className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground" placeholder="Type a message or / for commands..." />
+                  <input className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground" placeholder={t('input_placeholder')} />
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary"><Paperclip className="h-4 w-4" /></Button>
                 <Button size="icon" className="h-8 w-8 rounded-lg"><Send className="h-4 w-4" /></Button>
               </div>
@@ -231,30 +223,18 @@ function DashboardPreview() {
 function LogoCarousel() {
   const t = useTranslations('LandingPage.social_proof');
   return (
-    <div className="w-full py-12 border-y border-border/40 bg-muted/20 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 mb-8">
+    <div className="w-full border-y border-border/40 bg-muted/20 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 py-10">
         <p className="text-center text-sm font-medium text-muted-foreground uppercase tracking-widest">
           {t('trusted_by')}
         </p>
+        <div className="mt-7">
+          <LogoCarouselClient />
+        </div>
       </div>
-      <LogoCarouselClient />
     </div>
   );
 }
-
-function FeatureCard({ icon: Icon, title, description, delay }: { icon: any, title: string, description: string, delay: string }) {
-  return (
-    <div className={`group p-6 rounded-2xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 ${delay}`}>
-      <div className="h-12 w-12 rounded-lg bg-primary/5 flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
-        <Icon className="h-6 w-6 text-primary" />
-      </div>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
-    </div>
-  );
-}
-
-
 
 export default async function HomePage() {
 
@@ -310,7 +290,7 @@ export default async function HomePage() {
                 {t('hero.cta_primary')} <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="#features">
+            <Link href="#sales-line">
               <Button variant="outline" size="lg" className="rounded-full px-8 h-12 text-base backdrop-blur-sm bg-background/50">
                 {t('hero.cta_secondary')}
               </Button>
@@ -342,69 +322,7 @@ export default async function HomePage() {
 
       <LogoCarousel />
 
-      <TrustBadges />
-
-      <Stats />
-
-      <section id="features" className="py-24 bg-background relative scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.title')}</h2>
-            <p className="text-muted-foreground text-lg">
-              {t('features.subtitle')}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FeatureCard 
-              icon={Zap} 
-              title={t('features.card_flow_title')} 
-              description={t('features.card_flow_desc')} 
-              delay="delay-0"
-            />
-            <FeatureCard 
-              icon={Bot} 
-              title={t('features.card_ai_title')} 
-              description={t('features.card_ai_desc')} 
-              delay="delay-100"
-            />
-            <FeatureCard 
-              icon={MessageSquare} 
-              title={t('features.card_inbox_title')} 
-              description={t('features.card_inbox_desc')} 
-              delay="delay-200"
-            />
-            <FeatureCard 
-              icon={Smartphone} 
-              title={t('features.card_multi_title')} 
-              description={t('features.card_multi_desc')} 
-              delay="delay-300"
-            />
-            <FeatureCard 
-              icon={Users} 
-              title={t('features.card_team_title')} 
-              description={t('features.card_team_desc')} 
-              delay="delay-400"
-            />
-            <FeatureCard 
-              icon={BarChart3} 
-              title={t('features.card_campaigns_title')} 
-              description={t('features.card_campaigns_desc')} 
-              delay="delay-500"
-            />
-          </div>
-        </div>
-      </section>
-
-      <StepSection />
-
-      <UseCases />
-
-      <Integrations />
-
-      <WhyKyrn />
-
-      <RiskReversal />
+      <WhatomateSections />
 
       <section id="pricing" className="py-24 bg-muted/30 border-t border-border scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -21,8 +21,6 @@ export default function CampaignsPage() {
         const interval = setInterval(() => mutate(), 5000);
         return () => clearInterval(interval);
     }, [hasProcessing, mutate]);
-    const { data: featureData, isLoading: isFeatureLoading } = useSWR('/api/features?name=isCampaignsEnabled', fetcher);
-
     const handleStart = async (id: number) => {
         try {
             const res = await fetch('/api/campaigns/send', {
@@ -49,13 +47,11 @@ export default function CampaignsPage() {
                     <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
                     <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
                 </div>
-                {featureData?.hasAccess && (
+                <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     <Link href="/campaigns/new">
-                        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                            <Plus className="h-4 w-4 mr-2" /> {t('create_btn')}
-                        </Button>
+                        <Plus className="h-4 w-4 mr-2" /> {t('create_btn')}
                     </Link>
-                )}
+                </Button>
             </header>
 
             {isLoading ? (
@@ -65,6 +61,11 @@ export default function CampaignsPage() {
                     <Megaphone className="h-16 w-16 text-muted mb-4" />
                     <h3 className="text-lg font-medium text-foreground">{t('empty_title')}</h3>
                     <p className="text-muted-foreground mb-6">{t('empty_desc')}</p>
+                    <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                        <Link href="/campaigns/new">
+                            <Plus className="h-4 w-4 mr-2" /> {t('create_btn')}
+                        </Link>
+                    </Button>
                 </div>
             ) : (
                 <div className="grid gap-4">

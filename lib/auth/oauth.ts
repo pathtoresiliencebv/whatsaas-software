@@ -209,21 +209,23 @@ async function exchangeGoogleCode(code: string): Promise<{ accessToken: string; 
   const clientId = process.env.GOOGLE_CLIENT_ID!;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
   const redirectUri = `${process.env.BASE_URL}/api/auth/oauth/google`;
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    code,
+    grant_type: 'authorization_code',
+    redirect_uri: redirectUri,
+  });
 
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      code,
-      grant_type: 'authorization_code',
-      redirect_uri: redirectUri,
-    }),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
   });
 
   if (!response.ok) {
-    throw new Error('Failed to exchange code for token');
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`Failed to exchange Google code for token (${response.status}): ${errorText}`);
   }
 
   const data = await response.json();

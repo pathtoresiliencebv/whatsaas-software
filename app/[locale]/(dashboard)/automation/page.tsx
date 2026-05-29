@@ -1,22 +1,22 @@
 import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { GitMerge, Trash2, Bot, Smartphone } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { GitMerge, Trash2, MoreHorizontal, Search, Plus, LayoutTemplate, Bot, Smartphone, CalendarDays } from 'lucide-react';
 import { getAutomations, deleteAutomation } from './actions';
-import { CreateAutomationButton } from '@/components/automation/CreateAutomationButton';
 import { AutomationStatusToggle } from '@/components/automation/AutomationStatusToggle';
 import { SessionsSheet } from '@/components/sessions/SessionsSheet';
 import { enforceFeature } from '@/lib/limits';
-import { getTeamForUser } from '@/lib/db/queries';
+import { getTeamForUser, getUser } from '@/lib/db/queries';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
 export default async function AutomationListPage() {
   const t = await getTranslations('Automation');
-  const team = await getTeamForUser();
+  const [team, user] = await Promise.all([getTeamForUser(), getUser()]);
   
-  if(!team) redirect('/login');
+  if(!team) redirect('/sign-in');
   
   try {
     await enforceFeature(team.id, 'isFlowBuilderEnabled');
@@ -25,66 +25,121 @@ export default async function AutomationListPage() {
   }
   
   const automationsList = await getAutomations();
+  const ownerEmail = user?.email || team.teamMembers?.[0]?.user?.email || t('workspace_owner');
 
   return (
-    <div className="flex flex-col h-full bg-muted p-6">
-      <header className="flex justify-between items-center mb-8">
+    <div className="min-h-full bg-[#f8f8f7] px-6 py-8 text-zinc-950 dark:bg-[#17191b] dark:text-white">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('agents_title')}</h1>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{t('agents_description')}</p>
         </div>
         <div className="flex items-center gap-2">
           <SessionsSheet type="automation" />
-          <CreateAutomationButton />
+          <Button variant="outline" className="h-9 rounded-lg border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 dark:border-[#303630] dark:bg-[#111412] dark:text-white dark:hover:bg-[#1d221f]" asChild>
+            <Link href="/templates">
+              <LayoutTemplate className="mr-2 h-4 w-4" />
+              {t('browse_templates')}
+            </Link>
+          </Button>
+          <Button className="h-9 rounded-lg bg-black px-4 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200" asChild>
+            <Link href="/automation/new">
+              <Plus className="mr-2 h-4 w-4" />
+              {t('new_agent')}
+            </Link>
+          </Button>
         </div>
       </header>
 
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Input
+          readOnly
+          placeholder={t('search_agents_placeholder')}
+          className="h-11 rounded-xl border-zinc-200 bg-white pl-10 shadow-sm dark:border-[#303630] dark:bg-[#111412]"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" size="sm" className="h-7 rounded-full bg-white px-3 text-xs dark:border-[#303630] dark:bg-[#111412]">
+          <Plus className="mr-1 h-3 w-3" />
+          {t('filter_creator')}
+        </Button>
+        <Button variant="outline" size="sm" className="h-7 rounded-full bg-white px-3 text-xs dark:border-[#303630] dark:bg-[#111412]">
+          <Plus className="mr-1 h-3 w-3" />
+          {t('filter_archived')}
+        </Button>
+      </div>
+
       {automationsList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-96 bg-background rounded-xl border border-border shadow-sm">
-          <div className="p-4 bg-muted rounded-full mb-4">
-            <GitMerge className="h-8 w-8 text-muted-foreground" />
+        <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 bg-white text-center shadow-sm dark:border-[#303630] dark:bg-[#111412]">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#e8f9ed] text-[#14933a]">
+            <GitMerge className="h-6 w-6" />
           </div>
-          <h3 className="text-lg font-medium text-foreground">{t('empty_title')}</h3>
-          <p className="text-muted-foreground mb-6">{t('empty_desc')}</p>
-          <CreateAutomationButton />
+          <h3 className="text-lg font-semibold">{t('empty_title')}</h3>
+          <p className="mt-1 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">{t('empty_desc')}</p>
+          <Button className="mt-6 rounded-lg bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200" asChild>
+            <Link href="/automation/new">
+              <Plus className="mr-2 h-4 w-4" />
+              {t('new_agent')}
+            </Link>
+          </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-[#303630] dark:bg-[#111412]">
+          <div className="grid grid-cols-[minmax(260px,1.1fr)_minmax(220px,0.9fr)_180px_120px] border-b border-zinc-100 px-4 py-3 text-xs font-medium text-zinc-500 dark:border-[#252b27] dark:text-zinc-400">
+            <span>{t('col_name')}</span>
+            <span>{t('col_created_by')}</span>
+            <span>{t('col_created_at')}</span>
+            <span className="text-right">{t('col_actions')}</span>
+          </div>
           {automationsList.map((bot) => (
-            <Card key={bot.id} className="flex flex-col hover:border-primary/50 transition-colors relative overflow-hidden">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-md ${bot.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-muted text-muted-foreground'}`}>
-                            <Bot className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <CardTitle className="text-base">{bot.name}</CardTitle>
-                            <div className="flex items-center text-xs text-muted-foreground mt-1">
-                                <Smartphone className="h-3 w-3 mr-1" />
-                                {bot.instance?.instanceName || t('no_instance')}
-                            </div>
-                        </div>
-                    </div>
-                    <AutomationStatusToggle id={bot.id} initialActive={bot.isActive} />
+            <div key={bot.id} className="grid grid-cols-[minmax(260px,1.1fr)_minmax(220px,0.9fr)_180px_120px] items-center border-b border-zinc-100 px-4 py-4 text-sm last:border-b-0 hover:bg-zinc-50/80 dark:border-[#252b27] dark:hover:bg-[#171b18]">
+              <Link href={`/automation/${bot.id}`} className="min-w-0">
+                <div className="flex items-center gap-3">
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${bot.isActive ? 'bg-[#e8f9ed] text-[#14933a]' : 'bg-zinc-100 text-zinc-500 dark:bg-[#202620] dark:text-zinc-300'}`}>
+                    <Bot className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-2">
+                      <span className="truncate font-medium text-zinc-950 dark:text-white">{bot.name}</span>
+                      {bot.isActive && <Badge className="h-5 rounded-full bg-[#e8f9ed] px-2 text-[10px] text-[#14933a] hover:bg-[#e8f9ed]">{t('status_live')}</Badge>}
+                    </span>
+                    <span className="mt-1 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                      <Smartphone className="h-3 w-3" />
+                      {bot.instance?.instanceName || t('no_instance')}
+                    </span>
+                  </span>
                 </div>
-              </CardHeader>
-              
-              <CardFooter className="mt-auto flex justify-between border-t bg-muted/20 p-4">
-                <Link href={`/automation/${bot.id}`}>
-                  <Button variant="outline" size="sm">{t('edit_flow_btn')}</Button>
-                </Link>
-                
+              </Link>
+              <span className="truncate text-zinc-700 dark:text-zinc-300">{ownerEmail}</span>
+              <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+                <CalendarDays className="h-3.5 w-3.5" />
+                {new Date(bot.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </span>
+              <div className="flex items-center justify-end gap-2">
+                <AutomationStatusToggle id={bot.id} initialActive={bot.isActive} />
                 <form action={deleteAutomation.bind(null, bot.id)}>
-                  <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-8 w-8">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </form>
-              </CardFooter>
-            </Card>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500" asChild>
+                  <Link href={`/automation/${bot.id}`} aria-label={t('open_agent_label', { name: bot.name })}>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

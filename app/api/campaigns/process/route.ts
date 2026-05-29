@@ -120,12 +120,17 @@ export async function GET(request: Request) {
                         }
                     };
 
+                    const metaToken = campaign.instance.metaToken || campaign.instance.accessToken;
+                    if (!metaToken) {
+                        throw new Error('Invalid or unconnected WABA instance');
+                    }
+
                     const response = await fetch(
                         `https://graph.facebook.com/v21.0/${campaign.instance.metaPhoneNumberId}/messages`,
                         {
                             method: 'POST',
                             headers: {
-                                'Authorization': `Bearer ${campaign.instance.metaToken}`,
+                                'Authorization': `Bearer ${metaToken}`,
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify(metaPayload),

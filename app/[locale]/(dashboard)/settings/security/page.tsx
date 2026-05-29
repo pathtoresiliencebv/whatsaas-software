@@ -192,7 +192,7 @@ export default function SecurityPage() {
                     />
                     <Input
                       type="text"
-                      placeholder="Verification code"
+                      placeholder="Verificatiecode"
                       value={disableToken}
                       onChange={(e) => setDisableToken(e.target.value)}
                     />
@@ -201,15 +201,15 @@ export default function SecurityPage() {
                     <p className="text-red-500 text-sm">{disableError}</p>
                   )}
                   <div className="flex gap-2">
-                    <Button onClick={handleDisable2FA}>Disable 2FA</Button>
-                    <Button variant="ghost" onClick={() => setShowSetup(false)}>Cancel</Button>
+                    <Button onClick={handleDisable2FA}>2FA uitschakelen</Button>
+                    <Button variant="ghost" onClick={() => setShowSetup(false)}>Annuleren</Button>
                   </div>
                 </div>
               )}
             </div>
           ) : setupData?.success && setupData.backupCodes ? (
             <div className="space-y-4">
-              <p className="font-medium">Scan this QR code with your authenticator app:</p>
+              <p className="font-medium">Scan deze QR-code met je authenticator-app:</p>
               <div className="bg-white p-4 rounded-lg inline-block">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`otpauth://totp/Kyrn:${userEmail}?secret=${setupData.secret}&issuer=Kyrn`)}`}
@@ -229,7 +229,7 @@ export default function SecurityPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <p className="text-sm font-medium">Save your backup codes:</p>
+                <p className="text-sm font-medium">Bewaar je herstelcodes:</p>
                 <div className="bg-muted p-4 rounded-lg space-y-1">
                   {setupData.backupCodes.map((code, i) => (
                     <code key={i} className="font-mono text-sm">{code}</code>
@@ -237,10 +237,10 @@ export default function SecurityPage() {
                 </div>
                 <Button variant="outline" size="sm" onClick={downloadBackupCodes}>
                   <Download className="h-4 w-4 mr-2" />
-                  Download Backup Codes
+                  Herstelcodes downloaden
                 </Button>
                 <p className="text-xs text-muted-foreground">
-                  Store these codes safely. Each can only be used once.
+                  Bewaar deze codes veilig. Elke code kan maar een keer worden gebruikt.
                 </p>
               </div>
               <div className="space-y-2 pt-4 border-t">

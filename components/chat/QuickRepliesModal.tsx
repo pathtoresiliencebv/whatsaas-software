@@ -1,21 +1,24 @@
 'use client';
 
 import React from 'react';
+import useSWR from 'swr';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 type QuickReply = {
   id: number;
   shortcut: string;
-  message: string;
+  content?: string;
+  message?: string;
 };
 
 interface QuickRepliesModalProps {
@@ -25,56 +28,111 @@ interface QuickRepliesModalProps {
   [key: string]: any;
 }
 
-export function QuickRepliesModal({ open, onOpenChange, onSelect }: QuickRepliesModalProps) {
-  const [quickReplies] = React.useState<QuickReply[]>([
-    { id: 1, shortcut: '/hello', message: 'Hello! How can I help you today?' },
-    { id: 2, shortcut: '/thanks', message: 'Thank you for your message!' },
-    { id: 3, shortcut: '/bye', message: 'Goodbye! Have a great day!' },
-  ]);
-  const [search, setSearch] = React.useState('');
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-  const filtered = quickReplies.filter(
-    (qr) =>
-      qr.shortcut.toLowerCase().includes(search.toLowerCase()) ||
-      qr.message.toLowerCase().includes(search.toLowerCase())
-  );
+export function QuickRepliesModal({ open, onOpenChange, onSelect }: QuickRepliesModalProps) {
+  const { data, mutate } = useSWR<QuickReply[]>('/api/quick-replies', fetcher);
+  const [shortcut, setShortcut] = React.useState('');
+  const [content, setContent] = React.useState('');
+  const [saving, setSaving] = React.useState(false);
+  const replies = data || [];
+
+  const addReply = async () => {
+    if (!shortcut.trim() || !content.trim()) return;
+    setSaving(true);
+    const res = await fetch('/api/quick-replies', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shortcut, content }),
+    });
+    setSaving(false);
+    if (!res.ok) {
+      toast.error('Quick reply kon niet worden opgeslagen.');
+      return;
+    }
+    setShortcut('');
+    setContent('');
+    mutate();
+  };
+
+  const removeReply = async (id: number) => {
+    await fetch('/api/quick-replies', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    mutate();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>Quick Replies</DialogTitle>
-          <DialogDescription>Select a quick reply to insert into your message.</DialogDescription>
+          <DialogTitle>Snelle antwoorden</DialogTitle>
+          <DialogDescription>Beheer je snelkoppelingen. Typ /snelkoppeling om ze te gebruiken.</DialogDescription>
         </DialogHeader>
-        <Input
-          placeholder="Search quick replies..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="mb-4"
-        />
-        <div className="space-y-2 max-h-64 overflow-y-auto">
-          {filtered.map((qr) => (
-            <div
-              key={qr.id}
-              className="p-3 border rounded-lg hover:bg-muted cursor-pointer transition-colors"
-              onClick={() => {
-                onSelect?.(qr.message);
-                onOpenChange?.(false);
-              }}
-            >
-              <div className="font-mono text-sm text-primary">{qr.shortcut}</div>
-              <div className="text-sm text-muted-foreground mt-1">{qr.message}</div>
+
+        <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-2">
+          <Input
+            placeholder="Snelkoppeling"
+            value={shortcut}
+            onChange={(event) => setShortcut(event.target.value)}
+          />
+          <Input
+            placeholder="Volledige berichttekst..."
+            value={content}
+            onChange={(event) => setContent(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') addReply();
+            }}
+          />
+        </div>
+
+        <Button
+          type="button"
+          className="w-full bg-emerald-600 hover:bg-emerald-700"
+          disabled={saving || !shortcut.trim() || !content.trim()}
+          onClick={addReply}
+        >
+          Nieuwe toevoegen
+        </Button>
+
+        <div className="max-h-64 space-y-2 overflow-y-auto">
+          {replies.map((reply) => {
+            const text = reply.message || reply.content || '';
+            return (
+              <button
+                key={reply.id}
+                type="button"
+                className="flex w-full items-center gap-3 rounded-lg border bg-muted/30 px-3 py-3 text-left transition hover:bg-muted"
+                onClick={() => {
+                  onSelect?.(text);
+                  onOpenChange?.(false);
+                }}
+              >
+                <span className="font-mono text-sm font-semibold text-primary">/{reply.shortcut.replace(/^\//, '')}</span>
+                <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">{text}</span>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  className="rounded p-1 text-destructive hover:bg-destructive/10"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    removeReply(reply.id);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </span>
+              </button>
+            );
+          })}
+
+          {replies.length === 0 && (
+            <div className="rounded-lg border border-dashed py-8 text-center text-sm text-muted-foreground">
+              Nog geen snelle antwoorden.
             </div>
-          ))}
-          {filtered.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground text-sm">No quick replies found.</div>
           )}
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange?.(false)}>
-            Cancel
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

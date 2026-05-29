@@ -24,7 +24,9 @@
       "voice": "Chamadas de Voz",
       "voice_desc": "Voz Twilio e créditos",
       "security": "Segurança",
-      "security_desc": "Senha e 2FA"
+      "security_desc": "Senha e 2FA",
+      "billing": "Cobrança",
+      "billing_desc": "Faturas e pagamentos"
     },
     "footer": {
       "help": "Precisa de ajuda?",
@@ -79,7 +81,10 @@
     "calls": "Ligações",
     "settings": "Configurações",
     "sign_out": "Sair",
-    "toggle_theme": "Alternar tema"
+    "toggle_theme": "Alternar tema",
+    "whatsapp_agents": "Agentes de WhatsApp",
+    "voice_agents": "Agentes de voz",
+    "analytics": "Analytics"
   },
   "Pricing": {
     "manage_billing": "Gerenciar cobrança e faturas",
@@ -88,7 +93,8 @@
     "offline_plan": "Plano",
     "offline_amount": "Valor",
     "offline_instructions": "Após realizar o pagamento, envie o comprovante para o suporte. Seu plano será ativado manualmente em até 24 horas.",
-    "offline_close": "Entendi"
+    "offline_close": "Entendi",
+    "nav_label": "Preços"
   },
   "Sessions": {
     "title": "Sessões Ativas",
@@ -184,7 +190,10 @@
       "save": "Salvar",
       "mute": "Silenciar notificações",
       "unmute": "Reativar notificações"
-    }
+    },
+    "dashboard_title": "Dashboard",
+    "dashboard_start_desc": "Comece aqui para preparar seu workspace de WhatsApp e voz.",
+    "dashboard_return_desc": "Boas-vindas de volta. Aqui está uma visão geral do seu workspace."
   },
   "Settings": {
     "team_title": "Configurações da Equipe",
@@ -427,7 +436,6 @@
     "system_instructions_desc": "Defina como a IA deve se comportar, seu tom e limitações.",
     "system_prompt_placeholder": "Ex: Você é um agente de suporte da PizzariaX. Seja amigável. Seu objetivo é anotar pedidos...",
     "save_config_btn": "Salvar Configuração",
-
     "voice_config_title": "Configurações de Chamadas de Voz",
     "voice_config_desc": "Gerencie seus números de telefone e créditos de chamada.",
     "voice_phone_number": "Número de Telefone",
@@ -468,7 +476,6 @@
     "voice_col_credits": "Créditos",
     "voice_page_info": "Página {page} de {total}",
     "voice_no_history": "Nenhum histórico de chamadas ainda.",
-
     "activity_log_title": "Log de Atividade",
     "recent_activity_title": "Atividade Recente",
     "no_activity_yet_title": "Nenhuma atividade ainda",
@@ -713,7 +720,21 @@
     "http_add_mapping": "Adicionar",
     "http_mapping_hint": "Extraia campos do JSON de resposta e salve como variáveis.",
     "save_changes_btn": "Salvar Alterações",
-    "autosave_hint": "As alterações são salvas automaticamente"
+    "autosave_hint": "As alterações são salvas automaticamente",
+    "workspace_owner": "Proprietário do workspace",
+    "agents_title": "Agentes",
+    "agents_description": "Crie, conecte e monitore seus agentes de automação do WhatsApp.",
+    "browse_templates": "Ver templates",
+    "new_agent": "Novo agente",
+    "search_agents_placeholder": "Buscar agentes...",
+    "filter_creator": "Criador",
+    "filter_archived": "Arquivados",
+    "col_name": "Nome",
+    "col_created_by": "Criado por",
+    "col_created_at": "Criado em",
+    "col_actions": "Ações",
+    "status_live": "Ao vivo",
+    "open_agent_label": "Abrir {name}"
   },
   "Templates": {
     "no_waba_instance_connected": "Nenhuma Instância WABA Conectada",
@@ -796,7 +817,36 @@
     "language_portuguese": "Português",
     "language_english": "English",
     "language_spanish": "Español",
-    "language_dutch": "Nederlands"
+    "language_dutch": "Nederlands",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "deleting": "Excluindo...",
+    "edit": "Editar",
+    "editing": "Editando...",
+    "create": "Criar",
+    "creating": "Criando...",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "loading": "Carregando...",
+    "no_results": "Nenhum resultado encontrado",
+    "retry": "Tentar novamente",
+    "refresh": "Atualizar",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "required_field": "Este campo é obrigatório",
+    "invalid_email": "Digite um e-mail válido",
+    "success": "Sucesso",
+    "error": "Erro",
+    "warning": "Aviso",
+    "info": "Info"
   },
   "Admin": {
     "payment_gateway_label": "Gateway de Pagamento",
@@ -1110,7 +1160,6 @@
     "select_template_btn": "Selecionar modelo de mensagem",
     "send_template_btn": "Enviar modelo",
     "no_approved_templates": "Nenhum modelo aprovado encontrado",
-
     "voice_call": "Chamada de Voz",
     "calling": "Chamando...",
     "in_call": "Em Chamada",
@@ -1146,9 +1195,9 @@
     "call_bubble_canceled": "Ligação cancelada",
     "call_system_log": "{agent} fez uma ligação ({status})",
     "call_preview": "📞 Ligação de voz · {agent}",
-
     "sync_messages": {
       "banner": "Este chat não possui mensagens. Deseja importar o histórico?",
+      "auto_importing": "Importando o histórico de mensagens automaticamente...",
       "import_btn": "Importar histórico",
       "menu_btn": "Sincronizar mensagens",
       "success": "{count} mensagens importadas com sucesso!",
@@ -1197,7 +1246,9 @@
       "crm_tag_api": "WhatsApp API",
       "crm_actions": "Ações",
       "crm_action_assign": "Atribuir Agente",
-      "crm_action_pause": "Pausar IA"
+      "crm_action_pause": "Pausar IA",
+      "yesterday": "Ontem",
+      "input_placeholder": "Digite uma mensagem ou / para comandos..."
     },
     "social_proof": {
       "trusted_by": "Desenvolvido para equipes que entregam resultados",
@@ -1276,20 +1327,68 @@
       "title": "Comece em Minutos",
       "subtitle": "Funcionando em 4 passos simples. Sem necessidade de cdigo.",
       "steps": [
-        { "title": "Conecte o WhatsApp", "description": "Vincule seu nmero do WhatsApp via QR code ou pareamento de telefone." },
-        { "title": "Importe Contatos", "description": "Adicione contatos manualmente ou importe via arquivos CSV/Excel." },
-        { "title": "Crie Automaes", "description": "Construa fluxos com IA ou regras de chatbot para processar mensagens." },
-        { "title": "Comece a Enviar", "description": "Envie campanhas, automatize respostas e gerencie conversas." }
+        {
+          "title": "Conecte o WhatsApp",
+          "description": "Vincule seu nmero do WhatsApp via QR code ou pareamento de telefone."
+        },
+        {
+          "title": "Importe Contatos",
+          "description": "Adicione contatos manualmente ou importe via arquivos CSV/Excel."
+        },
+        {
+          "title": "Crie Automaes",
+          "description": "Construa fluxos com IA ou regras de chatbot para processar mensagens."
+        },
+        {
+          "title": "Comece a Enviar",
+          "description": "Envie campanhas, automatize respostas e gerencie conversas."
+        }
       ]
     },
     "useCases": {
       "title": "Feito para Sua Indstria",
       "subtitle": "Veja como empresas como a sua usam Kyrn para automatizar o WhatsApp.",
       "items": [
-        { "title": "E-commerce", "description": "Automatize atualizaes de pedidos, devolues e recomendaes de produtos.", "features": ["Confirmaes de pedido", "Rastreamento de entrega", "Recuperao de carrinho", "Catlogo de produtos"] },
-        { "title": "Agncias", "description": "Gerencie mltiplos clientes de um painel com colaborao de equipe.", "features": ["Gesto multi-cliente", "Atribuio de equipe", "White-label pronto", "Automao de campanhas"] },
-        { "title": "SaaS", "description": "Automatize onboarding, suporte e engajamento de usurios em escala.", "features": ["Fluxos de onboarding", "Automao de tickets", "Anncios de features", "Segmentao de usurios"] },
-        { "title": "Sade", "description": "Agende consultas, envie lembretes e trate consultas de pacientes.", "features": ["Agendamento de consultas", "Lembretes para pacientes", "Alertas de prescrio", "Mensagens seguras"] }
+        {
+          "title": "E-commerce",
+          "description": "Automatize atualizaes de pedidos, devolues e recomendaes de produtos.",
+          "features": [
+            "Confirmaes de pedido",
+            "Rastreamento de entrega",
+            "Recuperao de carrinho",
+            "Catlogo de produtos"
+          ]
+        },
+        {
+          "title": "Agncias",
+          "description": "Gerencie mltiplos clientes de um painel com colaborao de equipe.",
+          "features": [
+            "Gesto multi-cliente",
+            "Atribuio de equipe",
+            "White-label pronto",
+            "Automao de campanhas"
+          ]
+        },
+        {
+          "title": "SaaS",
+          "description": "Automatize onboarding, suporte e engajamento de usurios em escala.",
+          "features": [
+            "Fluxos de onboarding",
+            "Automao de tickets",
+            "Anncios de features",
+            "Segmentao de usurios"
+          ]
+        },
+        {
+          "title": "Sade",
+          "description": "Agende consultas, envie lembretes e trate consultas de pacientes.",
+          "features": [
+            "Agendamento de consultas",
+            "Lembretes para pacientes",
+            "Alertas de prescrio",
+            "Mensagens seguras"
+          ]
+        }
       ],
       "compliance_note": "Caso de uso de saúde inclui recursos em conformidade com HIPAA. Todos os dados são criptografados e armazenados com segurança."
     },
@@ -1297,12 +1396,30 @@
       "title": "Conecta com Seu Stack",
       "subtitle": "Integre com as ferramentas que voc j usa. Sem configurao complexa.",
       "items": [
-        { "name": "WhatsApp", "description": "Web & Business API" },
-        { "name": "Evolution API", "description": "Conexo multi-dispositivo" },
-        { "name": "Stripe", "description": "Pagamentos & faturamento" },
-        { "name": "OpenAI", "description": "Respostas com IA" },
-        { "name": "Twilio", "description": "Chamadas de voz & SMS" },
-        { "name": "Google AI", "description": "Modelos de IA avanados" }
+        {
+          "name": "WhatsApp",
+          "description": "Web & Business API"
+        },
+        {
+          "name": "Evolution API",
+          "description": "Conexo multi-dispositivo"
+        },
+        {
+          "name": "Stripe",
+          "description": "Pagamentos & faturamento"
+        },
+        {
+          "name": "OpenAI",
+          "description": "Respostas com IA"
+        },
+        {
+          "name": "Twilio",
+          "description": "Chamadas de voz & SMS"
+        },
+        {
+          "name": "Google AI",
+          "description": "Modelos de IA avanados"
+        }
       ]
     },
     "whyKyrn": {
@@ -1689,5 +1806,479 @@
     "type_add_tag": "Adicionar Tag",
     "select_tag_placeholder": "Selecionar tag",
     "tag_required": "Selecione uma tag"
+  },
+  "WelcomeOnboarding": {
+    "sidebar": {
+      "title": "Guia inicial da Kyrn",
+      "description": "Em um minuto você saberá por onde começar e o que cada parte importante faz."
+    },
+    "steps": {
+      "welcome": "Boas-vindas",
+      "intake": "Perguntas rápidas",
+      "product": "Como a Kyrn funciona",
+      "action": "Primeira ação"
+    },
+    "goals": {
+      "support": "Acelerar o suporte",
+      "sales": "Acompanhar mais leads",
+      "automation": "Automatizar trabalho",
+      "voice": "Testar agentes de voz"
+    },
+    "teamSizes": {
+      "solo": "Solo",
+      "small": "2-5 pessoas",
+      "medium": "6-20 pessoas",
+      "large": "20+ pessoas"
+    },
+    "channels": {
+      "inbox": "Inbox do WhatsApp",
+      "whatsappAgents": "Agentes de WhatsApp",
+      "voiceAgents": "Agentes de voz",
+      "campaigns": "Campanhas"
+    },
+    "products": {
+      "inbox": {
+        "title": "Inbox",
+        "description": "Todas as conversas em um só lugar, com informações do contato e contexto da equipe."
+      },
+      "whatsappAgents": {
+        "title": "Agentes de WhatsApp",
+        "description": "Crie agentes de fluxo que fazem perguntas, encaminham, respondem e executam ações."
+      },
+      "voiceAgents": {
+        "title": "Agentes de voz",
+        "description": "Deixe um agente de IA ligar ou atender, com scripts, ferramentas e arquivos de conhecimento."
+      },
+      "campaigns": {
+        "title": "Campanhas",
+        "description": "Inicie follow-ups controlados por WhatsApp ou voz para listas e segmentos."
+      }
+    },
+    "welcome": {
+      "paidTitle": "Você entrou. Boas-vindas à Kyrn.",
+      "title": "Boas-vindas à Kyrn.",
+      "description": "Que bom ter você aqui. Vamos preparar seu espaço de trabalho com calma para você entender exatamente por onde começar.",
+      "descriptionWithTeam": "Que bom ter {teamName} aqui. Vamos preparar seu espaço de trabalho com calma para você entender exatamente por onde começar.",
+      "card1": "Conte rapidamente o que você quer alcançar",
+      "card2": "Veja como agentes e fluxos funcionam",
+      "card3": "Comece com a primeira ação certa"
+    },
+    "actions": {
+      "skip": "Fazer depois",
+      "begin": "Começar",
+      "back": "Voltar",
+      "next": "Continuar",
+      "chooseFirstStep": "Escolher meu primeiro passo",
+      "startFirstStep": "Iniciar meu primeiro passo"
+    },
+    "questions": {
+      "title": "O que trouxe você aqui?",
+      "description": "Sem configuração longa. Escolha o que combina melhor agora e vamos levar você ao melhor começo.",
+      "goalTitle": "Seu principal objetivo",
+      "teamTitle": "Tamanho da equipe",
+      "channelTitle": "Por onde você quer começar?"
+    },
+    "product": {
+      "title": "Como a Kyrn funciona na prática",
+      "description": "Pense na Kyrn como seu centro de comando de WhatsApp e voz. Você cria agentes, deixa eles conduzirem conversas e mantém o controle pelo dashboard."
+    },
+    "action": {
+      "title": "Seu plano inicial está pronto",
+      "description": "Começamos pelo básico: conectar um canal, criar um agente e depois testar.",
+      "descriptionWithGoal": "Começamos com: {goal}.",
+      "orderTitle": "Ordem recomendada",
+      "order1": "Conecte seu WhatsApp ou canal de teste.",
+      "order2": "Crie seu primeiro agente de WhatsApp ou agente de fluxo.",
+      "order3": "Teste uma conversa antes de ir ao ar.",
+      "order4": "Adicione agentes de voz, campanhas e membros da equipe quando a base estiver pronta."
+    }
+  },
+  "OnboardingBanner": {
+    "workspaceFallback": "seu espaço de trabalho",
+    "title": "Configure {teamName}",
+    "description": "Comece pelo WhatsApp, adicione seus primeiros contatos e depois ative automação e voz quando a base estiver pronta.",
+    "continueSetup": "Continuar configuração",
+    "progress": "{completed} de {total} etapas concluídas",
+    "nextLevel": "Próximo nível",
+    "steps": {
+      "connect": {
+        "label": "Conectar WhatsApp",
+        "description": "Vincule um número comercial para a Kyrn enviar e receber mensagens."
+      },
+      "contacts": {
+        "label": "Adicione seus primeiros contatos",
+        "description": "Importe clientes ou adicione uma pequena lista de teste antes de lançar."
+      },
+      "automate": {
+        "label": "Crie um agente de WhatsApp",
+        "description": "Construa o primeiro fluxo para respostas, roteamento ou captura de leads."
+      },
+      "voiceModel": {
+        "label": "Configurar modelo de voz",
+        "description": "Adicione o modelo e as configurações de voz para agentes telefônicos."
+      },
+      "voiceAgent": {
+        "label": "Criar agente de voz",
+        "description": "Configure um agente de chamadas com script, ferramentas e conhecimento."
+      },
+      "telephony": {
+        "label": "Conectar telefonia",
+        "description": "Adicione telefonia e atribua um número quando estiver pronto."
+      },
+      "team": {
+        "label": "Convide sua equipe",
+        "description": "Traga suporte ou vendas para o espaço de trabalho compartilhado."
+      }
+    },
+    "dismissNextLevel": "Ocultar próximo nível",
+    "growthComplete": "Todas as etapas avançadas foram concluídas"
+  },
+  "VerifyEmailSent": {
+    "title": "Confira seu e-mail",
+    "description": "Enviamos um link de verificação. Verifique sua conta e a Kyrn guiará você pela primeira configuração do espaço de trabalho.",
+    "descriptionWithEmail": "Enviamos um link de verificação para {email}. Verifique sua conta e a Kyrn guiará você pela primeira configuração do espaço de trabalho.",
+    "noEmailTitle": "Ainda não chegou?",
+    "noEmailDescription": "Confira spam ou promoções. Se ainda não aparecer, envie um novo link de verificação.",
+    "sending": "Enviando...",
+    "resend": "Reenviar e-mail",
+    "continueSignIn": "Continuar para login",
+    "resendSuccess": "E-mail de verificação enviado! Confira sua caixa de entrada.",
+    "resendError": "Falha ao reenviar e-mail",
+    "genericError": "Algo deu errado. Tente novamente.",
+    "afterTitle": "O que acontece depois da verificação",
+    "steps": {
+      "connect": {
+        "title": "Conecte WhatsApp",
+        "description": "Adicione seu número comercial e reúna mensagens em um espaço de trabalho."
+      },
+      "agent": {
+        "title": "Crie seu primeiro agente",
+        "description": "Comece com um fluxo guiado de WhatsApp e depois adicione IA e voz quando estiver pronto."
+      },
+      "launch": {
+        "title": "Lance com segurança",
+        "description": "Convide sua equipe, teste conversas e monitore atividade pelo dashboard."
+      }
+    }
+  },
+  "Billing": {
+    "title": "Cobrança e faturas",
+    "invoices_title": "Histórico de faturas",
+    "billing_portal": "Portal de cobrança",
+    "col_date": "Data",
+    "col_number": "Fatura #",
+    "col_amount": "Valor",
+    "col_status": "Status",
+    "col_actions": "Ações",
+    "download_pdf": "Baixar PDF",
+    "view_online": "Ver online",
+    "no_invoices": "Nenhuma fatura encontrada.",
+    "no_billing_info": "Nenhuma informação de cobrança disponível.",
+    "error_loading": "Falha ao carregar faturas."
+  },
+  "CookieBanner": {
+    "title": "Sua privacidade",
+    "description": "Usamos apenas cookies essenciais para manter você conectado e lembrar suas preferências. Não usamos cookies de publicidade ou rastreamento.",
+    "essentialTitle": "Cookies essenciais",
+    "essentialDesc": "Necessários para autenticação e gerenciamento de sessão.",
+    "analyticsTitle": "Cookies funcionais",
+    "analyticsDesc": "Lembram seu idioma e preferências de interface.",
+    "alwaysActive": "Sempre ativo",
+    "accept": "Aceitar",
+    "decline": "Recusar",
+    "close": "Fechar",
+    "marketingTitle": "Cookies de marketing",
+    "marketingDesc": "Usados para mostrar anúncios relevantes e medir o desempenho de campanhas."
+  },
+  "TeamMembers": {
+    "title": "Membros da equipe",
+    "description": "Gerencie os membros da equipe e suas funções",
+    "invite": "Convidar membro",
+    "invite_title": "Novo membro da equipe",
+    "email_label": "E-mail",
+    "role_label": "Função",
+    "cancel": "Cancelar",
+    "invite_btn": "Convidar",
+    "inviting": "Convidando...",
+    "owner": "Proprietário",
+    "admin": "Admin",
+    "agent": "Agente",
+    "member": "Membro",
+    "pending": "Pendente",
+    "active": "Ativo",
+    "remove": "Remover",
+    "resend": "Reenviar",
+    "remove_confirm": "Tem certeza de que deseja remover este membro da equipe?",
+    "no_members": "Nenhum membro da equipe encontrado.",
+    "invitation_sent": "Convite enviado para",
+    "invite_error": "Ocorreu um erro ao enviar o convite",
+    "remove_error": "Ocorreu um erro ao remover o membro da equipe"
+  },
+  "Invoices": {
+    "title": "Faturas",
+    "description": "Veja seu histórico de faturas",
+    "download": "Baixar",
+    "view": "Ver",
+    "invoice": "Fatura",
+    "amount": "Valor",
+    "status": "Status",
+    "date": "Data",
+    "paid": "Paga",
+    "pending": "Pendente",
+    "failed": "Falhou",
+    "no_invoices": "Nenhuma fatura encontrada"
+  },
+  "Verification": {
+    "sent_title": "E-mail de verificação enviado",
+    "sent_description": "Enviamos um link de verificação para",
+    "check_spam": "Confira a pasta de spam se você não encontrar o e-mail.",
+    "not_received": "Não recebeu o e-mail?",
+    "resend": "Reenviar",
+    "resend_success": "Novo e-mail de verificação enviado!",
+    "verified_title": "E-mail verificado",
+    "verified_description": "Seu e-mail foi verificado com sucesso. Agora você pode entrar.",
+    "go_to_login": "Ir para login",
+    "expired_title": "Link de verificação expirado",
+    "expired_description": "Seu link de verificação expirou. Solicite um novo.",
+    "request_new": "Solicitar nova verificação",
+    "invalid_title": "Verificação inválida",
+    "invalid_description": "Este link de verificação é inválido. Solicite um novo.",
+    "error": "Ocorreu um erro ao verificar seu e-mail."
+  },
+  "instances_Sidebar": {
+    "title": "Conexões do WhatsApp",
+    "description": "Gerencie suas instâncias do WhatsApp",
+    "add": "Adicionar",
+    "add_title": "Nova instância",
+    "add_description": "Escaneie o QR code para conectar o WhatsApp",
+    "scan_qr": "Escanear QR Code",
+    "phone_number": "Número de telefone",
+    "device_name": "Nome do dispositivo",
+    "status": "Status",
+    "last_seen": "Visto por último",
+    "actions": "Ações",
+    "delete": "Excluir",
+    "logout": "Sair",
+    "delete_confirm": "Tem certeza de que deseja excluir esta instância?",
+    "logout_confirm": "Tem certeza de que deseja sair desta instância?",
+    "status_connected": "Conectado",
+    "status_disconnected": "Desconectado",
+    "status_connecting": "Conectando...",
+    "no_instances": "Nenhuma instância encontrada",
+    "create_first": "Crie sua primeira conexão do WhatsApp"
+  },
+  "ContactTable": {
+    "title": "Contatos",
+    "description": "Gerencie seus contatos",
+    "search": "Buscar...",
+    "add_contact": "Adicionar contato",
+    "import_contacts": "Importar",
+    "export_contacts": "Exportar",
+    "columns": {
+      "name": "Nome",
+      "phone": "Telefone",
+      "email": "E-mail",
+      "assigned_to": "Atribuído a",
+      "tags": "Tags",
+      "created_at": "Criado em",
+      "last_seen": "Visto por último",
+      "actions": "Ações"
+    },
+    "no_contacts": "Nenhum contato encontrado",
+    "create_first": "Crie seu primeiro contato",
+    "delete_confirm": "Tem certeza de que deseja excluir este contato?",
+    "delete_error": "Ocorreu um erro ao excluir o contato",
+    "import": {
+      "title": "Importar contatos",
+      "description": "Importe contatos de um arquivo CSV",
+      "dropzone": "Arraste seu arquivo CSV aqui ou clique para enviar",
+      "upload_btn": "Escolher arquivo",
+      "importing": "Importando...",
+      "success": "Contatos importados com sucesso!",
+      "error": "Ocorreu um erro ao importar",
+      "duplicate_count": "Duplicados ignorados",
+      "imported_count": "Importados"
+    },
+    "export": {
+      "title": "Exportar contatos",
+      "description": "Exporte seus contatos para um arquivo CSV",
+      "exporting": "Exportando...",
+      "success": "Contatos exportados com sucesso!",
+      "error": "Ocorreu um erro ao exportar"
+    }
+  },
+  "Errors": {
+    "generic": "Algo deu errado. Tente novamente mais tarde.",
+    "network": "Erro de rede. Verifique sua conexão.",
+    "unauthorized": "Você não tem autorização para esta ação.",
+    "not_found": "Não encontrado.",
+    "validation_error": "Verifique os dados e tente novamente.",
+    "rate_limit": "Muitas solicitações. Aguarde um momento e tente novamente."
+  },
+  "FlowBuilder": {
+    "title": "Construtor de fluxos",
+    "description": "Crie e gerencie seus fluxos de automação",
+    "create": "Novo fluxo",
+    "create_title": "Novo fluxo",
+    "name_label": "Nome",
+    "description_label": "Descrição (opcional)",
+    "trigger_label": "Gatilho",
+    "trigger_placeholder": "Selecione um gatilho",
+    "conditions_label": "Condições",
+    "actions_label": "Ações",
+    "add_condition": "Adicionar condição",
+    "add_action": "Adicionar ação",
+    "save_btn": "Salvar fluxo",
+    "saving": "Salvando...",
+    "publish_btn": "Publicar",
+    "publishing": "Publicando...",
+    "delete_btn": "Excluir",
+    "duplicate_btn": "Duplicar",
+    "cancel_btn": "Cancelar",
+    "enabled_label": "Ativado",
+    "runs_label": "Número de execuções",
+    "last_run_label": "Última execução",
+    "delete_confirm": "Tem certeza de que deseja excluir este fluxo?",
+    "no_flows": "Nenhum fluxo encontrado",
+    "create_first": "Crie seu primeiro fluxo",
+    "trigger_types": {
+      "keyword": "Palavra-chave",
+      "new_contact": "Novo contato",
+      "tag_added": "Tag adicionada",
+      "schedule": "Agendamento",
+      "webhook": "Webhook"
+    },
+    "action_types": {
+      "send_message": "Enviar mensagem",
+      "send_template": "Enviar template",
+      "add_tag": "Adicionar tag",
+      "remove_tag": "Remover tag",
+      "assign_agent": "Atribuir agente",
+      "delay": "Atraso",
+      "condition": "Condição"
+    },
+    "node_types": {
+      "trigger": "Gatilho",
+      "action": "Ação",
+      "condition": "Condição",
+      "delay": "Atraso"
+    }
+  },
+  "AiAgent": {
+    "title": "Agente de IA",
+    "description": "Configure seu agente de IA",
+    "model_label": "Modelo",
+    "temperature_label": "Temperatura",
+    "temperature_help": "Valores mais altos tornam a saída mais criativa; valores mais baixos tornam mais determinística",
+    "max_tokens_label": "Máx. tokens",
+    "system_prompt_label": "Prompt do sistema",
+    "system_prompt_placeholder": "Diga ao seu agente de IA como ele deve se comportar...",
+    "tools_label": "Ferramentas",
+    "tools_help": "Selecione quais ferramentas seu agente de IA pode usar",
+    "enabled_tools": {
+      "calendar": "Calendário (agendar compromissos)",
+      "crm": "CRM (buscar dados de contato)",
+      "knowledge": "Base de conhecimento (buscar respostas)",
+      "webhook": "Webhook (chamar APIs externas)"
+    },
+    "Save_btn": "Salvar",
+    "saving": "Salvando...",
+    "saved_success": "Agente de IA salvo com sucesso!",
+    "test_chat": {
+      "title": "Teste seu agente de IA",
+      "placeholder": "Digite uma mensagem para testar...",
+      "send_btn": "Enviar",
+      "thinking": "A IA está pensando..."
+    }
+  },
+  "Activity": {
+    "title": "Atividade",
+    "description": "Veja toda a atividade da sua equipe",
+    "filter": {
+      "all": "Todos",
+      "chat": "Chat",
+      "automation": "Automação",
+      "campaign": "Campanha",
+      "team": "Equipe",
+      "billing": "Cobrança"
+    },
+    "no_activity": "Nenhuma atividade encontrada",
+    "load_more": "Carregar mais",
+    "event_types": {
+      "chat_created": "Novo chat criado",
+      "chat_assigned": "Chat atribuído",
+      "chat_closed": "Chat fechado",
+      "message_sent": "Mensagem enviada",
+      "message_received": "Mensagem recebida",
+      "automation_triggered": "Automação acionada",
+      "automation_completed": "Automação concluída",
+      "campaign_sent": "Campanha enviada",
+      "member_invited": "Membro convidado",
+      "member_joined": "Membro adicionado",
+      "payment_succeeded": "Pagamento aprovado",
+      "payment_failed": "Pagamento falhou"
+    }
+  },
+  "GeneralSettings": {
+    "title": "Configurações gerais",
+    "description": "Gerencie as preferências do app",
+    "language_label": "Idioma",
+    "language_help": "Selecione seu idioma preferido",
+    "timezone_label": "Fuso horário",
+    "timezone_help": "Selecione seu fuso horário",
+    "time_format_label": "Formato de hora",
+    "time_format_12h": "Formato de 12 horas",
+    "time_format_24h": "Formato de 24 horas",
+    "date_format_label": "Formato de data",
+    "save_btn": "Salvar",
+    "saving": "Salvando...",
+    "saved_success": "Configurações salvas com sucesso!"
+  },
+  "Developers": {
+    "title": "Desenvolvedores",
+    "description": "Gerencie suas chaves de API",
+    "api_keys": {
+      "title": "Chaves de API",
+      "description": "Use chaves de API para acessar a API da Kyrn",
+      "create": "Criar nova chave",
+      "name_label": "Nome",
+      "name_placeholder": "Ex. Produção, Desenvolvimento",
+      "create_btn": "Criar",
+      "creating": "Criando...",
+      "copy_btn": "Copiar",
+      "copied": "Copiado!",
+      "revoke_btn": "Revogar",
+      "revoke_confirm": "Tem certeza de que deseja revogar esta chave de API?",
+      "no_keys": "Sem chaves de API",
+      "create_first": "Crie sua primeira chave de API"
+    },
+    "webhooks": {
+      "title": "Webhooks",
+      "description": "Receba notificações em tempo real quando eventos acontecerem",
+      "create": "Adicionar webhook",
+      "url_label": "URL do endpoint",
+      "url_placeholder": "https://your-server.com/webhook",
+      "events_label": "Eventos",
+      "secret_label": "Segredo (opcional)",
+      "secret_placeholder": "Segredo para verificação HMAC",
+      "create_btn": "Adicionar",
+      "creating": "Adicionando...",
+      "delete_btn": "Excluir",
+      "no_webhooks": "Sem webhooks",
+      "create_first": "Adicione seu primeiro webhook"
+    },
+    "documentation": {
+      "title": "Documentação",
+      "description": "Leia nossa documentação da API",
+      "link_text": "Abrir documentação da API"
+    }
+  },
+  "Analytics": {
+    "team_not_found": "Equipe não encontrada ou usuário não atribuído a uma equipe.",
+    "dashboard_title": "Dashboard de analytics",
+    "conversations_by_funnel": "Conversas por funil (tendência)",
+    "funnel_distribution": "Distribuição do funil",
+    "conversations_by_agent": "Conversas por agente",
+    "conversation_traffic": "Tráfego de conversas"
   }
 }

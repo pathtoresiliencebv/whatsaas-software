@@ -41,7 +41,9 @@ import {
   Bell,
   BellRing,
   BellOff,
-  Info
+  Info,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -154,8 +156,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (notificationPermission === 'default' || notificationPermission === 'denied') {
       setSystemAlert({
         type: 'permission',
-        message: 'Enable desktop notifications to receive message alerts.',
-        actionLabel: 'Enable',
+        message: 'Schakel desktopmeldingen in om berichtmeldingen te ontvangen.',
+        actionLabel: 'Inschakelen',
         onAction: requestNotificationPermission
       });
     } else {
@@ -165,7 +167,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const requestNotificationPermission = async () => {
     if (!('Notification' in window)) {
-        toast.error("Browser does not support notifications");
+        toast.error("Deze browser ondersteunt geen meldingen");
         return;
     }
     
@@ -174,9 +176,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     
     if (permission === 'granted') {
       setSystemAlert(null);
-      new Notification("Notifications Enabled", { body: "You will now receive alerts for new messages." });
+      new Notification("Meldingen ingeschakeld", { body: "Je ontvangt nu meldingen voor nieuwe berichten." });
     } else if (permission === 'denied') {
-      toast.error("Permission denied. Please enable in browser settings.");
+      toast.error("Toestemming geweigerd. Schakel dit in via je browserinstellingen.");
     }
   };
 
@@ -198,7 +200,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             playPromise.catch(error => {
                 console.error("Audio playback error:", error);
                 if (error.name === 'NotSupportedError') {
-                    toast.error("Audio format not supported or file not found.");
+                    toast.error("Audioformaat wordt niet ondersteund of bestand is niet gevonden.");
                 }
             });
         }
@@ -343,6 +345,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   };
 
+  const allVisibleSelected = validChats.length > 0 && validChats.every((chat) => selectedChats.has(chat.id));
+
+  const handleSelectAllVisible = () => {
+    if (validChats.length === 0) return;
+
+    setSelectedChats((current) => {
+      const next = new Set(current);
+
+      if (allVisibleSelected) {
+        validChats.forEach((chat) => next.delete(chat.id));
+      } else {
+        validChats.forEach((chat) => next.add(chat.id));
+      }
+
+      return next;
+    });
+    setIsSelectionMode(true);
+  };
+
   const toggleSelectionMode = () => {
     if (isSelectionMode) {
       setSelectedChats(new Set());
@@ -371,9 +392,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         body: JSON.stringify({ chatIds: Array.from(selectedChats) }),
       });
 
-      if (!response.ok) throw new Error('Failed to delete chats');
+      if (!response.ok) throw new Error('Chats verwijderen mislukt');
 
-      toast.success('Chats deleted successfully');
+      toast.success('Chats verwijderd');
       
       const currentChat = Array.isArray(chats) ? chats.find(c => c.remoteJid.includes(activeChatNumber || '')) : undefined;
       if (currentChat && selectedChats.has(currentChat.id)) {
@@ -384,7 +405,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setIsSelectionMode(false);
       setIsDeleteDialogOpen(false);
     } catch (error) {
-      toast.error('Error deleting chats');
+      toast.error('Chats verwijderen mislukt');
       mutate('/api/chats', previousChats, { revalidate: true });
     } finally {
       setIsDeleting(false);
@@ -417,12 +438,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const renderChatList = () => {
     if (isLoading) return <ChatListSkeleton />;
-    if (error) return <div className="p-4 text-center text-destructive text-sm">Error loading chats.</div>;
+    if (error) return <div className="p-4 text-center text-destructive text-sm">Chats laden mislukt.</div>;
     if (!validChats || validChats.length === 0) {
       if (searchQuery || activeTab === 'unread' || detailedFilters.funnelStageId || detailedFilters.instanceId) {
-        return <div className="p-8 text-center text-muted-foreground text-sm">No chats found.</div>;
+        return <div className="p-8 text-center text-muted-foreground text-sm">Geen chats gevonden.</div>;
       }
-      return <div className="p-8 text-center text-muted-foreground text-sm">No chats started.</div>;
+      return <div className="p-8 text-center text-muted-foreground text-sm">Nog geen chats gestart.</div>;
     }
 
     return (
@@ -481,7 +502,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-muted/40 dark:bg-background">
-      <aside className="w-full max-w-md flex flex-col bg-card border-r md:w-[35%] lg:w-[28%]">
+      <aside className="flex w-full flex-col border-r bg-card md:w-[35%] md:basis-[35%] md:min-w-[320px] lg:min-w-0">
         <header className="flex items-center justify-between px-4 py-2 border-b h-[60px]">
           <div className="flex items-center gap-2">
             {isSelectionMode ? (
@@ -489,7 +510,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground" onClick={toggleSelectionMode}>
                         <X className="h-5 w-5" />
                     </Button>
-                    <span className="text-sm font-medium text-primary">{selectedChats.size} selected</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 gap-2 px-2 text-primary"
+                      onClick={handleSelectAllVisible}
+                      disabled={validChats.length === 0}
+                    >
+                      {allVisibleSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+                      <span className="hidden sm:inline">{allVisibleSelected ? 'Alles deselecteren' : 'Alles selecteren'}</span>
+                    </Button>
+                    <span className="text-sm font-medium text-primary">{selectedChats.size} geselecteerd</span>
                 </div>
             ) : (
                 <DropdownMenu>
@@ -506,14 +537,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-64" align="start">
-                    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                    <DropdownMenuLabel>Meldingen</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     
                     {notificationPermission !== 'granted' && (
                         <>
                             <DropdownMenuItem onClick={requestNotificationPermission} className="text-destructive focus:text-destructive cursor-pointer">
                                 <BellRing className="mr-2 h-4 w-4" />
-                                Allow Notifications
+                                Meldingen toestaan
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                         </>
@@ -523,11 +554,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         checked={soundEnabled} 
                         onCheckedChange={handleSoundToggle}
                     >
-                        Enable Sound
+                        Geluid inschakelen
                     </DropdownMenuCheckboxItem>
                     
                     <DropdownMenuSeparator />
-                    <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Alert Tone</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Meldingstoon</DropdownMenuLabel>
                     <DropdownMenuRadioGroup value={selectedSound} onValueChange={handleSoundChange}>
                         {SOUNDS.map(sound => (
                             <DropdownMenuRadioItem key={sound.id} value={sound.id} className="cursor-pointer">
@@ -568,7 +599,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       className="w-full justify-start text-sm h-8 px-2"
                       onClick={toggleSelectionMode}
                     >
-                      Select Chats
+                      Chats selecteren
                     </Button>
                   </PopoverContent>
                 </Popover>
@@ -606,7 +637,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search..."
+              placeholder="Zoeken..."
               className="pl-10 bg-background border-border rounded-lg h-11 focus-visible:ring-ring"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -628,6 +659,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           filters={detailedFilters}
           setFilters={setDetailedFilters}
           instances={instances || []}
+          agents={contextAgents}
+          funnelStages={contextFunnelStages || []}
+          tags={contextTags || []}
         />
 
         <nav ref={parentRef} className="flex-1 overflow-y-auto relative bg-background pt-2">
@@ -635,7 +669,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
       </aside>
 
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">{children}</main>
+      <main className="flex min-w-0 flex-1 flex-col h-screen overflow-hidden">{children}</main>
 
       <NewChatDialog 
         isOpen={isNewChatOpen} 
@@ -646,15 +680,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Chats?</DialogTitle>
+            <DialogTitle>Chats verwijderen?</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete {selectedChats.size} chat(s) and their history.
+              Deze actie kan niet ongedaan worden gemaakt. Hiermee verwijder je permanent {selectedChats.size} chat(s) en hun geschiedenis.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>Annuleren</Button>
             <Button variant="destructive" onClick={handleDeleteChats} disabled={isDeleting}>
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? 'Verwijderen...' : 'Verwijderen'}
             </Button>
           </DialogFooter>
         </DialogContent>

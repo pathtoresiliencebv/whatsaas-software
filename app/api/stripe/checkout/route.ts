@@ -50,9 +50,17 @@ export async function GET(request: NextRequest) {
       throw new Error('No product ID found for this subscription.');
     }
 
-    const internalPlan = await db.query.plans.findFirst({
-      where: eq(plans.stripeProductId, productId),
-    });
+    const planIdFromMetadata =
+      subscription.metadata?.planId ||
+      session.metadata?.planId;
+
+    const internalPlan = planIdFromMetadata
+      ? await db.query.plans.findFirst({
+          where: eq(plans.id, Number(planIdFromMetadata)),
+        })
+      : await db.query.plans.findFirst({
+          where: eq(plans.stripeProductId, productId),
+        });
 
     if (!internalPlan) {
       throw new Error('Internal plan not found for this Stripe product.');
@@ -102,7 +110,7 @@ export async function GET(request: NextRequest) {
       .where(eq(teams.id, userTeam[0].teamId));
 
     await setSession(user[0]);
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/dashboard?onboarding=paid', request.url));
   } catch (error) {
     console.error('Error handling successful checkout:', error);
     return NextResponse.redirect(new URL('/error', request.url));

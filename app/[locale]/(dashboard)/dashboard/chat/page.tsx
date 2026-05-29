@@ -1,18 +1,28 @@
 'use client';
 
-import React from 'react';
-import { MessageSquare } from 'lucide-react';
+import { Columns3 } from 'lucide-react';
+import KanbanBoard from '../KanbanBoard';
 
-export default function NoChatSelectedPage() {
+export default function ChatKanbanPage() {
   return (
-    <div className="flex flex-col items-center justify-center h-full bg-background/50 text-muted-foreground p-8">
-      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-        <MessageSquare className="h-8 w-8 text-muted-foreground/60" />
+    <div className="flex h-full min-h-0 flex-col bg-muted/40">
+      <header className="shrink-0 border-b border-border bg-background px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Columns3 className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">Chat Kanban</h1>
+            <p className="text-sm text-muted-foreground">
+              Move conversations through your funnel stages without leaving Chats.
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <div className="min-h-0 flex-1 overflow-hidden p-4">
+        <KanbanBoard />
       </div>
-      <h2 className="text-xl font-semibold mb-2 text-foreground">No Conversation Selected</h2>
-      <p className="text-sm text-center max-w-sm text-muted-foreground/80">
-        Choose a conversation from the left sidebar or create a new one to start messaging.
-      </p>
     </div>
   );
 }

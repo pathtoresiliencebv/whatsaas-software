@@ -41,7 +41,7 @@ export function EvolutionSetup() {
           </div>
           {status === 'success' && (
             <Badge variant="default" className="gap-1">
-              <Check className="h-3 w-3" /> Connected
+              <Check className="h-3 w-3" /> Verbonden
             </Badge>
           )}
         </div>

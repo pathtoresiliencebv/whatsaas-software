@@ -35,12 +35,12 @@ export function NewChatDialog({ isOpen, onClose, instances }: NewChatDialogProps
 
   const handleStartChat = async () => {
     if (!phoneNumber.trim()) {
-      toast.error('Please enter a phone number');
+      toast.error('Vul een telefoonnummer in');
       return;
     }
 
     if (!selectedInstance) {
-      toast.error('Please select an instance');
+      toast.error('Kies een instantie');
       return;
     }
 
@@ -62,14 +62,14 @@ export function NewChatDialog({ isOpen, onClose, instances }: NewChatDialogProps
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create chat');
+        throw new Error('Chat kon niet worden aangemaakt');
       }
 
-      toast.success('Chat started successfully');
+      toast.success('Chat gestart');
       setPhoneNumber('');
       onClose();
     } catch (error) {
-      toast.error('Failed to start chat');
+      toast.error('Chat starten mislukt');
     } finally {
       setIsLoading(false);
     }
@@ -79,15 +79,15 @@ export function NewChatDialog({ isOpen, onClose, instances }: NewChatDialogProps
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
-          <DialogTitle>Start New Chat</DialogTitle>
+          <DialogTitle>Nieuwe chat starten</DialogTitle>
           <DialogDescription>
-            Enter a phone number to start a new conversation.
+            Vul een telefoonnummer in om een nieuw gesprek te starten.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone">Telefoonnummer</Label>
             <Input
               id="phone"
               placeholder="31612345678"
@@ -99,7 +99,7 @@ export function NewChatDialog({ isOpen, onClose, instances }: NewChatDialogProps
 
           {instances.length > 1 && (
             <div className="space-y-2">
-              <Label>Instance</Label>
+              <Label>Instantie</Label>
               <div className="space-y-1">
                 {instances.map((instance) => (
                   <button
@@ -123,10 +123,10 @@ export function NewChatDialog({ isOpen, onClose, instances }: NewChatDialogProps
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            Cancel
+            Annuleren
           </Button>
           <Button onClick={handleStartChat} disabled={isLoading}>
-            {isLoading ? 'Starting...' : 'Start Chat'}
+            {isLoading ? 'Starten...' : 'Chat starten'}
           </Button>
         </DialogFooter>
       </DialogContent>

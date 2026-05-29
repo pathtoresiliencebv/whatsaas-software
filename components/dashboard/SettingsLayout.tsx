@@ -8,12 +8,12 @@ import { Button } from '@/components/ui/button';
 import { User, CreditCard, Plug, Key, Globe, Bell } from 'lucide-react';
 
 const settingsNav = [
-  { href: '/settings', icon: User, label: 'Profile' },
-  { href: '/settings/billing', icon: CreditCard, label: 'Billing' },
-  { href: '/settings/instances', icon: Plug, label: 'Instances' },
-  { href: '/settings/api', icon: Key, label: 'API Keys' },
+  { href: '/settings', icon: User, label: 'Profiel' },
+  { href: '/settings/billing', icon: CreditCard, label: 'Facturering' },
+  { href: '/settings/instances', icon: Plug, label: 'Instanties' },
+  { href: '/settings/api', icon: Key, label: 'API-sleutels' },
   { href: '/settings/webhooks', icon: Globe, label: 'Webhooks' },
-  { href: '/settings/notifications', icon: Bell, label: 'Notifications' },
+  { href: '/settings/notifications', icon: Bell, label: 'Meldingen' },
 ];
 
 export function SettingsLayout({ children }: { children: React.ReactNode }) {

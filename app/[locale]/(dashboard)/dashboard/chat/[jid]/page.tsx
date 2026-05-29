@@ -67,6 +67,7 @@ export default function ChatPage() {
   const [quickRepliesOpen, setQuickRepliesOpen] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [showQuickReplySuggestions, setShowQuickReplySuggestions] = useState(false);
+  const autoSyncKeyRef = useRef<string | null>(null);
   const [chatSidebarCollapsed, setChatSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('chatSidebarCollapsed') === 'true';
@@ -174,7 +175,9 @@ export default function ChatPage() {
   const filteredQuickReplies = useMemo(() => {
     if (!newMessage.startsWith('/') || !quickReplies) return [];
     const search = newMessage.slice(1).toLowerCase();
-    return quickReplies.filter(r => r.shortcut.toLowerCase().startsWith(search));
+    return quickReplies
+      .filter(r => r.shortcut.toLowerCase().startsWith(search))
+      .map(r => ({ ...r, message: r.message || r.content || '' }));
   }, [newMessage, quickReplies]);
 
   const handleMediaClick = (messageId: string) => {
@@ -187,7 +190,10 @@ export default function ChatPage() {
     name: contact?.name || currentChat?.name || currentChat?.pushName || chatNumber || 'Chat',
     profilePicUrl: currentChat?.profilePicUrl || null,
     lastCustomerInteraction: currentChat?.lastCustomerInteraction ? new Date(currentChat.lastCustomerInteraction).toISOString() : null,
-    integration: activeInstance?.integration || 'WHATSAPP-BAILEYS'
+    integration: activeInstance?.integration || 'WHATSAPP-BAILEYS',
+    chatId: currentChat?.id,
+    phoneNumber: remoteJid?.split('@')[0],
+    contact: contact || undefined,
   };
 
   const isWaba = activeInstance?.integration === 'WHATSAPP-BUSINESS';
@@ -602,7 +608,20 @@ export default function ChatPage() {
 
   useEffect(() => {
     setSyncDismissed(false);
+    autoSyncKeyRef.current = null;
   }, [remoteJid]);
+
+  useEffect(() => {
+    if (!remoteJid || !currentChat?.instanceId || !messages || messages.length > 0 || isLoading || error || isSyncingMessages) {
+      return;
+    }
+
+    const syncKey = `${currentChat.instanceId}:${remoteJid}`;
+    if (autoSyncKeyRef.current === syncKey) return;
+
+    autoSyncKeyRef.current = syncKey;
+    handleSyncMessages(100);
+  }, [remoteJid, currentChat?.instanceId, messages?.length, isLoading, error, isSyncingMessages]);
 
   const showSyncBanner = !syncDismissed && currentChat?.instanceId && messages && messages.length === 0 && !isLoading && !error;
 
@@ -611,7 +630,7 @@ export default function ChatPage() {
     return (
       <div className="relative p-2 px-4 border-t bg-accent">
         <div className="p-2 rounded-md bg-muted border-l-4 border-primary">
-          <p className="text-sm font-medium text-primary">Replying...</p>
+          <p className="text-sm font-medium text-primary">Beantwoorden...</p>
           <p className="text-sm text-muted-foreground truncate">{quotedMessage.text || 'Media'}</p>
         </div>
         <Button variant="ghost" size="icon" className="absolute top-1 right-2 h-7 w-7 rounded-full" onClick={() => setQuotedMessage(null)}><X className="h-4 w-4 text-muted-foreground" /></Button>
@@ -621,10 +640,18 @@ export default function ChatPage() {
 
   const renderMessages = () => {
     if (isLoading) return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
-    if (error) return <div className="p-4 text-center text-destructive">Error loading messages.</div>;
+    if (error) return <div className="p-4 text-center text-destructive">Berichten laden mislukt.</div>;
     if (!filteredMessages || filteredMessages.length === 0) {
-      if (searchQuery) return <div className="p-4 text-center text-muted-foreground">No message found for "{searchQuery}".</div>;
-      return <div className="p-4 text-center text-muted-foreground">No messages in this chat yet.</div>;
+      if (isSyncingMessages) {
+        return (
+          <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-muted-foreground">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <p className="text-sm">{t('sync_messages.auto_importing')}</p>
+          </div>
+        );
+      }
+      if (searchQuery) return <div className="p-4 text-center text-muted-foreground">Geen bericht gevonden voor "{searchQuery}".</div>;
+      return <div className="p-4 text-center text-muted-foreground">Nog geen berichten in deze chat.</div>;
     }
 
     return filteredMessages.map((msg, index) => {
@@ -680,8 +707,14 @@ export default function ChatPage() {
 
         {showSyncBanner && (
           <div className="flex items-center gap-3 px-4 py-2 bg-blue-50 dark:bg-blue-950/30 border-b border-blue-200 dark:border-blue-800 text-sm shrink-0">
-            <Download className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
-            <span className="text-blue-700 dark:text-blue-300">{t('sync_messages.banner')}</span>
+            {isSyncingMessages ? (
+              <Loader2 className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-400 shrink-0" />
+            ) : (
+              <Download className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            )}
+            <span className="text-blue-700 dark:text-blue-300">
+              {isSyncingMessages ? t('sync_messages.auto_importing') : t('sync_messages.banner')}
+            </span>
             <Button size="sm" variant="outline" className="h-7 text-xs shrink-0 ml-auto" onClick={() => handleSyncMessages(100)} disabled={isSyncingMessages}>
               {isSyncingMessages ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Download className="h-3 w-3 mr-1" />}
               {t('sync_messages.import_btn')}
@@ -746,7 +779,11 @@ export default function ChatPage() {
 
       <ChatSidebar chatDetails={chatDetails} isCollapsed={chatSidebarCollapsed} onToggleCollapse={toggleChatSidebar} isGroup={isGroup} onSyncMessages={() => handleSyncMessages(100)} isSyncingMessages={isSyncingMessages} />
 
-      <QuickRepliesModal open={quickRepliesOpen} onOpenChange={setQuickRepliesOpen} />
+      <QuickRepliesModal
+        open={quickRepliesOpen}
+        onOpenChange={setQuickRepliesOpen}
+        onSelect={(message) => setNewMessage(message)}
+      />
       <TemplateDialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen} onSendTemplate={handleSendTemplate} />
 
       <Lightbox open={lightboxOpen} close={() => setLightboxOpen(false)} slides={slides} index={lightboxIndex} plugins={[Zoom, Video]} zoom={{ maxZoomPixelRatio: 3, doubleTapDelay: 300 }} />

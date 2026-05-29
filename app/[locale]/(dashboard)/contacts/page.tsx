@@ -528,7 +528,7 @@ export default function ContactsPage() {
                 <div className="flex gap-2">
                      <Button variant="outline" onClick={() => setIsFieldsManagerOpen(true)}>
                         <Settings2 className="h-4 w-4 mr-2"/>
-                        Custom Fields
+                        Eigen velden
                      </Button>
                      <Button onClick={() => setIsImportOpen(true)}>
                         <Upload className="h-4 w-4 mr-2"/>
@@ -557,7 +557,7 @@ export default function ContactsPage() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
-                                <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
+                                <DropdownMenuLabel>Kolommen tonen</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 {columns.map(col => (
                                     <DropdownMenuCheckboxItem
@@ -751,7 +751,7 @@ export default function ContactsPage() {
                                                                     {(contact.assignedUser.name || contact.assignedUser.email || '??').substring(0, 2).toUpperCase()}
                                                                 </AvatarFallback>
                                                             </Avatar>
-                                                            <span className="text-sm text-foreground truncate">{contact.assignedUser.name || contact.assignedUser.email || "Unknown"}</span>
+                                                            <span className="text-sm text-foreground truncate">{contact.assignedUser.name || contact.assignedUser.email || "Onbekend"}</span>
                                                         </div>
                                                     ) : <span className="text-xs text-muted-foreground italic">{t('unassigned')}</span>
                                                 )}
@@ -777,7 +777,7 @@ export default function ContactsPage() {
                                                 {col.isCustom && contact.customData && (
                                                     <span className="text-sm text-foreground truncate">
                                                         {col.type === 'boolean' 
-                                                            ? (contact.customData[col.fieldKey!] ? 'Yes' : 'No')
+                                                            ? (contact.customData[col.fieldKey!] ? 'Ja' : 'Nee')
                                                             : contact.customData[col.fieldKey!]
                                                         }
                                                     </span>
@@ -812,22 +812,22 @@ export default function ContactsPage() {
             <Dialog open={isFieldsManagerOpen} onOpenChange={setIsFieldsManagerOpen}>
                 <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
-                        <DialogTitle>Manage Custom Fields</DialogTitle>
-                        <DialogDescription>Add or remove custom fields for your contacts.</DialogDescription>
+                        <DialogTitle>Eigen velden beheren</DialogTitle>
+                        <DialogDescription>Voeg eigen velden toe of verwijder ze voor je contacten.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="flex gap-2 items-end">
                             <div className="grid gap-2 flex-1">
-                                <Label>Field Name</Label>
-                                <Input value={newFieldName} onChange={e => setNewFieldName(e.target.value)} placeholder="e.g. CPF, Birthday" />
+                                <Label>Veldnaam</Label>
+                                <Input value={newFieldName} onChange={e => setNewFieldName(e.target.value)} placeholder="bijv. btw-nummer, verjaardag" />
                             </div>
                             <div className="grid gap-2 w-[140px]">
                                 <Label>Type</Label>
                                 <Select value={newFieldType} onValueChange={(v: any) => setNewFieldType(v)}>
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="text">Text</SelectItem>
-                                        <SelectItem value="boolean">Boolean</SelectItem>
+                                        <SelectItem value="text">Tekst</SelectItem>
+                                        <SelectItem value="boolean">Ja/nee</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -838,9 +838,9 @@ export default function ContactsPage() {
                         
                         <div className="border rounded-md mt-4">
                             <div className="bg-muted p-2 text-xs font-semibold grid grid-cols-12 gap-2">
-                                <div className="col-span-6">Name</div>
+                                <div className="col-span-6">Naam</div>
                                 <div className="col-span-4">Type</div>
-                                <div className="col-span-2 text-right">Action</div>
+                                <div className="col-span-2 text-right">Actie</div>
                             </div>
                             <div className="max-h-[300px] overflow-y-auto">
                                 {customFields?.map(field => (
@@ -855,7 +855,7 @@ export default function ContactsPage() {
                                     </div>
                                 ))}
                                 {(!customFields || customFields.length === 0) && (
-                                    <div className="p-4 text-center text-muted-foreground text-sm">No custom fields created.</div>
+                                    <div className="p-4 text-center text-muted-foreground text-sm">Nog geen eigen velden aangemaakt.</div>
                                 )}
                             </div>
                         </div>
@@ -988,7 +988,7 @@ export default function ContactsPage() {
                         {customFields && customFields.length > 0 && (
                             <>
                                 <div className="border-t my-2" />
-                                <Label className="text-xs font-semibold text-muted-foreground uppercase">Custom Fields</Label>
+                                <Label className="text-xs font-semibold text-muted-foreground uppercase">Eigen velden</Label>
                                 <div className="grid gap-3">
                                     {customFields.map(cf => (
                                         <div key={cf.id} className="grid gap-1.5">
@@ -999,7 +999,7 @@ export default function ContactsPage() {
                                                         checked={!!editCustomData[cf.key]} 
                                                         onCheckedChange={(checked) => setEditCustomData(prev => ({ ...prev, [cf.key]: checked }))} 
                                                     />
-                                                    <span className="text-sm text-muted-foreground">{editCustomData[cf.key] ? 'Yes' : 'No'}</span>
+                                                    <span className="text-sm text-muted-foreground">{editCustomData[cf.key] ? 'Ja' : 'Nee'}</span>
                                                 </div>
                                             ) : (
                                                 <Input 

@@ -20,6 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from 'sonner';
 import { WhatsAppPreview } from '@/components/templates/WhatsAppPreview';
 import { useTranslations } from 'next-intl';
+import { isOfficialWhatsAppIntegration } from '@/lib/whatsapp/official';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -54,7 +55,7 @@ export default function NewTemplatePage() {
     const [headerVarExample, setHeaderVarExample] = useState(''); 
     const [bodyVarExamples, setBodyVarExamples] = useState<string[]>([]); 
 
-    const wabaInstances = (Array.isArray(instances) ? instances : []).filter(i => i.integration === 'WHATSAPP-BUSINESS');
+    const wabaInstances = (Array.isArray(instances) ? instances : []).filter(i => isOfficialWhatsAppIntegration(i.integration));
 
     useEffect(() => {
         if (!isFeatureLoading && featureData && !featureData.hasAccess) {

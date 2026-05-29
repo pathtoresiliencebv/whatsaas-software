@@ -34,6 +34,7 @@ type Plan = {
   isFlowBuilderEnabled: boolean;
   isCampaignsEnabled: boolean;
   isTemplatesEnabled: boolean;
+  isVoiceCallsEnabled: boolean;
 };
 
 
@@ -67,10 +68,11 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
   }, [searchParams]);
 
   const featuredPlanIndex = 1;
-  const filteredPlans = allPlans.filter((plan) => plan.interval === billingCycle);
+  const primaryPlans = allPlans.filter((plan) => plan.interval !== 'year');
+  const filteredPlans = primaryPlans.length > 0 ? primaryPlans : allPlans;
 
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('nl-NL', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
@@ -116,13 +118,13 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
         </div>
         
         <h1 className="text-4xl font-medium text-foreground sm:text-6xl tracking-tight mb-4">
-          AI WhatsApp. Your Rules.
+          AI WhatsApp. Jouw regels.
           <br />
-          <span className="text-muted-foreground/80">Start Free, Scale as You Grow</span>
+          <span className="text-muted-foreground/80">Start gratis, groei wanneer jij groeit</span>
         </h1>
 
         <p className="max-w-xl mx-auto text-lg text-muted-foreground mb-10">
-          From solo entrepreneurs to large support teams. All plans include 14-day free trial. No credit card required.
+          Voor solo-ondernemers tot grote supportteams. Elk plan bevat een gratis proefperiode van 14 dagen. Geen creditcard nodig.
         </p>
 
         <div className="flex flex-col items-center gap-6">
@@ -134,7 +136,7 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
                 billingCycle === 'month' ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
             >
-                Monthly
+                Maandelijks
             </button>
             <button
                 onClick={() => setBillingCycle('year')}
@@ -143,7 +145,7 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
                 billingCycle === 'year' ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
             >
-                Annually
+                Jaarlijks
             </button>
             <div
                 className={cn(
@@ -190,20 +192,20 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
                 
                 <h3 className={cn("text-2xl font-medium mb-2", isFeatured ? "text-white" : "text-foreground")}>
                   {plan.name}
-                  {isCurrentPlan && <span className="ml-2 text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded-full border border-green-500/30">Active</span>}
+                  {isCurrentPlan && <span className="ml-2 text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded-full border border-green-500/30">Actief</span>}
                 </h3>
                 <p className={cn("text-sm", isFeatured ? "text-zinc-400" : "text-muted-foreground")}>
-                  {plan.description || "Ideal for growing businesses."}
+                  {plan.description || "Ideaal voor groeiende bedrijven."}
                 </p>
               </div>
 
               <div className="mb-4 flex items-baseline gap-1">
                 <span className={cn("text-5xl font-semibold tracking-tight", isFeatured ? "text-white" : "text-foreground")}>
-                  {plan.amount === 0 ? "Free" : formatCurrency(billingCycle === 'year' && plan.amountAnnual ? plan.amountAnnual : plan.amount, plan.currency)}
+                  {plan.amount === 0 ? "Gratis" : formatCurrency(billingCycle === 'year' && plan.amountAnnual ? plan.amountAnnual : plan.amount, plan.currency)}
                 </span>
                 {plan.amount > 0 && (
                   <span className={cn("text-sm", isFeatured ? "text-zinc-500" : "text-muted-foreground")}>
-                    / {billingCycle === 'year' ? 'year' : 'month'}
+                    / {billingCycle === 'year' ? 'jaar' : 'maand'}
                   </span>
                 )}
               </div>
@@ -211,7 +213,7 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
                 <div className="mb-6">
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-xs font-medium border border-green-500/20">
                     <Sparkles className="h-3 w-3" />
-                    4 months free — save 33%
+                    4 maanden gratis - bespaar 33%
                   </span>
                 </div>
               )}
@@ -230,22 +232,23 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
                 {loadingId === plan.id ? (
                     <Loader2 className="animate-spin h-4 w-4" />
                 ) : isCurrentPlan ? (
-                    "Current Plan"
+                    "Huidig plan"
                 ) : (
-                    plan.amount === 0 ? "Downgrade to Free" : "Upgrade / Switch"
+                    plan.amount === 0 ? "Terug naar gratis" : "Upgraden / wisselen"
                 )}
               </Button>
 
               <div className="space-y-6 flex-1">
-                <p className={cn("text-sm font-medium", isFeatured ? "text-white" : "text-foreground")}>What's included</p>
+                <p className={cn("text-sm font-medium", isFeatured ? "text-white" : "text-foreground")}>Inbegrepen</p>
                 <ul className="space-y-4">
-                  <FeatureItem text={`${plan.maxUsers} Team Members`} isFeatured={isFeatured} />
-                  <FeatureItem text={`${plan.maxContacts.toLocaleString()} Contacts`} isFeatured={isFeatured} />
-                  <FeatureItem text={`${plan.maxInstances} WhatsApp Connections`} isFeatured={isFeatured} />
+                  <FeatureItem text={`${plan.maxUsers} teamleden`} isFeatured={isFeatured} />
+                  <FeatureItem text={`${plan.maxContacts.toLocaleString('nl-NL')} contacten`} isFeatured={isFeatured} />
+                  <FeatureItem text={`${plan.maxInstances} WhatsApp-verbindingen`} isFeatured={isFeatured} />
                   <FeatureItem text="AI Agent (OpenAI/Gemini)" isEnabled={plan.isAiEnabled} isFeatured={isFeatured} />
-                  <FeatureItem text="Visual Flow Builder" isEnabled={plan.isFlowBuilderEnabled} isFeatured={isFeatured} />
-                  <FeatureItem text="Mass Campaigns" isEnabled={plan.isCampaignsEnabled} isFeatured={isFeatured} />
-                  <FeatureItem text="WABA Templates" isEnabled={plan.isTemplatesEnabled} isFeatured={isFeatured} />
+                  <FeatureItem text="Visuele flowbuilder" isEnabled={plan.isFlowBuilderEnabled} isFeatured={isFeatured} />
+                  <FeatureItem text="Massacampagnes" isEnabled={plan.isCampaignsEnabled} isFeatured={isFeatured} />
+                  <FeatureItem text="WABA-sjablonen" isEnabled={plan.isTemplatesEnabled} isFeatured={isFeatured} />
+                  <FeatureItem text="Spraakagents" isEnabled={plan.isVoiceCallsEnabled} isFeatured={isFeatured} />
                 </ul>
               </div>
             </div>
@@ -256,9 +259,9 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
       <Dialog open={isConfirmationOpen} onOpenChange={setIsConfirmationOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Confirm Downgrade</DialogTitle>
+            <DialogTitle>Planwissel bevestigen</DialogTitle>
             <DialogDescription>
-              You are switching to the <strong>{selectedFreePlan?.name}</strong> plan. Some features may be limited immediately.
+              Je wisselt naar het plan <strong>{selectedFreePlan?.name}</strong>. Sommige functies kunnen direct beperkt worden.
             </DialogDescription>
           </DialogHeader>
           
@@ -266,21 +269,21 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
              <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
                 <Sparkles className="h-5 w-5 text-primary mt-0.5" />
                 <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">Plan Limits</p>
+                    <p className="text-sm font-medium text-foreground">Planlimieten</p>
                     <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
-                        <li>{selectedFreePlan?.maxUsers} User(s)</li>
-                        <li>{selectedFreePlan?.maxContacts} Contacts</li>
-                        <li>{selectedFreePlan?.maxInstances} WhatsApp Connection</li>
+                        <li>{selectedFreePlan?.maxUsers} gebruiker(s)</li>
+                        <li>{selectedFreePlan?.maxContacts} contacten</li>
+                        <li>{selectedFreePlan?.maxInstances} WhatsApp-verbinding</li>
                     </ul>
                 </div>
              </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsConfirmationOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsConfirmationOpen(false)}>Annuleren</Button>
             <Button onClick={confirmFreePlan} disabled={loadingId !== null}>
                 {loadingId === selectedFreePlan?.id ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRight className="h-4 w-4 mr-2" />}
-                Confirm Switch
+                Wissel bevestigen
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -305,7 +308,7 @@ export function PricingClient({ allPlans, currentTeam }: { allPlans: Plan[], cur
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{t('offline_amount')}</span>
                 <span className="font-medium">
-                  {new Intl.NumberFormat('en', { style: 'currency', currency: offlineModal?.currency || 'usd' }).format(parseInt(offlineModal?.amount || '0') / 100)}
+                  {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: offlineModal?.currency || 'usd' }).format(parseInt(offlineModal?.amount || '0') / 100)}
                 </span>
               </div>
             </div>

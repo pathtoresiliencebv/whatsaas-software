@@ -324,7 +324,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return createCheckoutSession({ team: createdTeam, priceId });
   }
 
-  return redirectToLocalized('/verify-email-sent');
+  return redirectToLocalized(`/verify-email-sent?email=${encodeURIComponent(email)}`);
 });
 
 export async function signOut() {

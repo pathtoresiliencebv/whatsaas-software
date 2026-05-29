@@ -377,7 +377,7 @@ export default function AiSettingsPage() {
                                                 onClick={() => fileInputRef.current?.click()}
                                             >
                                                 <Paperclip className="h-6 w-6 mb-2 text-muted-foreground" />
-                                                <span className="text-xs text-muted-foreground">Add more</span>
+                                                <span className="text-xs text-muted-foreground">Meer toevoegen</span>
                                             </div>
                                         </div>
                                     )}

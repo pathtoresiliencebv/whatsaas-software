@@ -10,7 +10,7 @@ export function CreateAutomationButton() {
     <Button asChild>
       <Link href="/automation/new">
         <Plus className="h-4 w-4 mr-2" />
-        Create Automation
+        Automatisering maken
       </Link>
     </Button>
   );

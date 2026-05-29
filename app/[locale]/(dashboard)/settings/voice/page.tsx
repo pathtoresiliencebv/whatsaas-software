@@ -322,10 +322,10 @@ export default function VoiceSettingsPage() {
                     <SelectItem value="JP">🇯🇵 Japan</SelectItem>
                     <SelectItem value="IN">🇮🇳 India</SelectItem>
                     <SelectItem value="IL">🇮🇱 Israel</SelectItem>
-                    <SelectItem value="ZA">🇿🇦 South Africa</SelectItem>
-                    <SelectItem value="NL">🇳🇱 Netherlands</SelectItem>
-                    <SelectItem value="BE">🇧🇪 Belgium</SelectItem>
-                    <SelectItem value="SE">🇸🇪 Sweden</SelectItem>
+                    <SelectItem value="ZA">🇿🇦 Zuid-Afrika</SelectItem>
+                    <SelectItem value="NL">🇳🇱 Nederland</SelectItem>
+                    <SelectItem value="BE">🇧🇪 Belgie</SelectItem>
+                    <SelectItem value="SE">🇸🇪 Zweden</SelectItem>
                     <SelectItem value="PL">🇵🇱 Poland</SelectItem>
                   </SelectContent>
                 </Select>
@@ -335,9 +335,9 @@ export default function VoiceSettingsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="local">Local</SelectItem>
-                    <SelectItem value="tollFree">Toll Free</SelectItem>
-                    <SelectItem value="mobile">Mobile</SelectItem>
+                    <SelectItem value="local">Lokaal</SelectItem>
+                    <SelectItem value="tollFree">Gratis nummer</SelectItem>
+                    <SelectItem value="mobile">Mobiel</SelectItem>
                   </SelectContent>
                 </Select>
 

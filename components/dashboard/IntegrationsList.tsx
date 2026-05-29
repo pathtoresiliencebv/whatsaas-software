@@ -15,12 +15,12 @@ type Integration = {
 };
 
 const integrations: Integration[] = [
-  { id: 'stripe', name: 'Stripe', description: 'Payment processing', connected: false },
-  { id: 'razorpay', name: 'Razorpay', description: 'Payment processing (India)', connected: false },
-  { id: 'pusher', name: 'Pusher', description: 'Real-time messaging', connected: true },
-  { id: 'openai', name: 'OpenAI', description: 'AI chatbot integration', connected: false },
-  { id: 'google', name: 'Google Gemini', description: 'AI chatbot integration', connected: false },
-  { id: 'resend', name: 'Resend', description: 'Email notifications', connected: false },
+  { id: 'stripe', name: 'Stripe', description: 'Betalingen verwerken', connected: false },
+  { id: 'razorpay', name: 'Razorpay', description: 'Betalingen verwerken (India)', connected: false },
+  { id: 'pusher', name: 'Pusher', description: 'Realtime berichten', connected: true },
+  { id: 'openai', name: 'OpenAI', description: 'AI-chatbotintegratie', connected: false },
+  { id: 'google', name: 'Google Gemini', description: 'AI-chatbotintegratie', connected: false },
+  { id: 'resend', name: 'Resend', description: 'E-mailmeldingen', connected: false },
 ];
 
 export function IntegrationsList() {
@@ -37,14 +37,14 @@ export function IntegrationsList() {
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium">{integration.name}</h3>
                   {integration.connected && (
-                    <Badge variant="default" className="text-xs">Connected</Badge>
+                    <Badge variant="default" className="text-xs">Verbonden</Badge>
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">{integration.description}</p>
               </div>
             </div>
             <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
-              {integration.connected ? 'Configure' : 'Connect'}
+              {integration.connected ? 'Configureren' : 'Verbinden'}
             </Button>
           </CardContent>
         </Card>

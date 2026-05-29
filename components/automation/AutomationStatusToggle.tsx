@@ -23,7 +23,7 @@ export function AutomationStatusToggle({
         onCheckedChange={onChange}
       />
       <Label htmlFor="automation-status">
-        {enabled ? 'Active' : 'Paused'}
+        {enabled ? 'Actief' : 'Gepauzeerd'}
       </Label>
     </div>
   );

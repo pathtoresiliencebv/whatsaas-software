@@ -2,139 +2,145 @@ import { getBranding } from '@/lib/db/queries/branding';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { getLocale } from 'next-intl/server';
 
 export const metadata = {
-  title: 'Privacy Policy',
-  description: 'How we handle your data.',
+  title: 'Privacybeleid',
+  description: 'Hoe Kyrn met je gegevens omgaat.',
 };
 
 export default async function PrivacyPage() {
   const branding = await getBranding();
+  const locale = await getLocale();
   const siteName = branding?.name || 'Kyrn';
+  const isEnglish = locale === 'en';
 
   return (
-    <main className="min-h-screen bg-background py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <main className="min-h-screen bg-background px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl">
         <Link href="/">
           <Button variant="ghost" className="mb-8 pl-0 hover:bg-transparent hover:text-primary">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+            <ArrowLeft className="mr-2 h-4 w-4" /> {isEnglish ? 'Back to home' : 'Terug naar home'}
           </Button>
         </Link>
 
-        <h1 className="text-4xl font-bold tracking-tight text-foreground mb-2">Privacy Policy</h1>
-        <p className="text-muted-foreground mb-10">Last updated: {new Date().toLocaleDateString()}</p>
+        <h1 className="mb-2 text-4xl font-bold tracking-tight text-foreground">
+          {isEnglish ? 'Privacy Policy' : 'Privacybeleid'}
+        </h1>
+        <p className="mb-10 text-muted-foreground">
+          {isEnglish ? 'Last updated' : 'Laatst bijgewerkt'}: {new Date().toLocaleDateString(isEnglish ? 'en-US' : 'nl-NL')}
+        </p>
 
-        <div className="space-y-8 text-foreground/90 leading-relaxed">
+        <div className="space-y-8 leading-relaxed text-foreground/90">
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">1. Who We Are</h2>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">{isEnglish ? '1. Who We Are' : '1. Wie wij zijn'}</h2>
             <p>
-              {siteName} is a WhatsApp Business management platform. We act as a data processor for your customer data. Our company details and registration are available on request.
+              {isEnglish
+                ? `${siteName} is a WhatsApp Business management platform. For customer data, we usually act as a processor on behalf of your workspace.`
+                : `${siteName} is een WhatsApp Business-platform. Voor klantgegevens treden wij meestal op als verwerker namens jouw workspace.`}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">2. What Data We Collect</h2>
-            <p>
-              We collect the following data to provide our service:
-            </p>
-            <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li><strong>Account data:</strong> name, email address, password (hashed)</li>
-              <li><strong>Billing data:</strong> subscription plan, payment history (via Stripe)</li>
-              <li><strong>Team data:</strong> member names, roles, invitations</li>
-              <li><strong>Contact data:</strong> names, phone numbers, chat history, tags, notes, funnel stages</li>
-              <li><strong>Usage data:</strong> login timestamps, feature usage, API calls</li>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">
+              {isEnglish ? '2. Data We Collect' : '2. Welke gegevens wij verzamelen'}
+            </h2>
+            <p>{isEnglish ? 'We collect the data needed to provide the service:' : 'We verzamelen gegevens die nodig zijn om de dienst te leveren:'}</p>
+            <ul className="mt-2 list-disc space-y-1 pl-6">
+              <li><strong>{isEnglish ? 'Account data:' : 'Accountgegevens:'}</strong> {isEnglish ? 'name, email address, hashed password.' : 'naam, e-mailadres en gehashte wachtwoorden.'}</li>
+              <li><strong>{isEnglish ? 'Billing data:' : 'Facturatiegegevens:'}</strong> {isEnglish ? 'subscription plan and payment history through Stripe.' : 'abonnement, betaalstatus en betaalhistorie via Stripe.'}</li>
+              <li><strong>{isEnglish ? 'Team data:' : 'Teamgegevens:'}</strong> {isEnglish ? 'members, roles, invitations, and permissions.' : 'leden, rollen, uitnodigingen en rechten.'}</li>
+              <li><strong>{isEnglish ? 'Contact data:' : 'Contactgegevens:'}</strong> {isEnglish ? 'names, phone numbers, chat history, tags, notes, and funnel stages.' : 'namen, telefoonnummers, chatgeschiedenis, tags, notities en funnel-fases.'}</li>
+              <li><strong>{isEnglish ? 'Usage data:' : 'Gebruiksgegevens:'}</strong> {isEnglish ? 'logins, feature usage, API calls, and audit logs.' : 'logins, functiegebruik, API-verzoeken en auditlogs.'}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">3. How We Use Your Data</h2>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">
+              {isEnglish ? '3. How We Use Data' : '3. Hoe wij gegevens gebruiken'}
+            </h2>
             <p>
-              We use your data solely to provide and improve the {siteName} service. This includes:
+              {isEnglish
+                ? `We use data only to provide, secure, support, and improve ${siteName}. We do not sell your data and do not use conversation content to train AI models.`
+                : `We gebruiken gegevens alleen om ${siteName} te leveren, te beveiligen, ondersteuning te bieden en te verbeteren. We verkopen je gegevens niet en gebruiken gespreksinhoud niet om AI-modellen te trainen.`}
             </p>
-            <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li>Delivering automated responses and AI agent functionality</li>
-              <li>Routing and managing conversations</li>
-              <li>Billing and account management</li>
-              <li>Providing customer support</li>
-              <li>Detecting and preventing abuse</li>
-            </ul>
+          </section>
+
+          <section>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">
+              {isEnglish ? '4. AI and External Processors' : '4. AI en externe verwerkers'}
+            </h2>
+            <p>
+              {isEnglish
+                ? 'For AI-powered features such as automated replies, lead qualification, and voice agents, conversation data may be processed by selected AI providers under data processing agreements.'
+                : 'Voor AI-functies zoals automatische antwoorden, leadkwalificatie en voice agents kunnen gespreksgegevens worden verwerkt door geselecteerde AI-providers onder verwerkersovereenkomsten.'}
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">
+              {isEnglish ? '5. Storage and Security' : '5. Opslag en beveiliging'}
+            </h2>
+            <p>
+              {isEnglish
+                ? 'We use encryption in transit, restricted access, audit logs, and operational controls to protect your data.'
+                : 'We gebruiken versleuteling tijdens transport, beperkte toegang, auditlogs en operationele controles om je gegevens te beschermen.'}
+            </p>
             <p className="mt-4">
-              We do <strong>not</strong> use your conversation content to train machine learning models. We do not display ads based on your data. Your data is never sold.
+              {isEnglish
+                ? `${siteName} processes WhatsApp messages on its servers to provide inbox, automation, and reporting features.`
+                : `${siteName} verwerkt WhatsApp-berichten op servers om inbox-, automatiserings- en rapportagefuncties mogelijk te maken.`}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">4. AI and External Processors</h2>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">
+              {isEnglish ? '6. Retention' : '6. Bewaartermijnen'}
+            </h2>
             <p>
-              To provide AI-powered features (automated replies, lead qualification), your conversation data is processed by AI providers (OpenAI or Google AI). These providers process data under strict data processing agreements and are not permitted to use your data for model training. All AI processing occurs in data centers within the EU or in providers certified under the EU-U.S. Data Privacy Framework.
+              {isEnglish
+                ? 'We keep data while your subscription is active and for a limited period after closure so you can export it, unless longer retention is legally required.'
+                : 'We bewaren gegevens zolang je abonnement actief is en nog beperkt na sluiting zodat je kunt exporteren, tenzij wettelijke verplichtingen langere bewaring vereisen.'}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">5. Data Storage and Security</h2>
-            <p>
-              Your data is stored on servers in the European Union. We use TLS 1.2+ encryption for data in transit and AES-256 encryption for data at rest. Access is restricted to authorized personnel only.
-            </p>
-            <p className="mt-4">
-              Important: While WhatsApp provides end-to-end encryption for individual messages, {siteName} processes messages on our servers to deliver automation features. This means messages are decrypted briefly for processing and stored in our database.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">6. Data Retention</h2>
-            <p>
-              Your data is retained for the duration of your subscription and for 30 days after account closure to allow data export. After this period, all personal data is deleted from our systems, except where retention is required by law (e.g., financial records).
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">7. Your Rights (GDPR)</h2>
-            <p>
-              Under GDPR, you have the following rights regarding your personal data:
-            </p>
-            <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li><strong>Right of Access:</strong> Request a copy of all personal data we hold about you.</li>
-              <li><strong>Right to Rectification:</strong> Correct any inaccurate personal data.</li>
-              <li><strong>Right to Erasure:</strong> Request deletion of your account and associated data.</li>
-              <li><strong>Right to Data Portability:</strong> Export your data in a machine-readable format (JSON).</li>
-              <li><strong>Right to Object:</strong> Object to certain processing of your personal data.</li>
-              <li><strong>Right to Lodge a Complaint:</strong> File a complaint with your local data protection authority.</li>
-            </ul>
-            <p className="mt-4">
-              To exercise any of these rights, contact us at hello@{siteName.toLowerCase().replace(/\s+/g, '')}.nl or through your account settings.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">8. Data Export</h2>
-            <p>
-              You can export all your personal data at any time from your account settings. The export includes:
-            </p>
-            <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li>Profile information (name, email, role)</li>
-              <li>Team memberships and permissions</li>
-              <li>Contacts (names, phone numbers, tags, notes, custom fields)</li>
-              <li>Full conversation history (all messages)</li>
-              <li>Activity logs and automation flows</li>
-              <li>Subscription information</li>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">
+              {isEnglish ? '7. Your GDPR Rights' : '7. Jouw AVG-rechten'}
+            </h2>
+            <p>{isEnglish ? 'Under the GDPR, you can request:' : 'Onder de AVG kun je verzoeken om:'}</p>
+            <ul className="mt-2 list-disc space-y-1 pl-6">
+              <li>{isEnglish ? 'access to your personal data;' : 'inzage in je persoonsgegevens;'}</li>
+              <li>{isEnglish ? 'correction of inaccurate data;' : 'correctie van onjuiste gegevens;'}</li>
+              <li>{isEnglish ? 'deletion of your account and related data;' : 'verwijdering van je account en bijbehorende gegevens;'}</li>
+              <li>{isEnglish ? 'export of your data in a machine-readable format;' : 'export van je gegevens in een machineleesbaar formaat;'}</li>
+              <li>{isEnglish ? 'restriction or objection to certain processing.' : 'beperking van of bezwaar tegen bepaalde verwerkingen.'}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">9. Cookies</h2>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">{isEnglish ? '8. Data Export' : '8. Gegevens exporteren'}</h2>
             <p>
-              We use cookies solely to keep you logged in and to remember your preferences. We do not use advertising or tracking cookies.
+              {isEnglish
+                ? 'You can export workspace data from your account where available, including contacts, messages, notes, tags, activity, and automation data.'
+                : 'Je kunt workspacegegevens exporteren waar beschikbaar, waaronder contacten, berichten, notities, tags, activiteiten en automatiseringsdata.'}
             </p>
-            <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li><strong>Essential cookies:</strong> Required for authentication and session management. Cannot be disabled.</li>
-              <li><strong>Functional cookies:</strong> Remember your language and UI preferences. Can be disabled without affecting functionality.</li>
-            </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">10. Contact</h2>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">{isEnglish ? '9. Cookies' : '9. Cookies'}</h2>
             <p>
-              For privacy-related questions or to exercise your rights, contact us at hello@{siteName.toLowerCase().replace(/\s+/g, '')}.nl
+              {isEnglish
+                ? 'We use essential cookies for login sessions and functional cookies for preferences such as language and theme. We do not use advertising cookies.'
+                : 'We gebruiken essentiële cookies voor sessies en functionele cookies voor voorkeuren zoals taal en thema. We gebruiken geen advertentiecookies.'}
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-4 text-2xl font-semibold text-foreground">{isEnglish ? '10. Contact' : '10. Contact'}</h2>
+            <p>
+              {isEnglish ? 'For privacy questions or requests, contact us at ' : 'Voor privacyvragen of verzoeken kun je contact opnemen via '}
+              hello@{siteName.toLowerCase().replace(/\s+/g, '')}.nl
             </p>
           </section>
         </div>

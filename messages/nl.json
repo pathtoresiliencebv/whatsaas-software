@@ -13,9 +13,9 @@
       "team_desc": "Beheer leden en rollen",
       "general": "Algemeen",
       "general_desc": "App-voorkeuren",
-      "instances": "Instances",
+      "instances": "Instanties",
       "instances_desc": "WhatsApp-verbindingen",
-      "ai": "AI Agent",
+      "ai": "AI-agent",
       "ai_desc": "Hersenen en gedrag",
       "developers": "Ontwikkelaars",
       "developers_desc": "API-sleutels en documentatie",
@@ -30,7 +30,7 @@
     },
     "footer": {
       "help": "Hulp nodig?",
-      "desc": "Bekijk onze docs of neem contact op met support."
+      "desc": "Bekijk onze documentatie of neem contact op met support."
     }
   },
   "Billing": {
@@ -42,8 +42,8 @@
     "col_amount": "Bedrag",
     "col_status": "Status",
     "col_actions": "Acties",
-    "download_pdf": "Download PDF",
-    "view_online": "Online Bekijken",
+    "download_pdf": "PDF downloaden",
+    "view_online": "Online bekijken",
     "no_invoices": "Geen facturen gevonden.",
     "no_billing_info": "Geen factureringsinformatie beschikbaar.",
     "error_loading": "Laden van facturen mislukt."
@@ -63,7 +63,7 @@
     "close": "Sluiten"
   },
   "Auth": {
-    "back_to_home": "Terug naar Home",
+    "back_to_home": "Terug naar home",
     "welcome_back": "Welkom terug",
     "create_account": "Account aanmaken",
     "signin_desc": "Voer je inloggegevens in om toegang te krijgen tot je werkruimte",
@@ -77,10 +77,18 @@
     "creating_account": "Account aanmaken...",
     "no_account": "Heb je nog geen account? ",
     "has_account": "Heb je al een account? ",
+    "two_step_verification": "Tweestapsverificatie",
+    "two_step_desc": "Voer je authenticatorcode in om verder te gaan.",
+    "invalid_verification_code": "Ongeldige verificatiecode",
+    "generic_error": "Er ging iets mis. Probeer het opnieuw.",
+    "agree_prefix": "Door verder te gaan, ga je akkoord met de ",
+    "terms_link": "Voorwaarden",
+    "agree_middle": " en het ",
+    "privacy_link": "Privacybeleid",
     "rights_reserved": "Alle rechten voorbehouden."
   },
   "PasswordReset": {
-    "back_to_login": "Terug naar Login",
+    "back_to_login": "Terug naar inloggen",
     "forgot_title": "Wachtwoord vergeten?",
     "forgot_desc": "Voer je e-mailadres in en we sturen je een link om je wachtwoord te resetten.",
     "email_label": "E-mailadres",
@@ -97,20 +105,23 @@
     "reset_password": "Wachtwoord resetten",
     "resetting": "Resetten...",
     "reset_success": "Wachtwoord succesvol gereset! Je kunt nu inloggen.",
-    "go_to_login": "Naar login"
+    "go_to_login": "Naar inloggen"
   },
   "Sidebar": {
     "dashboard": "Dashboard",
     "chats": "Chats",
     "automation": "Automatisering",
-    "ai_agent": "AI Agent",
+    "ai_agent": "AI-agent",
     "contacts": "Contacten",
-    "templates": "Templates",
+    "templates": "Sjablonen",
     "campaigns": "Campagnes",
     "calls": "Belletjes",
     "settings": "Instellingen",
     "sign_out": "Uitloggen",
-    "toggle_theme": "Thema wisselen"
+    "toggle_theme": "Thema wisselen",
+    "whatsapp_agents": "WhatsApp-agents",
+    "voice_agents": "Spraakagents",
+    "analytics": "Analyse"
   },
   "Pricing": {
     "manage_billing": "Facturering en facturen beheren",
@@ -119,7 +130,8 @@
     "offline_plan": "Plan",
     "offline_amount": "Bedrag",
     "offline_instructions": "Na het doen van de betaling, stuur het bewijs naar support. Je plan wordt binnen 24 uur handmatig geactiveerd.",
-    "offline_close": "Begrepen"
+    "offline_close": "Begrepen",
+    "nav_label": "Prijzen"
   },
   "Sessions": {
     "title": "Actieve Sessies",
@@ -147,7 +159,7 @@
     "avg_duration": "Gem. duur",
     "missed_calls": "Gemiste oproepen",
     "history": "Geschiedenis",
-    "history_desc": "Alle oproepen gedaan door agents.",
+    "history_desc": "Alle oproepen van je spraakagents.",
     "col_date": "Datum",
     "col_agent": "Agent",
     "col_to": "Naar",
@@ -219,7 +231,7 @@
     "unassigned": "Niet toegewezen",
     "new_stage_modal": "Nieuwe Funnel Fase",
     "edit_stage_modal": "Fase Bewerken",
-    "open_chat": "Chat Openen",
+    "open_chat": "Chat openen",
     "hide_time": "Tijd Verbergen",
     "view_time": "Tijd in Fase Bekijken",
     "stage_name_placeholder": "Fase Naam (bijv. Onderhandeling)",
@@ -270,11 +282,14 @@
       "save": "Opslaan",
       "mute": "Meldingen dempen",
       "unmute": "Meldingen aanzetten"
-    }
+    },
+    "dashboard_title": "Dashboard",
+    "dashboard_start_desc": "Begin hier om je WhatsApp- en voice-workspace klaar te zetten.",
+    "dashboard_return_desc": "Welkom terug. Hier is een overzicht van je workspace."
   },
   "Settings": {
-    "team_title": "Team Instellingen",
-    "subscription_title": "Team Abonnement",
+    "team_title": "Teaminstellingen",
+    "subscription_title": "Teamabonnement",
     "current_plan": "Huidig Plan",
     "upgrade_btn": "Plan Upgraden",
     "change_plan_btn": "Plan Wijzigen",
@@ -284,7 +299,6 @@
     "canceled": "Geannuleerd",
     "active": "Actief",
     "free_plan": "Gratis Plan",
-
     "members_title": "Teamleden",
     "no_members": "Nog geen teamleden.",
     "remove_btn": "Verwijderen",
@@ -295,12 +309,10 @@
     "remove_member": "Lid verwijderen",
     "you": "jij",
     "pending": "In afwachting",
-
     "invites_title": "Openstaande Uitnodigingen",
     "invite_sent": "Verzonden: {date}",
     "copy_link": "Link Kopiëren",
     "revoke": "Intrekken",
-
     "invite_section_title": "Teamlid Uitnodigen",
     "email_label": "E-mailadres",
     "role_label": "Rol",
@@ -348,7 +360,6 @@
     "save_btn": "Opslaan",
     "role_updated": "Machtigingen bijgewerkt",
     "failed_to_update_role": "Machtigingen bijwerken mislukt",
-
     "general_title": "Algemene Instellingen",
     "account_info": "Account Informatie",
     "name_label": "Naam",
@@ -517,7 +528,6 @@
     "system_instructions_desc": "Bepaal hoe de AI zich moet gedragen, de toon en beperkingen.",
     "system_prompt_placeholder": "Bijv: Je bent een supportmedewerker bij PizzaPlace. Wees vriendelijk. Je doel is om bestellingen op te nemen...",
     "save_config_btn": "Configuratie Opslaan",
-
     "voice_config_title": "Spraakoproep Instellingen",
     "voice_config_desc": "Beheer je telefoonnummers en oproeptegoeden.",
     "voice_phone_number": "Telefoonnummer",
@@ -558,7 +568,6 @@
     "voice_col_credits": "Tegoeden",
     "voice_page_info": "Pagina {page} van {total}",
     "voice_no_history": "Nog geen oproepgeschiedenis.",
-
     "activity_log_title": "Activiteitenlog",
     "recent_activity_title": "Recente Activiteit",
     "no_activity_yet_title": "Nog geen activiteit",
@@ -587,10 +596,10 @@
     "action_removed_tag_from_contact": "Je hebt een tag verwijderd van een contact",
     "action_unknown": "Onbekende actie uitgevoerd",
     "from_ip": " vanaf IP {ipAddress}",
-    "developer_api_title": "Developer API",
+    "developer_api_title": "Ontwikkelaars-API",
     "developer_api_desc": "Beheer API-sleutels en bekijk documentatie.",
-    "create_new_key_btn": "Nieuwe Sleutel Aanmaken",
-    "api_keys_card_title": "API Sleutels",
+    "create_new_key_btn": "Nieuwe sleutel aanmaken",
+    "api_keys_card_title": "API-sleutels",
     "api_keys_card_desc": "Gebruik deze sleutels om je verzoeken te authenticeren. Houd ze geheim.",
     "failed_to_load_api_keys_toast": "API-sleutels laden mislukt",
     "no_api_keys_generated_yet": "Nog geen API-sleutels gegenereerd.",
@@ -803,14 +812,28 @@
     "http_add_mapping": "Toevoegen",
     "http_mapping_hint": "Extraheer JSON response velden en sla op als variabelen.",
     "save_changes_btn": "Wijzigingen Opslaan",
-    "autosave_hint": "Wijzigingen worden automatisch opgeslagen"
+    "autosave_hint": "Wijzigingen worden automatisch opgeslagen",
+    "workspace_owner": "Workspace-eigenaar",
+    "agents_title": "Agents",
+    "agents_description": "Maak, koppel en monitor je WhatsApp automation agents.",
+    "browse_templates": "Bekijk templates",
+    "new_agent": "Nieuwe agent",
+    "search_agents_placeholder": "Agents zoeken...",
+    "filter_creator": "Maker",
+    "filter_archived": "Gearchiveerd",
+    "col_name": "Naam",
+    "col_created_by": "Aangemaakt door",
+    "col_created_at": "Aangemaakt op",
+    "col_actions": "Acties",
+    "status_live": "Live",
+    "open_agent_label": "{name} openen"
   },
   "Templates": {
     "no_waba_instance_connected": "Geen WABA Instantie Verbonden",
     "connect_waba_desc": "Om templates te beheren, moet je eerst een WhatsApp Business API (WABA) instantie verbinden.",
     "connect_waba_btn": "WABA Instantie Verbinden",
-    "message_templates_title": "Bericht Templates",
-    "message_templates_desc": "Beheer je WhatsApp Business templates.",
+    "message_templates_title": "Berichtsjablonen",
+    "message_templates_desc": "Beheer je WhatsApp Business-sjablonen.",
     "select_instance_placeholder": "Selecteer Instantie",
     "sync_btn": "Sync",
     "create_template_btn": "Template Aanmaken",
@@ -822,7 +845,7 @@
     "actions_header": "Acties",
     "no_templates_found": "Geen templates gevonden voor deze instantie.",
     "sync_or_create_new": "Sync van Meta of maak een nieuwe aan.",
-    "view_preview_title": "Preview Bekijken",
+    "view_preview_title": "Voorbeeld bekijken",
     "status_approved": "Goedgekeurd",
     "status_rejected": "Afgewezen",
     "status_pending": "In afwachting",
@@ -1098,7 +1121,7 @@
     "background_image_desc": "Upload een PNG-patroon als chat-achtergrond. De afbeelding wordt herhaald om het gebied te vullen.",
     "upload_pattern": "Klik om patroon te uploaden",
     "upload_hint": "PNG aanbevolen",
-    "preview_title": "Preview",
+    "preview_title": "Voorbeeld",
     "save_btn": "Thema Opslaan",
     "saving_btn": "Opslaan...",
     "success_msg": "Chatthema succesvol bijgewerkt.",
@@ -1153,7 +1176,7 @@
     "awaiting_customer_reply": "Wachten op antwoord van klant. Berichten kunnen alleen worden verzonden nadat het contact reageert op het via Meta verzonden template.",
     "group_label": "Groep",
     "group_read_only": "Groepen zijn alleen-lezen. Berichten kunnen hier niet worden verzonden.",
-    "preview_title": "Preview",
+    "preview_title": "Voorbeeld",
     "recording_status_text": "Opnemen...",
     "image_item": "📷 Afbeelding",
     "video_item": "📹 Video",
@@ -1264,9 +1287,9 @@
     "call_bubble_canceled": "Oproep geannuleerd",
     "call_system_log": "{agent} heeft gebeld ({status})",
     "call_preview": "📞 Spraakoproep · {agent}",
-
     "sync_messages": {
       "banner": "Deze chat heeft geen berichten. Wil je de geschiedenis importeren?",
+      "auto_importing": "Berichtgeschiedenis wordt automatisch geïmporteerd...",
       "import_btn": "Geschiedenis importeren",
       "menu_btn": "Berichten synchroniseren",
       "success": "{count} berichten succesvol geïmporteerd!",
@@ -1315,7 +1338,9 @@
       "crm_tag_api": "WhatsApp API",
       "crm_actions": "Acties",
       "crm_action_assign": "Agent Toewijzen",
-      "crm_action_pause": "AI Pauzeren"
+      "crm_action_pause": "AI pauzeren",
+      "yesterday": "Gisteren",
+      "input_placeholder": "Typ een bericht of / voor opdrachten..."
     },
     "social_proof": {
       "trusted_by": "Gebouwd voor teams die resultaat boeken",
@@ -1394,20 +1419,68 @@
       "title": "Binnen enkele minuten aan de slag",
       "subtitle": "In 4 eenvoudige stappen up and running. Geen codeerwerk nodig.",
       "steps": [
-        { "title": "Verbind WhatsApp", "description": "Koppel uw WhatsApp-nummer via QR-code of telefoonkoppeling." },
-        { "title": "Importeer Contacten", "description": "Voeg contacten handmatig toe of importeer via CSV/Excel-bestanden." },
-        { "title": "Maak Automatisering", "description": "Bouw AI-gestuurde flows of chatbotregels om berichten te verwerken." },
-        { "title": "Begin met Versturen", "description": "Verstuur campagnes, automatiseer antwoorden en beheer gesprekken." }
+        {
+          "title": "Verbind WhatsApp",
+          "description": "Koppel uw WhatsApp-nummer via QR-code of telefoonkoppeling."
+        },
+        {
+          "title": "Importeer Contacten",
+          "description": "Voeg contacten handmatig toe of importeer via CSV/Excel-bestanden."
+        },
+        {
+          "title": "Maak Automatisering",
+          "description": "Bouw AI-gestuurde flows of chatbotregels om berichten te verwerken."
+        },
+        {
+          "title": "Begin met Versturen",
+          "description": "Verstuur campagnes, automatiseer antwoorden en beheer gesprekken."
+        }
       ]
     },
     "useCases": {
       "title": "Gebouwd voor Uw Branche",
       "subtitle": "Zie hoe bedrijven zoals het uwe WhatsApp automatiseren met Kyrn.",
       "items": [
-        { "title": "E-commerce", "description": "Automatiseer orderupdates, retouren en productaanbevelingen.", "features": ["Orderbevestigingen", "Leveringsbijhouding", "Winkelwagenherstel", "Productcatalogus"] },
-        { "title": "Bureaus", "description": "Beheer meerdere klanten vanuit n dashboard met teamsamenwerking.", "features": ["Multi-klantbeheer", "Teamtoewijzing", "White-label klaar", "Campagne-automatisering"] },
-        { "title": "SaaS", "description": "Automatiseer onboarding, ondersteuning en gebruikersbetrokkenheid op schaal.", "features": ["Onboardingflows", "Ticketautomatisering", "Feature-aankondigingen", "Gebruikerssegmentatie"] },
-        { "title": "Zorg", "description": "Plan afspraken, stuur herinneringen en behandel patintvragen.", "features": ["Afspraakplanning", "Patintherinneringen", "Receptmeldingen", "Veilig berichtenverkeer"] }
+        {
+          "title": "E-commerce",
+          "description": "Automatiseer orderupdates, retouren en productaanbevelingen.",
+          "features": [
+            "Orderbevestigingen",
+            "Leveringsbijhouding",
+            "Winkelwagenherstel",
+            "Productcatalogus"
+          ]
+        },
+        {
+          "title": "Bureaus",
+          "description": "Beheer meerdere klanten vanuit n dashboard met teamsamenwerking.",
+          "features": [
+            "Multi-klantbeheer",
+            "Teamtoewijzing",
+            "White-label klaar",
+            "Campagne-automatisering"
+          ]
+        },
+        {
+          "title": "SaaS",
+          "description": "Automatiseer onboarding, ondersteuning en gebruikersbetrokkenheid op schaal.",
+          "features": [
+            "Onboardingflows",
+            "Ticketautomatisering",
+            "Feature-aankondigingen",
+            "Gebruikerssegmentatie"
+          ]
+        },
+        {
+          "title": "Zorg",
+          "description": "Plan afspraken, stuur herinneringen en behandel patintvragen.",
+          "features": [
+            "Afspraakplanning",
+            "Patintherinneringen",
+            "Receptmeldingen",
+            "Veilig berichtenverkeer"
+          ]
+        }
       ],
       "compliance_note": "Zorggebruik omvat HIPAA-compliance functies. Alle data is versleuteld en veilig opgeslagen."
     },
@@ -1415,12 +1488,30 @@
       "title": "Verbindt met Uw Stack",
       "subtitle": "Integreer met de tools die u al gebruikt. Geen complexe setup nodig.",
       "items": [
-        { "name": "WhatsApp", "description": "Web & Business API" },
-        { "name": "Evolution API", "description": "Multi-apparaat verbinding" },
-        { "name": "Stripe", "description": "Betalingen & facturatie" },
-        { "name": "OpenAI", "description": "AI-gestuurde antwoorden" },
-        { "name": "Twilio", "description": "Spraakoproepen & SMS" },
-        { "name": "Google AI", "description": "Geavanceerde AI-modellen" }
+        {
+          "name": "WhatsApp",
+          "description": "Web & Business API"
+        },
+        {
+          "name": "Evolution API",
+          "description": "Multi-apparaat verbinding"
+        },
+        {
+          "name": "Stripe",
+          "description": "Betalingen & facturatie"
+        },
+        {
+          "name": "OpenAI",
+          "description": "AI-gestuurde antwoorden"
+        },
+        {
+          "name": "Twilio",
+          "description": "Spraakoproepen & SMS"
+        },
+        {
+          "name": "Google AI",
+          "description": "Geavanceerde AI-modellen"
+        }
       ]
     },
     "whyKyrn": {
@@ -1635,7 +1726,7 @@
   "Campaigns": {
     "title": "Massaberichten",
     "subtitle": "Maak en beheer je broadcastcampagnes.",
-    "create_btn": "Campagne Aanmaken",
+    "create_btn": "Nieuwe campagne",
     "empty_title": "Nog geen campagnes",
     "empty_desc": "Maak je eerste campagne om meerdere klanten te bereiken.",
     "stats_total": "Totaal: {count}",
@@ -2035,5 +2126,167 @@
       "description": "Lees onze API-documentatie",
       "link_text": "Open API Documentatie"
     }
+  },
+  "WelcomeOnboarding": {
+    "sidebar": {
+      "title": "Kyrn startgids",
+      "description": "In een minuut weet je waar je begint en wat de belangrijkste onderdelen doen."
+    },
+    "steps": {
+      "welcome": "Welkom",
+      "intake": "Korte intake",
+      "product": "Zo werkt Kyrn",
+      "action": "Eerste actie"
+    },
+    "goals": {
+      "support": "Support sneller maken",
+      "sales": "Meer leads opvolgen",
+      "automation": "Werk automatiseren",
+      "voice": "Voice agents testen"
+    },
+    "teamSizes": {
+      "solo": "Solo",
+      "small": "2-5 mensen",
+      "medium": "6-20 mensen",
+      "large": "20+ mensen"
+    },
+    "channels": {
+      "inbox": "WhatsApp inbox",
+      "whatsappAgents": "WhatsApp agents",
+      "voiceAgents": "Voice agents",
+      "campaigns": "Campagnes"
+    },
+    "products": {
+      "inbox": {
+        "title": "Inbox",
+        "description": "Alle gesprekken op een plek, met contactinformatie en teamoverzicht."
+      },
+      "whatsappAgents": {
+        "title": "WhatsApp Agents",
+        "description": "Maak flow agents die vragen stellen, routeren, antwoorden en acties uitvoeren."
+      },
+      "voiceAgents": {
+        "title": "Voice Agents",
+        "description": "Laat een AI-agent bellen of opnemen, met scripts, tools en kennisbestanden."
+      },
+      "campaigns": {
+        "title": "Campagnes",
+        "description": "Start gecontroleerde WhatsApp of voice opvolging voor lijsten en segmenten."
+      }
+    },
+    "welcome": {
+      "paidTitle": "Je bent binnen. Welkom bij Kyrn.",
+      "title": "Welkom bij Kyrn.",
+      "description": "Leuk dat je er bent. We zetten je workspace rustig klaar, zodat je direct snapt wat je waar doet.",
+      "descriptionWithTeam": "Leuk dat je er bent met {teamName}. We zetten je workspace rustig klaar, zodat je direct snapt wat je waar doet.",
+      "card1": "Vertel kort wat je wilt bereiken",
+      "card2": "Bekijk hoe agents en flows werken",
+      "card3": "Start met de juiste eerste actie"
+    },
+    "actions": {
+      "skip": "Later doen",
+      "begin": "Beginnen",
+      "back": "Terug",
+      "next": "Verder",
+      "chooseFirstStep": "Kies mijn eerste stap",
+      "startFirstStep": "Start mijn eerste stap"
+    },
+    "questions": {
+      "title": "Wat brengt je hier?",
+      "description": "Geen lange setup. Kies gewoon wat nu het meest klopt, dan sturen we je naar de slimste start.",
+      "goalTitle": "Je belangrijkste doel",
+      "teamTitle": "Teamgrootte",
+      "channelTitle": "Waar wil je als eerste mee starten?"
+    },
+    "product": {
+      "title": "Zo werkt Kyrn in de praktijk",
+      "description": "Denk aan Kyrn als je WhatsApp en voice command center. Je bouwt agents, laat ze gesprekken voeren en houdt controle in het dashboard."
+    },
+    "action": {
+      "title": "Je startplan staat klaar",
+      "description": "We starten met de basis: kanaal koppelen, agent maken, daarna testen.",
+      "descriptionWithGoal": "We starten met: {goal}.",
+      "orderTitle": "Aanbevolen volgorde",
+      "order1": "Koppel je WhatsApp of testkanaal.",
+      "order2": "Maak je eerste WhatsApp agent of flow agent.",
+      "order3": "Test een gesprek voordat je live gaat.",
+      "order4": "Voeg voice agents, campagnes en teamleden toe zodra de basis klopt."
+    }
+  },
+  "OnboardingBanner": {
+    "workspaceFallback": "je workspace",
+    "title": "Richt {teamName} in",
+    "description": "Start met WhatsApp, voeg je eerste contacten toe en zet daarna automation en voice aan zodra de basis klopt.",
+    "continueSetup": "Ga verder met setup",
+    "progress": "{completed} van {total} stappen afgerond",
+    "nextLevel": "Volgende niveau",
+    "steps": {
+      "connect": {
+        "label": "Koppel WhatsApp",
+        "description": "Verbind een zakelijk nummer zodat Kyrn berichten kan ontvangen en verzenden."
+      },
+      "contacts": {
+        "label": "Voeg je eerste contacten toe",
+        "description": "Importeer klanten of voeg een kleine testlijst toe voordat je live gaat."
+      },
+      "automate": {
+        "label": "Maak een WhatsApp agent",
+        "description": "Bouw de eerste flow voor antwoorden, routering of lead capture."
+      },
+      "voiceModel": {
+        "label": "Configureer voice model",
+        "description": "Voeg model- en steminstellingen toe voor telefonische agents."
+      },
+      "voiceAgent": {
+        "label": "Maak een voice agent",
+        "description": "Zet een belagent op met script, tools en kennis."
+      },
+      "telephony": {
+        "label": "Koppel telefonie",
+        "description": "Voeg telefonie toe en wijs een nummer toe wanneer je klaar bent."
+      },
+      "team": {
+        "label": "Nodig je team uit",
+        "description": "Breng support of sales samen in de gedeelde workspace."
+      }
+    },
+    "dismissNextLevel": "Volgende niveau verbergen",
+    "growthComplete": "Alle vervolgstappen zijn afgerond"
+  },
+  "VerifyEmailSent": {
+    "title": "Check je e-mail",
+    "description": "We hebben een verificatielink gestuurd. Verifieer je account, daarna leidt Kyrn je door de eerste workspace setup.",
+    "descriptionWithEmail": "We hebben een verificatielink gestuurd naar {email}. Verifieer je account, daarna leidt Kyrn je door de eerste workspace setup.",
+    "noEmailTitle": "Nog geen e-mail?",
+    "noEmailDescription": "Check spam of promoties. Als hij nog steeds ontbreekt, stuur dan een nieuwe verificatielink.",
+    "sending": "Verzenden...",
+    "resend": "E-mail opnieuw sturen",
+    "continueSignIn": "Verder naar inloggen",
+    "resendSuccess": "Verificatie-e-mail verzonden! Check je inbox.",
+    "resendError": "Opnieuw verzenden mislukt",
+    "genericError": "Er ging iets mis. Probeer het opnieuw.",
+    "afterTitle": "Wat gebeurt er na verificatie?",
+    "steps": {
+      "connect": {
+        "title": "Koppel WhatsApp",
+        "description": "Voeg je zakelijke nummer toe en breng berichten samen in een workspace."
+      },
+      "agent": {
+        "title": "Bouw je eerste agent",
+        "description": "Start met een begeleide WhatsApp-flow en voeg daarna AI en voice toe wanneer je klaar bent."
+      },
+      "launch": {
+        "title": "Ga veilig live",
+        "description": "Nodig je team uit, test gesprekken en monitor activiteit vanuit het dashboard."
+      }
+    }
+  },
+  "Analytics": {
+    "team_not_found": "Team niet gevonden of gebruiker is niet aan een team gekoppeld.",
+    "dashboard_title": "Analytics dashboard",
+    "conversations_by_funnel": "Gesprekken per funnel (trend)",
+    "funnel_distribution": "Funnelverdeling",
+    "conversations_by_agent": "Gesprekken per agent",
+    "conversation_traffic": "Gespreksverkeer"
   }
 }

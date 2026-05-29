@@ -53,6 +53,7 @@ function ConnectInstanceForm({ onSuccess, onCancel }: { onSuccess: () => void; o
   const [metaToken, setMetaToken] = useState("");
   const [metaBusinessId, setMetaBusinessId] = useState("");
   const [metaPhoneNumberId, setMetaPhoneNumberId] = useState("");
+  const [isFacebookAuthLoading, setIsFacebookAuthLoading] = useState(false);
 
   const [rejectCalls, setRejectCalls] = useState(false);
   const [ignoreGroups, setIgnoreGroups] = useState(true);
@@ -60,8 +61,8 @@ function ConnectInstanceForm({ onSuccess, onCancel }: { onSuccess: () => void; o
   const [readMessages, setReadMessages] = useState(false);
   const [readStatus, setReadStatus] = useState(false);
 
-  const [channelInfo, setChannelInfo] = useState<{ evoActive: boolean; metaActive: boolean; metaAppId: string }>({
-    evoActive: true, metaActive: false, metaAppId: '',
+  const [channelInfo, setChannelInfo] = useState<{ evoActive: boolean; metaActive: boolean; metaAppId: string; metaConfigId: string }>({
+    evoActive: true, metaActive: false, metaAppId: '', metaConfigId: '',
   });
 
   useEffect(() => {
@@ -70,6 +71,7 @@ function ConnectInstanceForm({ onSuccess, onCancel }: { onSuccess: () => void; o
         evoActive: data.evolution?.active ?? true,
         metaActive: data.metaCloud?.active ?? false,
         metaAppId: data.metaCloud?.appId || '',
+        metaConfigId: data.metaCloud?.configId || '',
       });
     }).catch(() => {});
   }, []);
@@ -78,7 +80,11 @@ function ConnectInstanceForm({ onSuccess, onCancel }: { onSuccess: () => void; o
 
   const launchMetaEmbeddedSignup = () => {
     const metaAppId = channelInfo.metaAppId;
-    if (!metaAppId) return;
+    const metaConfigId = channelInfo.metaConfigId;
+    if (!metaAppId || !metaConfigId) {
+      setError('Facebook login is nog niet volledig ingesteld. Controleer de Meta App ID en Facebook configuration ID bij Channels.');
+      return;
+    }
     setIsLoading(true);
     setError(null);
 
@@ -101,7 +107,7 @@ function ConnectInstanceForm({ onSuccess, onCancel }: { onSuccess: () => void; o
           }
         },
         {
-          config_id: process.env.NEXT_PUBLIC_META_CONFIG_ID,
+          config_id: metaConfigId,
           response_type: 'code',
           override_default_response_type: true,
           extras: {
@@ -156,6 +162,23 @@ function ConnectInstanceForm({ onSuccess, onCancel }: { onSuccess: () => void; o
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const composioStatus = params.get('composio');
+    if (!composioStatus) return;
+
+    if (composioStatus === 'success') {
+      toast.success('Facebook login connected');
+    } else {
+      toast.error('Facebook login failed');
+    }
+
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete('composio');
+    cleanUrl.searchParams.delete('connectedAccountId');
+    window.history.replaceState({}, '', cleanUrl.toString());
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -259,6 +282,27 @@ function ConnectInstanceForm({ onSuccess, onCancel }: { onSuccess: () => void; o
                         {t('meta_configuration_desc')}<br/>
                         <code className="bg-black/10 dark:bg-black/30 px-1 rounded select-all">{process.env.NEXT_PUBLIC_EVOLUTION_WEBHOOK_URL+'/webhook/meta' || ''}</code><br/>
                         {t('verify_token_label')} <code className="bg-black/10 dark:bg-black/30 px-1 rounded select-all">{process.env.NEXT_PUBLIC_EVOLUTION_WEBHOOK_TOKEN || ''}</code>
+                    </AlertDescription>
+                </Alert>
+
+                <Alert className="border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/20">
+                    <Zap className="h-4 w-4 text-emerald-700 dark:text-emerald-300" />
+                    <AlertTitle className="text-emerald-900 dark:text-emerald-200">Inloggen met Facebook</AlertTitle>
+                    <AlertDescription className="mt-2 flex flex-col gap-3 text-xs text-emerald-800 dark:text-emerald-200 sm:flex-row sm:items-center sm:justify-between">
+                        <span>Verbind de Official WhatsApp API via Facebook login. Kyrn opent een beveiligde autorisatieflow en vult de koppeling daarna netjes aan.</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="w-fit bg-emerald-700 text-white transition-all hover:bg-emerald-800 hover:shadow-sm"
+                          disabled={isFacebookAuthLoading}
+                          onClick={() => {
+                            setIsFacebookAuthLoading(true);
+                            window.location.href = '/api/composio/connect';
+                          }}
+                        >
+                          {isFacebookAuthLoading ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <ExternalLink className="mr-2 h-3.5 w-3.5" />}
+                          Inloggen met Facebook
+                        </Button>
                     </AlertDescription>
                 </Alert>
 

@@ -3,7 +3,8 @@ import { db } from '@/lib/db/drizzle';
 import { getTeamForUser } from '@/lib/db/queries';
 import { checkRoutePermission } from '@/lib/auth/permissions-guard';
 import { wabaTemplates, evolutionInstances } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
+import { OFFICIAL_WHATSAPP_INTEGRATIONS } from '@/lib/whatsapp/official';
 
 export async function POST(request: Request) {
   try {
@@ -23,20 +24,23 @@ export async function POST(request: Request) {
       where: and(
         eq(evolutionInstances.id, parseInt(instanceId)),
         eq(evolutionInstances.teamId, team.id),
-        eq(evolutionInstances.integration, 'WHATSAPP-BUSINESS')
+        inArray(evolutionInstances.integration, OFFICIAL_WHATSAPP_INTEGRATIONS)
       ),
-      columns: { id: true, metaToken: true, metaBusinessId: true }
+      columns: { id: true, metaToken: true, accessToken: true, metaBusinessId: true, metaWabaId: true }
     });
 
-    if (!instance || !instance.metaToken || !instance.metaBusinessId) {
+    const metaToken = instance?.metaToken || instance?.accessToken;
+    const wabaId = instance?.metaWabaId || instance?.metaBusinessId;
+
+    if (!instance || !metaToken || !wabaId) {
       return NextResponse.json({ error: 'Invalid WABA instance.' }, { status: 404 });
     }
 
     const fields = 'name,status,category,language,components,id';
     const response = await fetch(
-      `https://graph.facebook.com/v21.0/${instance.metaBusinessId}/message_templates?fields=${fields}&limit=100`,
+      `https://graph.facebook.com/v21.0/${wabaId}/message_templates?fields=${fields}&limit=100`,
       {
-        headers: { 'Authorization': `Bearer ${instance.metaToken}` }
+        headers: { 'Authorization': `Bearer ${metaToken}` }
       }
     );
 

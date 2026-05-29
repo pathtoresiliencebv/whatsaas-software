@@ -24,6 +24,7 @@ import {
 import { toast } from 'sonner';
 import { WhatsAppPreview } from '@/components/templates/WhatsAppPreview';
 import { useTranslations } from 'next-intl';
+import { isOfficialWhatsAppIntegration } from '@/lib/whatsapp/official';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -73,8 +74,9 @@ export default function TemplatesPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTemplate, setSelectedTemplate] = useState<WabaTemplate | null>(null);
     const [isViewOpen, setIsViewOpen] = useState(false);
+    const autoSyncedInstanceRef = React.useRef<string | null>(null);
 
-    const wabaInstances = (Array.isArray(instances) ? instances : []).filter(i => i.integration === 'WHATSAPP-BUSINESS');
+    const wabaInstances = (Array.isArray(instances) ? instances : []).filter(i => isOfficialWhatsAppIntegration(i.integration));
 
     useEffect(() => {
         if (wabaInstances.length > 0 && !selectedInstanceId) {
@@ -92,8 +94,8 @@ export default function TemplatesPage() {
                 body: JSON.stringify({ instanceId: selectedInstanceId })
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed to sync');
-            toast.success(data.message || 'Templates synced successfully');
+            if (!res.ok) throw new Error(data.error || 'Synchroniseren mislukt');
+            toast.success(data.message || 'Templates succesvol gesynchroniseerd');
             mutate('/api/templates/list');
         } catch (error: any) {
             toast.error(error.message);
@@ -101,6 +103,16 @@ export default function TemplatesPage() {
             setIsSyncing(false);
         }
     };
+
+    useEffect(() => {
+        if (!selectedInstanceId || loadingTemplates || isSyncing) return;
+        if (autoSyncedInstanceRef.current === selectedInstanceId) return;
+        const hasTemplatesForInstance = (templates || []).some(t => t.instanceId.toString() === selectedInstanceId);
+        if (!hasTemplatesForInstance) {
+            autoSyncedInstanceRef.current = selectedInstanceId;
+            handleSync();
+        }
+    }, [selectedInstanceId, loadingTemplates]);
 
     const handleView = (template: WabaTemplate) => {
         setSelectedTemplate(template);

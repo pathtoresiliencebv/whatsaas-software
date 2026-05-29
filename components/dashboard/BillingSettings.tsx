@@ -11,37 +11,37 @@ export function BillingSettings() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Billing Information</CardTitle>
-          <CardDescription>Manage your billing details and payment method.</CardDescription>
+          <CardTitle>Factuurgegevens</CardTitle>
+          <CardDescription>Beheer je factuurgegevens en betaalmethode.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4">
             <div className="space-y-2">
-              <Label htmlFor="billing-name">Billing Name</Label>
-              <Input id="billing-name" placeholder="Company Name" />
+              <Label htmlFor="billing-name">Factuurnaam</Label>
+              <Input id="billing-name" placeholder="Bedrijfsnaam" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="billing-email">Billing Email</Label>
+              <Label htmlFor="billing-email">Factuur-e-mail</Label>
               <Input id="billing-email" type="email" placeholder="billing@company.com" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="vat">VAT Number (Optional)</Label>
+              <Label htmlFor="vat">Btw-nummer (optioneel)</Label>
               <Input id="vat" placeholder="NL123456789B01" />
             </div>
           </div>
-          <Button>Update Billing Info</Button>
+          <Button>Factuurgegevens bijwerken</Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Payment Method</CardTitle>
-          <CardDescription>Your current payment method on file.</CardDescription>
+          <CardTitle>Betaalmethode</CardTitle>
+          <CardDescription>Je huidige opgeslagen betaalmethode.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No payment method on file.</p>
+          <p className="text-sm text-muted-foreground">Er is nog geen betaalmethode opgeslagen.</p>
           <Button variant="outline" className="mt-4">
-            Add Payment Method
+            Betaalmethode toevoegen
           </Button>
         </CardContent>
       </Card>

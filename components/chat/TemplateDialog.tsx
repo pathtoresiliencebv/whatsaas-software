@@ -29,9 +29,9 @@ interface TemplateDialogProps {
 
 export function TemplateDialog({ open, onOpenChange, onSelect }: TemplateDialogProps) {
   const [templates] = React.useState<Template[]>([
-    { id: 1, name: 'Greeting', message: 'Hello! How can I help you today?' },
-    { id: 2, name: 'Thanks', message: 'Thank you for your message. We will get back to you soon.' },
-    { id: 3, name: 'Follow-up', message: 'Just following up on our previous conversation.' },
+    { id: 1, name: 'Begroeting', message: 'Hallo! Waarmee kan ik je vandaag helpen?' },
+    { id: 2, name: 'Bedankt', message: 'Bedankt voor je bericht. We komen hier snel bij je op terug.' },
+    { id: 3, name: 'Follow-up', message: 'Ik volg nog even op naar aanleiding van ons vorige gesprek.' },
   ]);
   const [search, setSearch] = React.useState('');
 
@@ -45,11 +45,11 @@ export function TemplateDialog({ open, onOpenChange, onSelect }: TemplateDialogP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Message Templates</DialogTitle>
-          <DialogDescription>Select a template to use in your message.</DialogDescription>
+          <DialogTitle>Berichtsjablonen</DialogTitle>
+          <DialogDescription>Kies een sjabloon om in je bericht te gebruiken.</DialogDescription>
         </DialogHeader>
         <Input
-          placeholder="Search templates..."
+          placeholder="Sjablonen zoeken..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="mb-4"
@@ -69,12 +69,12 @@ export function TemplateDialog({ open, onOpenChange, onSelect }: TemplateDialogP
             </div>
           ))}
           {filtered.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground text-sm">No templates found.</div>
+            <div className="text-center py-8 text-muted-foreground text-sm">Geen sjablonen gevonden.</div>
           )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange?.(false)}>
-            Cancel
+            Annuleren
           </Button>
         </DialogFooter>
       </DialogContent>
