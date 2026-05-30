@@ -502,7 +502,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-muted/40 dark:bg-background">
-      <aside className="flex w-full flex-col border-r bg-card md:w-[35%] md:basis-[35%] md:min-w-[320px] lg:min-w-0">
+      <aside className="flex w-full flex-col border-r bg-card md:w-[32%] md:basis-[32%] md:min-w-[300px] lg:min-w-0">
         <header className="flex items-center justify-between px-4 py-2 border-b h-[60px]">
           <div className="flex items-center gap-2">
             {isSelectionMode ? (

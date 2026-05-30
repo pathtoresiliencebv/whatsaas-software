@@ -77,8 +77,8 @@ export function ChatSidebar(props: ChatSidebarProps) {
   };
 
   return (
-    <aside className="hidden h-full basis-[23.077%] min-w-[160px] max-w-[220px] flex-col border-l bg-background lg:flex">
-      <div className="flex items-center justify-between border-b p-5">
+    <aside className="hidden h-full basis-[26%] min-w-[280px] max-w-[320px] flex-col border-l bg-background lg:flex">
+      <div className="flex items-center justify-between border-b p-4">
         <div className="flex min-w-0 items-center gap-3">
           <Avatar className="h-12 w-12">
             <AvatarImage src={avatar} />
@@ -94,12 +94,12 @@ export function ChatSidebar(props: ChatSidebarProps) {
         </Button>
       </div>
 
-      <div className="flex-1 space-y-6 overflow-y-auto p-5">
+      <div className="flex-1 space-y-6 overflow-y-auto p-4">
         <section className="space-y-4">
           <InfoRow label="Funnelfase">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex max-w-[160px] items-center gap-1 truncate text-sm">
+                <button className="flex max-w-full items-center gap-1 truncate text-sm">
                   <span>{contact?.funnelStage?.emoji || '📍'}</span>
                   <span className="truncate">{contact?.funnelStage?.name || 'Geen fase'}</span>
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -125,7 +125,7 @@ export function ChatSidebar(props: ChatSidebarProps) {
           <InfoRow label="Agent toewijzen">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex max-w-[160px] items-center gap-1 truncate text-sm">
+                <button className="flex max-w-full items-center gap-1 truncate text-sm">
                   <span className="truncate">{contact?.assignedUser?.name || contact?.assignedUser?.email || 'Niemand'}</span>
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </button>
@@ -189,7 +189,7 @@ export function ChatSidebar(props: ChatSidebarProps) {
 
         <section className="border-t pt-5">
           <h3 className="mb-3 text-sm font-medium text-muted-foreground">Activiteit</h3>
-          <Button variant="outline" className="w-full" onClick={props.onSyncMessages} disabled={props.isSyncingMessages}>
+          <Button variant="outline" className="w-full whitespace-normal px-3 text-center leading-snug" onClick={props.onSyncMessages} disabled={props.isSyncingMessages}>
             Berichten synchroniseren
           </Button>
         </section>
@@ -214,9 +214,9 @@ export function ChatSidebar(props: ChatSidebarProps) {
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="grid grid-cols-[minmax(92px,0.86fr)_minmax(0,1fr)] items-center gap-3">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <div className="min-w-0">{children}</div>
+      <div className="min-w-0 justify-self-end text-right">{children}</div>
     </div>
   );
 }

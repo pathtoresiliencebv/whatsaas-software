@@ -81,10 +81,14 @@ function WhatsAppSidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle
   const settingsActive = normalizedPathname === '/settings' || normalizedPathname.startsWith('/settings/');
 
   return (
-    <aside className={`hidden h-dvh min-h-0 shrink-0 flex-col border-r border-zinc-200 bg-[#fbfbfa] text-zinc-700 transition-[width] duration-200 dark:border-[#272d2a] dark:bg-[#0c0e0f] dark:text-zinc-300 lg:flex ${collapsed ? 'w-[72px]' : 'w-[250px]'}`}>
-      <div className={`flex h-12 shrink-0 items-center border-b border-zinc-200 px-4 dark:border-[#272d2a] ${collapsed ? 'justify-center' : 'justify-start'}`}>
+    <aside className={`hidden h-dvh min-h-0 shrink-0 flex-col border-r border-zinc-200 bg-[#fbfbfa] text-zinc-700 transition-[width] duration-200 dark:border-[#272d2a] dark:bg-[#0c0e0f] dark:text-zinc-300 lg:flex ${collapsed ? 'w-[56px]' : 'w-[232px]'}`}>
+      <div className={`flex h-12 shrink-0 items-center border-b border-zinc-200 dark:border-[#272d2a] ${collapsed ? 'justify-center px-2' : 'justify-start px-4'}`}>
         <Link href="/automation" className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
-          <Logo className="h-7" />
+          {collapsed ? (
+            <img src="/images/icon.png" alt="Kyrn" className="h-7 w-7 object-contain" />
+          ) : (
+            <Logo className="h-7" />
+          )}
           {!collapsed && <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">WhatsApp v1</span>}
         </Link>
       </div>
