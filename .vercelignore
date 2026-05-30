@@ -14,6 +14,5 @@ agentic-os-dashboard
 example-voice-agents
 playwright-mcp
 *.log
-*.png
 tsconfig.tsbuildinfo
 .vercel-env-*
