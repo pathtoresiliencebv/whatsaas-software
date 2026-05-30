@@ -1,7 +1,6 @@
 'use client';
 
 import { useActionState, useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +17,7 @@ import { ToolsManager } from '@/components/ai/ToolsManager';
 import { SessionsSheet } from '@/components/sessions/SessionsSheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from 'next-intl';
+import { FeatureLockedCard } from '@/components/billing/FeatureLockedCard';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -53,7 +53,6 @@ interface Attachment {
 }
 
 export default function AiSettingsPage() {
-  const router = useRouter();
   const t = useTranslations('Settings');
   const { data: featureData, isLoading: isFeatureLoading } = useSWR('/api/features?name=isAiEnabled', fetcher);
   const [state, formAction, isPending] = useActionState(saveAiConfig, initialState);
@@ -102,13 +101,6 @@ export default function AiSettingsPage() {
   };
 
   useEffect(() => {
-    if (!isFeatureLoading && featureData && !featureData.hasAccess) {
-        toast.error(t('feature_not_available'));
-        router.push('/dashboard');
-    }
-  }, [featureData, isFeatureLoading, router, t]);
-
-  useEffect(() => {
     if(featureData?.hasAccess) {
         loadData();
     }
@@ -151,8 +143,23 @@ export default function AiSettingsPage() {
     return <FileIcon className="h-8 w-8 text-gray-500 mb-2" />;
   };
 
-  if (isLoadingData || isFeatureLoading || !featureData?.hasAccess) {
+  if (isFeatureLoading || (featureData?.hasAccess && isLoadingData)) {
     return <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+  }
+
+  if (!featureData?.hasAccess) {
+    return (
+      <FeatureLockedCard
+        title="AI-agent is onderdeel van een hoger plan"
+        description="Je workspace kan alvast verder met WhatsApp en contacten. Voor autonome antwoorden, kennisbestanden en tools heb je AI-agent toegang nodig."
+        featureLabel="AI-agent activeren"
+        examples={[
+          'Laat Kyrn klantvragen beantwoorden met je centrale brein.',
+          'Voeg kennisbestanden, tools en workflows toe aan je agent.',
+          'Zet gesprekken automatisch door naar support of sales.',
+        ]}
+      />
+    );
   }
 
   return (

@@ -155,6 +155,36 @@ export const teams = pgTable('teams', {
   trialEndsAt: timestamp('trial_ends_at'),
 });
 
+export type TeamBrainSnapshot = {
+  websiteUrl: string;
+  title?: string;
+  description?: string;
+  headings: string[];
+  highlights: string[];
+  suggestedAudience: string[];
+  suggestedChannels: string[];
+  suggestedTone: string;
+  centralPrompt: string;
+  scannedAt: string;
+};
+
+export const teamBrains = pgTable('team_brains', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+  websiteUrl: text('website_url'),
+  status: varchar('status', { length: 20 }).notNull().default('empty'),
+  summary: text('summary'),
+  snapshot: jsonb('snapshot').$type<TeamBrainSnapshot>(),
+  onboardingCompletedAt: timestamp('onboarding_completed_at'),
+  dismissedAt: timestamp('dismissed_at'),
+  lastScannedAt: timestamp('last_scanned_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 export const teamMembers = pgTable('team_members', {
   id: serial('id').primaryKey(),
   userId: integer('user_id')
@@ -732,6 +762,7 @@ export const teamsRelations = relations(teams, ({ one, many }) => ({
   callCredits: one(callCredits),
   callLogs: many(callLogs),
   callCreditTransactions: many(callCreditTransactions),
+  centralBrain: one(teamBrains),
   voiceAgents: many(voiceAgents),
   voiceAgentRuns: many(voiceAgentRuns),
   voiceCampaigns: many(voiceCampaigns),
@@ -739,6 +770,13 @@ export const teamsRelations = relations(teams, ({ one, many }) => ({
   voiceTools: many(voiceTools),
   voiceFiles: many(voiceFiles),
   voiceRecordings: many(voiceRecordings),
+}));
+
+export const teamBrainsRelations = relations(teamBrains, ({ one }) => ({
+  team: one(teams, {
+    fields: [teamBrains.teamId],
+    references: [teams.id],
+  }),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -1349,6 +1387,8 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
 export type NewTeam = typeof teams.$inferInsert;
+export type TeamBrain = typeof teamBrains.$inferSelect;
+export type NewTeamBrain = typeof teamBrains.$inferInsert;
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type NewTeamMember = typeof teamMembers.$inferInsert;
 export type ActivityLog = typeof activityLogs.$inferSelect;

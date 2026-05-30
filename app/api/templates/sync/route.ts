@@ -33,7 +33,9 @@ export async function POST(request: Request) {
     const wabaId = instance?.metaWabaId || instance?.metaBusinessId;
 
     if (!instance || !metaToken || !wabaId) {
-      return NextResponse.json({ error: 'Invalid WABA instance.' }, { status: 404 });
+      return NextResponse.json({
+        error: 'Deze WhatsApp Business-instantie mist nog Meta template-rechten of WABA-ID.',
+      }, { status: 404 });
     }
 
     const fields = 'name,status,category,language,components,id';
