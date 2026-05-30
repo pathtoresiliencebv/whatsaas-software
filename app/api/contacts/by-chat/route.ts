@@ -15,18 +15,38 @@ export async function GET(request: NextRequest) {
     }
 
     const jid = request.nextUrl.searchParams.get('jid');
-    if (!jid) {
-      return NextResponse.json({ error: 'jid (remoteJid) is required' }, { status: 400 });
-    }
+    const chatId = request.nextUrl.searchParams.get('chatId');
+    const instanceId = request.nextUrl.searchParams.get('instanceId');
 
-    
-    const chat = await db.query.chats.findFirst({
-      where: and(
+    let chat;
+
+    if (chatId) {
+      chat = await db.query.chats.findFirst({
+        where: and(
+          eq(chats.teamId, team.id),
+          eq(chats.id, parseInt(chatId))
+        ),
+        columns: { id: true }
+      });
+    } else {
+      if (!jid) {
+        return NextResponse.json({ error: 'jid (remoteJid) or chatId is required' }, { status: 400 });
+      }
+
+      const conditions = [
         eq(chats.teamId, team.id),
         eq(chats.remoteJid, jid)
-      ),
-      columns: { id: true }
-    });
+      ];
+
+      if (instanceId) {
+        conditions.push(eq(chats.instanceId, parseInt(instanceId)));
+      }
+
+      chat = await db.query.chats.findFirst({
+        where: and(...conditions),
+        columns: { id: true }
+      });
+    }
 
     if (!chat) {
       

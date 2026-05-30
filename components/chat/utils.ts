@@ -1,5 +1,12 @@
-export function fetcher(url: string) {
-  return fetch(url).then((res) => res.json());
+export async function fetcher(url: string) {
+  const res = await fetch(url);
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok || data?.error) {
+    throw new Error(data?.error || 'Deze chat kon niet worden geopend. Vernieuw de lijst of probeer opnieuw.');
+  }
+
+  return data;
 }
 
 export function fileToBase64(file: File | Blob): Promise<string> {

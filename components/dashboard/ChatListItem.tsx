@@ -59,7 +59,7 @@ export type Chat = {
   lastMessageTimestamp?: Date | string | number;
   lastMessageFromMe?: boolean;
   unreadCount?: number;
-  instanceId?: number;
+  instanceId?: number | null;
   contact?: Contact;
 };
 
@@ -105,6 +105,14 @@ export function ChatListItem({
   const previewText = chat.lastMessageText || chat.lastMessage || 'Nog geen berichten';
   const contactId = chat.contact?.id;
   const selectedTagIds = new Set(chat.contact?.tags?.map((tag) => tag.id) || []);
+  const routeJid = encodeURIComponent(isGroupChat ? chat.remoteJid : chat.remoteJid.split('@')[0]);
+  const chatParams = new URLSearchParams({ chatId: String(chat.id) });
+
+  if (chat.instanceId) {
+    chatParams.set('instanceId', String(chat.instanceId));
+  }
+
+  const chatHref = `/dashboard/chat/${routeJid}?${chatParams.toString()}`;
 
   const time = chat.lastMessageTimestamp
     ? new Date(chat.lastMessageTimestamp).toLocaleTimeString('nl-NL', {
@@ -116,14 +124,12 @@ export function ChatListItem({
 
   const instanceName = instances.find((i) => i.dbId === chat.instanceId)?.instanceName;
 
-  const href = `/dashboard/chat/${encodeURIComponent(isGroupChat ? chat.remoteJid : chat.remoteJid.split('@')[0])}?instanceId=${chat.instanceId || ''}`;
-
   const openChat = () => {
     if (isSelectionMode) {
       onSelect(chat.id);
       return;
     }
-    router.push(href);
+    router.push(chatHref);
   };
 
   const refreshContacts = () => onContactUpdate?.(null);
