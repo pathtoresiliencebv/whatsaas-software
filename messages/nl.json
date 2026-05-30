@@ -2251,6 +2251,7 @@
       }
     },
     "dismissNextLevel": "Volgende niveau verbergen",
+    "dismissSetup": "Setupblok sluiten",
     "growthComplete": "Alle vervolgstappen zijn afgerond"
   },
   "VerifyEmailSent": {

@@ -48,9 +48,11 @@ export function OnboardingBanner({
   const t = useTranslations('OnboardingBanner');
   const [isGrowthOpen, setIsGrowthOpen] = useState(false);
   const [isGrowthDismissed, setIsGrowthDismissed] = useState(false);
+  const [isBannerDismissed, setIsBannerDismissed] = useState(false);
 
   useEffect(() => {
     setIsGrowthDismissed(window.localStorage.getItem('kyrn:onboarding:growth-dismissed') === 'true');
+    setIsBannerDismissed(window.localStorage.getItem('kyrn:onboarding:banner-dismissed') === 'true');
   }, []);
 
   const coreSteps = [
@@ -123,12 +125,23 @@ export function OnboardingBanner({
   const nextStep = [...coreSteps, ...growthSteps].find((step) => !step.done);
   const progress = Math.round((completedCount / totalSteps) * 100);
 
-  if (allDone) return null;
+  if (allDone || isBannerDismissed) return null;
 
   return (
-    <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-[#303630] dark:bg-[#151816]">
+    <section className="relative overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-[#303630] dark:bg-[#151816]">
+      <button
+        type="button"
+        onClick={() => {
+          window.localStorage.setItem('kyrn:onboarding:banner-dismissed', 'true');
+          setIsBannerDismissed(true);
+        }}
+        className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-500 shadow-sm transition hover:border-zinc-300 hover:text-zinc-900 dark:border-[#303630] dark:bg-[#171b18]/95 dark:text-zinc-400 dark:hover:text-white"
+        aria-label={t('dismissSetup')}
+      >
+        <X className="h-4 w-4" />
+      </button>
       <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="p-5 sm:p-6">
+        <div className="p-5 pr-12 sm:p-6 sm:pr-14">
           <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-[#e8f9ed] text-[#14933a] dark:bg-[#14331f] dark:text-[#35c45f]">

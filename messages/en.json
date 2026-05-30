@@ -1968,6 +1968,7 @@
       }
     },
     "dismissNextLevel": "Hide next level setup",
+    "dismissSetup": "Close setup panel",
     "growthComplete": "All advanced steps are complete"
   },
   "VerifyEmailSent": {

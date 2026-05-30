@@ -1931,6 +1931,7 @@
       }
     },
     "dismissNextLevel": "Ocultar siguiente nivel",
+    "dismissSetup": "Cerrar panel de configuración",
     "growthComplete": "Todos los pasos avanzados están completos"
   },
   "VerifyEmailSent": {
