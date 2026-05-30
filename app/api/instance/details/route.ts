@@ -4,6 +4,7 @@ import { db } from '@/lib/db/drizzle';
 import { evolutionInstances } from '@/lib/db/schema'; 
 import { eq } from 'drizzle-orm';
 import { getEvolutionConfig } from '@/lib/whatsapp/config';
+import { resolveWhatsAppIntegration } from '@/lib/whatsapp/official';
 
 type InstanceDetailItem = {
     dbId: number;
@@ -139,7 +140,7 @@ export async function GET(request: Request) {
                 owner: profileInfo.owner ?? null,
                 profileName: profileInfo.profileName ?? null,
                 number: profileInfo.number ?? null,
-                integration: profileInfo.integration ?? null,
+                integration: resolveWhatsAppIntegration(dbInstance.integration, profileInfo.integration),
                 profilePictureUrl: profileInfo.profilePictureUrl ?? null,
             } as InstanceDetailItem;
         }
