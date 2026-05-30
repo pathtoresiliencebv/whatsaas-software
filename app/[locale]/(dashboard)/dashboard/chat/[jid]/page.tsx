@@ -42,10 +42,12 @@ export default function ChatPage() {
   const rawJid = params.jid as string;
   const chatNumber = rawJid ? decodeURIComponent(rawJid) : rawJid;
   const instanceIdParam = searchParams.get('instanceId');
+  const chatIdParam = searchParams.get('chatId');
+  const selectedChatId = chatIdParam && /^\d+$/.test(chatIdParam) ? Number(chatIdParam) : null;
 
-  const isGroup = chatNumber ? chatNumber.endsWith('@g.us') : false;
-  const remoteJid = chatNumber
-    ? (isGroup ? chatNumber : `${chatNumber}@s.whatsapp.net`)
+  const routeIsGroup = chatNumber ? chatNumber.endsWith('@g.us') : false;
+  const routeRemoteJid = chatNumber
+    ? (routeIsGroup ? chatNumber : `${chatNumber}@s.whatsapp.net`)
     : null;
 
   const activeChatRef = useRef<Chat | undefined>(undefined);
@@ -69,9 +71,10 @@ export default function ChatPage() {
   const [showQuickReplySuggestions, setShowQuickReplySuggestions] = useState(false);
   const [chatSidebarCollapsed, setChatSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('chatSidebarCollapsed') === 'true';
+      const persisted = localStorage.getItem('chatSidebarCollapsed');
+      return persisted === null ? true : persisted === 'true';
     }
-    return false;
+    return true;
   });
 
   const toggleChatSidebar = useCallback(() => {
@@ -84,7 +87,7 @@ export default function ChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const recordingTimerRef = useRef<number | null>(null);
   const audioPlayerRef = useRef<HTMLAudioElement>(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,15 +108,25 @@ export default function ChatPage() {
   const { data: chats } = useSWR<Chat[]>('/api/chats', fetcher);
 
   const currentChat = useMemo(() => {
-      if (!chats || !remoteJid) return undefined;
+      if (!chats) return undefined;
+      if (selectedChatId) {
+          return chats.find(c => c.id === selectedChatId);
+      }
+      if (!routeRemoteJid) return undefined;
       if (instanceIdParam) {
-          return chats.find(c => c.remoteJid === remoteJid && c.instanceId === parseInt(instanceIdParam));
+          return chats.find(c => c.remoteJid === routeRemoteJid && c.instanceId === parseInt(instanceIdParam));
       }
 
-      return chats.find(c => c.remoteJid === remoteJid);
-  }, [chats, remoteJid, instanceIdParam]);
+      return chats.find(c => c.remoteJid === routeRemoteJid);
+  }, [chats, selectedChatId, routeRemoteJid, instanceIdParam]);
+
+  const remoteJid = currentChat?.remoteJid || routeRemoteJid;
+  const isGroup = remoteJid ? remoteJid.endsWith('@g.us') : routeIsGroup;
 
   const swrKey = useMemo(() => {
+      if (selectedChatId) {
+          return `/api/messages?chatId=${selectedChatId}`;
+      }
       if (!remoteJid) return null;
       
       if (instanceIdParam) {
@@ -124,12 +137,27 @@ export default function ChatPage() {
       }
 
       return `/api/messages?jid=${remoteJid}`;
-  }, [remoteJid, instanceIdParam, currentChat]);
+  }, [selectedChatId, remoteJid, instanceIdParam, currentChat]);
 
   const { data: messages, error, isLoading, mutate: mutateMessages } = useSWR<Message[]>(swrKey, fetcher, { revalidateOnFocus: true });
+  const safeMessages = Array.isArray(messages) ? messages : [];
+
+  const contactKey = useMemo(() => {
+    if (selectedChatId) {
+      return `/api/contacts/by-chat?chatId=${selectedChatId}`;
+    }
+    if (!remoteJid) return null;
+
+    const params = new URLSearchParams({ jid: remoteJid });
+    if (instanceIdParam) {
+      params.set('instanceId', instanceIdParam);
+    }
+
+    return `/api/contacts/by-chat?${params.toString()}`;
+  }, [selectedChatId, remoteJid, instanceIdParam]);
   
   const { data: contact, mutate: mutateContact } = useSWR<ContactData | null>(
-    remoteJid ? `/api/contacts/by-chat?jid=${remoteJid}` : null,
+    contactKey,
     fetcher
   );
   
@@ -143,19 +171,19 @@ export default function ChatPage() {
   const { data: quickReplies } = useSWR<QuickReply[]>('/api/quick-replies', fetcher);
 
   const mediaMessages = useMemo(() => {
-    if (!messages) return [];
-    return messages.filter(msg => (msg.messageType === 'imageMessage' || msg.messageType === 'videoMessage') && msg.mediaUrl);
-  }, [messages]);
+    if (safeMessages.length === 0) return [];
+    return safeMessages.filter(msg => (msg.messageType === 'imageMessage' || msg.messageType === 'videoMessage') && msg.mediaUrl);
+  }, [safeMessages]);
 
   const filteredMessages = useMemo(() => {
-    if (!messages) return [];
-    if (!searchQuery.trim()) return messages;
-    return messages.filter(msg =>
+    if (safeMessages.length === 0) return [];
+    if (!searchQuery.trim()) return safeMessages;
+    return safeMessages.filter(msg =>
       msg.text?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       msg.mediaCaption?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (msg.messageType === 'documentMessage' && msg.text?.toLowerCase().includes(searchQuery.toLowerCase()))
     );
-  }, [messages, searchQuery]);
+  }, [safeMessages, searchQuery]);
 
   const slides = useMemo(() => {
     return mediaMessages.map(msg => {
@@ -204,11 +232,11 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
-    if (messages && messages.length > 0 && !searchQuery) {
+    if (safeMessages.length > 0 && !searchQuery) {
       const timer = setTimeout(() => scrollToBottom(), 100);
       return () => clearTimeout(timer);
     }
-  }, [messages, scrollToBottom, searchQuery]);
+  }, [safeMessages, scrollToBottom, searchQuery]);
 
   useEffect(() => {
     setShowQuickReplySuggestions(newMessage.startsWith('/') && filteredQuickReplies.length > 0);
@@ -286,13 +314,13 @@ export default function ChatPage() {
   }, [teamId, remoteJid, mutateMessages, mutateContact, scrollToBottom, globalMutate]);
 
   useEffect(() => {
-    if (messages && remoteJid && teamId) {
+    if (safeMessages.length > 0 && remoteJid && teamId) {
       if (currentChat && currentChat.unreadCount && currentChat.unreadCount > 0) {
         globalMutate('/api/chats', (currentData: Chat[] | undefined = []) => currentData.map(chat => chat.id === currentChat.id ? { ...chat, unreadCount: 0 } : chat), false);
         fetch('/api/chats/mark-read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: currentChat.id }), }).catch(err => console.error(err));
       }
     }
-  }, [messages, remoteJid, teamId, globalMutate, swrCache, currentChat]);
+  }, [safeMessages, remoteJid, teamId, globalMutate, swrCache, currentChat]);
 
   const startRecording = async () => {
     if (recordingStatus !== 'idle') return;
@@ -312,7 +340,7 @@ export default function ChatPage() {
       recorder.start();
       setRecordingStatus('recording');
       setRecordingTime(0);
-      recordingTimerRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
+      recordingTimerRef.current = window.setInterval(() => setRecordingTime(prev => prev + 1), 1000);
     } catch (err) {
       toast.error("Could not start recording.");
     }
@@ -321,7 +349,7 @@ export default function ChatPage() {
   const stopRecording = () => {
     if (recordingStatus !== 'recording' || !mediaRecorderRef.current) return;
     mediaRecorderRef.current.stop();
-    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
     recordingTimerRef.current = null;
   };
 
@@ -330,7 +358,7 @@ export default function ChatPage() {
     setAudioBlob(null); setAudioUrl(null);
     setRecordingStatus('idle'); setRecordingTime(0);
     setIsAudioPlaying(false);
-    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
     recordingTimerRef.current = null;
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') mediaRecorderRef.current.stop();
   };
@@ -604,7 +632,7 @@ export default function ChatPage() {
     setSyncDismissed(false);
   }, [remoteJid]);
 
-  const showSyncBanner = !syncDismissed && currentChat?.instanceId && messages && messages.length === 0 && !isLoading && !error;
+  const showSyncBanner = !syncDismissed && currentChat?.instanceId && safeMessages.length === 0 && !isLoading && !error;
 
   const renderReplyPreview = () => {
     if (!quotedMessage) return null;
@@ -621,7 +649,13 @@ export default function ChatPage() {
 
   const renderMessages = () => {
     if (isLoading) return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
-    if (error) return <div className="p-4 text-center text-destructive">Error loading messages.</div>;
+    if (error) {
+      return (
+        <div className="mx-auto mt-12 max-w-md rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center text-sm text-destructive">
+          Deze chat kon niet worden geopend. Vernieuw de lijst of probeer opnieuw.
+        </div>
+      );
+    }
     if (!filteredMessages || filteredMessages.length === 0) {
       if (searchQuery) return <div className="p-4 text-center text-muted-foreground">No message found for "{searchQuery}".</div>;
       return <div className="p-4 text-center text-muted-foreground">No messages in this chat yet.</div>;

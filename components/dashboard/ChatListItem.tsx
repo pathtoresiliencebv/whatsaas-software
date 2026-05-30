@@ -41,11 +41,13 @@ export type Chat = {
   remoteJid: string;
   name?: string;
   pushName?: string;
+  profilePicUrl?: string | null;
   lastMessage?: string;
+  lastMessageText?: string | null;
   lastMessageTimestamp?: Date | string | number;
   lastMessageFromMe?: boolean;
   unreadCount?: number;
-  instanceId?: number;
+  instanceId?: number | null;
   contact?: Contact;
 };
 
@@ -79,8 +81,17 @@ export function ChatListItem({
   onSelect,
 }: ChatListItemProps) {
   const isGroupChat = chat.remoteJid.endsWith('@g.us');
-  const displayName = chat.name || chat.pushName || chat.remoteJid.split('@')[0];
+  const displayName = chat.contact?.name || chat.name || chat.pushName || chat.remoteJid.split('@')[0];
   const initials = displayName.slice(0, 2).toUpperCase();
+  const previewText = chat.lastMessageText || chat.lastMessage || 'No messages yet';
+  const routeJid = encodeURIComponent(isGroupChat ? chat.remoteJid : chat.remoteJid.split('@')[0]);
+  const chatParams = new URLSearchParams({ chatId: String(chat.id) });
+
+  if (chat.instanceId) {
+    chatParams.set('instanceId', String(chat.instanceId));
+  }
+
+  const chatHref = `/dashboard/chat/${routeJid}?${chatParams.toString()}`;
 
   const time = chat.lastMessageTimestamp
     ? new Date(chat.lastMessageTimestamp).toLocaleTimeString('en-US', {
@@ -94,7 +105,7 @@ export function ChatListItem({
 
   return (
     <Link
-      href={`/dashboard/chat/${encodeURIComponent(isGroupChat ? chat.remoteJid : chat.remoteJid.split('@')[0])}?instanceId=${chat.instanceId || ''}`}
+      href={chatHref}
       className={`flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors ${
         isActive ? 'bg-muted/70' : ''
       } ${isSelected ? 'bg-primary/5' : ''}`}
@@ -114,7 +125,7 @@ export function ChatListItem({
       )}
 
       <Avatar className="h-12 w-12 shrink-0">
-        <AvatarImage src={chat.contact?.name ? undefined : undefined} />
+        <AvatarImage src={chat.profilePicUrl || undefined} />
         <AvatarFallback className="bg-primary/10 text-primary text-sm">{initials}</AvatarFallback>
       </Avatar>
 
@@ -147,7 +158,7 @@ export function ChatListItem({
             </span>
           )}
           <p className="text-sm text-muted-foreground truncate flex-1">
-            {chat.lastMessage || 'No messages yet'}
+            {previewText}
           </p>
           {chat.unreadCount !== undefined && chat.unreadCount > 0 && (
             <Badge variant="default" className="h-5 w-5 p-0 text-xs justify-center">
