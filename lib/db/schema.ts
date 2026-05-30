@@ -155,6 +155,55 @@ export const teams = pgTable('teams', {
   trialEndsAt: timestamp('trial_ends_at'),
 });
 
+export type TeamBrainSnapshot = {
+  websiteUrl: string;
+  title?: string;
+  description?: string;
+  headings: string[];
+  highlights: string[];
+  suggestedAudience: string[];
+  suggestedChannels: string[];
+  suggestedTone: string;
+  centralPrompt: string;
+  scannedAt: string;
+};
+
+export const teamBrains = pgTable('team_brains', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+  websiteUrl: text('website_url'),
+  status: varchar('status', { length: 20 }).notNull().default('empty'),
+  summary: text('summary'),
+  snapshot: jsonb('snapshot').$type<TeamBrainSnapshot>(),
+  onboardingCompletedAt: timestamp('onboarding_completed_at'),
+  dismissedAt: timestamp('dismissed_at'),
+  lastScannedAt: timestamp('last_scanned_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const voiceAgents = pgTable('voice_agents', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 120 }).notNull(),
+  description: text('description'),
+  status: varchar('status', { length: 30 }).notNull().default('draft'),
+  provider: varchar('provider', { length: 50 }).notNull().default('openai'),
+  model: varchar('model', { length: 100 }).notNull().default('gpt-realtime-2'),
+  voice: varchar('voice', { length: 100 }).notNull().default('alloy'),
+  prompt: text('prompt'),
+  config: jsonb('config').$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamIdIdx: index('voice_agents_team_id_idx').on(table.teamId),
+}));
+
 export const teamMembers = pgTable('team_members', {
   id: serial('id').primaryKey(),
   userId: integer('user_id')
@@ -732,6 +781,22 @@ export const teamsRelations = relations(teams, ({ one, many }) => ({
   callCredits: one(callCredits),
   callLogs: many(callLogs),
   callCreditTransactions: many(callCreditTransactions),
+  centralBrain: one(teamBrains),
+  voiceAgents: many(voiceAgents),
+}));
+
+export const teamBrainsRelations = relations(teamBrains, ({ one }) => ({
+  team: one(teams, {
+    fields: [teamBrains.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const voiceAgentsRelations = relations(voiceAgents, ({ one }) => ({
+  team: one(teams, {
+    fields: [voiceAgents.teamId],
+    references: [teams.id],
+  }),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -1113,6 +1178,10 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
 export type NewTeam = typeof teams.$inferInsert;
+export type TeamBrain = typeof teamBrains.$inferSelect;
+export type NewTeamBrain = typeof teamBrains.$inferInsert;
+export type VoiceAgent = typeof voiceAgents.$inferSelect;
+export type NewVoiceAgent = typeof voiceAgents.$inferInsert;
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type NewTeamMember = typeof teamMembers.$inferInsert;
 export type ActivityLog = typeof activityLogs.$inferSelect;

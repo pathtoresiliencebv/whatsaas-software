@@ -74,7 +74,9 @@ export default function TemplatesPage() {
     const [selectedTemplate, setSelectedTemplate] = useState<WabaTemplate | null>(null);
     const [isViewOpen, setIsViewOpen] = useState(false);
 
-    const wabaInstances = (Array.isArray(instances) ? instances : []).filter(i => i.integration === 'WHATSAPP-BUSINESS');
+    const wabaInstances = (Array.isArray(instances) ? instances : []).filter(
+        i => i.integration === 'WHATSAPP-BUSINESS' || i.integration === 'META-CLOUD'
+    );
 
     useEffect(() => {
         if (wabaInstances.length > 0 && !selectedInstanceId) {

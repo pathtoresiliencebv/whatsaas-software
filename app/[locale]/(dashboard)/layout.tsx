@@ -19,6 +19,7 @@ import { Sidebar } from '@/components/interface/Sidebar';
 import Logo from '@/components/interface/Logo';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { CentralBrainOnboarding } from '@/components/dashboard/CentralBrainOnboarding';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -158,6 +159,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         {children}
       </main>
+      <CentralBrainOnboarding />
     </div>
   );
 }

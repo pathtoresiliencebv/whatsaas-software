@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -39,11 +38,11 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
+import { FeatureLockedCard } from '@/components/billing/FeatureLockedCard';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function VoiceSettingsPage() {
-  const router = useRouter();
   const t = useTranslations('Settings');
   const { data: featureData, isLoading: isFeatureLoading } = useSWR(
     '/api/features?name=isVoiceCallsEnabled',
@@ -69,13 +68,6 @@ export default function VoiceSettingsPage() {
   } | null>(null);
 
   const { data: creditsData, mutate: mutateCredits } = useSWR('/api/calls/credits', fetcher);
-
-  useEffect(() => {
-    if (!isFeatureLoading && featureData && !featureData.hasAccess) {
-      toast.error(t('feature_not_available'));
-      router.push('/dashboard');
-    }
-  }, [featureData, isFeatureLoading, router, t]);
 
   useEffect(() => {
     if (featureData?.hasAccess) {
@@ -196,11 +188,26 @@ export default function VoiceSettingsPage() {
     return `$${(cents / 100).toFixed(2)}`;
   };
 
-  if (isLoading || isFeatureLoading || !featureData?.hasAccess) {
+  if (isFeatureLoading || (featureData?.hasAccess && isLoading)) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
+    );
+  }
+
+  if (!featureData?.hasAccess) {
+    return (
+      <FeatureLockedCard
+        title="Spraakoproepen zijn onderdeel van een hoger plan"
+        description="Voice geeft je team directe belgesprekken, beltegoeden, nummers en browser calls vanuit dezelfde klantcontext."
+        featureLabel="spraakoproepen starten"
+        examples={[
+          'Bel klanten direct vanuit een chat.',
+          'Koop en beheer teamnummers met beltegoed.',
+          'Bewaar callstatus en opnames bij de klant.',
+        ]}
+      />
     );
   }
 
