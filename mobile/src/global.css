@@ -1,0 +1,51 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+:root {
+  color-scheme: dark;
+  --font-display:
+    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Segoe UI Symbol, Noto Color Emoji;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --kyrn-bg: #111415;
+  --kyrn-panel: #1d2021;
+  --kyrn-panel-high: #282a2b;
+  --kyrn-line: #323536;
+  --kyrn-text: #e1e3e4;
+  --kyrn-muted: #becab8;
+  --kyrn-primary: #70dd75;
+}
+
+@media android {
+  :root {
+    --font-mono: monospace;
+    --font-rounded: normal;
+    --font-serif: serif;
+    --font-sans: normal;
+  }
+}
+
+@media ios {
+  :root {
+    --font-mono: ui-monospace;
+    --font-serif: ui-serif;
+    --font-sans: system-ui;
+    --font-rounded: ui-rounded;
+  }
+}
+
+@layer theme {
+  @theme {
+    --color-kyrn-bg: var(--kyrn-bg);
+    --color-kyrn-panel: var(--kyrn-panel);
+    --color-kyrn-panel-high: var(--kyrn-panel-high);
+    --color-kyrn-line: var(--kyrn-line);
+    --color-kyrn-text: var(--kyrn-text);
+    --color-kyrn-muted: var(--kyrn-muted);
+    --color-kyrn-primary: var(--kyrn-primary);
+  }
+}
