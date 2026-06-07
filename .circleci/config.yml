@@ -1,0 +1,109 @@
+version: 2.1
+
+executors:
+  node:
+    docker:
+      - image: cimg/node:lts
+    resource_class: medium
+
+commands:
+  setup_pnpm:
+    steps:
+      - run:
+          name: Enable pnpm
+          command: |
+            corepack enable
+            corepack prepare pnpm@10.33.2 --activate
+            pnpm config set store-dir .pnpm-store
+
+  install_dependencies:
+    steps:
+      - restore_cache:
+          keys:
+            - pnpm-store-v1-{{ arch }}-{{ checksum "pnpm-lock.yaml" }}
+            - pnpm-store-v1-{{ arch }}-
+      - run:
+          name: Install dependencies
+          command: pnpm install --frozen-lockfile
+      - save_cache:
+          key: pnpm-store-v1-{{ arch }}-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
+
+  verify_vercel_context:
+    steps:
+      - run:
+          name: Verify Vercel credentials
+          command: |
+            test -n "$VERCEL_TOKEN"
+            test -n "$VERCEL_ORG_ID"
+            test -n "$VERCEL_PROJECT_ID"
+
+jobs:
+  quality:
+    executor: node
+    steps:
+      - checkout
+      - setup_pnpm
+      - install_dependencies
+      - run:
+          name: Typecheck web app
+          command: pnpm exec tsc --noEmit
+      - run:
+          name: Run tests
+          command: pnpm test
+
+  deploy_preview:
+    executor: node
+    steps:
+      - checkout
+      - setup_pnpm
+      - install_dependencies
+      - verify_vercel_context
+      - run:
+          name: Pull Vercel preview environment
+          command: pnpm dlx vercel@latest pull --yes --environment=preview --token "$VERCEL_TOKEN"
+      - run:
+          name: Build preview deployment
+          command: pnpm dlx vercel@latest build --token "$VERCEL_TOKEN"
+      - run:
+          name: Deploy preview
+          command: pnpm dlx vercel@latest deploy --prebuilt --token "$VERCEL_TOKEN"
+
+  deploy_production:
+    executor: node
+    steps:
+      - checkout
+      - setup_pnpm
+      - install_dependencies
+      - verify_vercel_context
+      - run:
+          name: Pull Vercel production environment
+          command: pnpm dlx vercel@latest pull --yes --environment=production --token "$VERCEL_TOKEN"
+      - run:
+          name: Build production deployment
+          command: pnpm dlx vercel@latest build --prod --token "$VERCEL_TOKEN"
+      - run:
+          name: Deploy production
+          command: pnpm dlx vercel@latest deploy --prebuilt --prod --token "$VERCEL_TOKEN"
+
+workflows:
+  build_test_deploy:
+    jobs:
+      - quality
+      - deploy_preview:
+          context: vercel-deploy
+          requires:
+            - quality
+          filters:
+            branches:
+              ignore:
+                - main
+      - deploy_production:
+          context: vercel-deploy
+          requires:
+            - quality
+          filters:
+            branches:
+              only:
+                - main
