@@ -37,6 +37,7 @@
   "exclude": [
     "node_modules",
     "agentic-os-dashboard",
-    "example-voice-agents"
+    "example-voice-agents",
+    "mobile"
   ]
 }

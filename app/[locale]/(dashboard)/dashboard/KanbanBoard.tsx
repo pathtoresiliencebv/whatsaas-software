@@ -49,7 +49,7 @@ type ChatCard = {
   unreadCount: number;
   updatedAt: string;
   showTimeInStage: boolean;
-  instanceId?: number;
+  instanceId?: number | null;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -389,9 +389,15 @@ function CardItem({ card, index, toggleAlert, t }: { card: ChatCard, index: numb
     const daysInStage = getDaysInStage(card.updatedAt);
     
     const handleOpenChat = () => {
-        const chatNumber = card.remoteJid.split('@')[0];
-        const query = card.instanceId ? `?instanceId=${card.instanceId}` : '';
-        router.push(`/dashboard/chat/${chatNumber}${query}`);
+        const isGroupChat = card.remoteJid.endsWith('@g.us');
+        const routeJid = encodeURIComponent(isGroupChat ? card.remoteJid : card.remoteJid.split('@')[0]);
+        const params = new URLSearchParams({ chatId: String(card.id) });
+
+        if (card.instanceId) {
+            params.set('instanceId', String(card.instanceId));
+        }
+
+        router.push(`/dashboard/chat/${routeJid}?${params.toString()}`);
     };
 
     return (

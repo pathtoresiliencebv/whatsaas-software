@@ -63,6 +63,9 @@ const apiCorsHeaders = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  turbopack: {
+    root: process.cwd(),
+  },
   async rewrites() {
     const voiceApiBaseUrl = process.env.VOICE_API_BASE_URL?.replace(/\/$/, '');
 
